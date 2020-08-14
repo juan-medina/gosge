@@ -34,6 +34,9 @@ type myGame struct {
 
 func (m *myGame) Init(e engine.Engine) {
 	e.World().Add(entitiy.New().
+		Add(components.GameSettings{Width: 640, Height: 480, Title: "Basic Game"}),
+	)
+	e.World().Add(entitiy.New().
 		Add(components.Text{String: "Hello world", Size: 50, Color: color.RGBA{R: 255, G: 0, B: 0, A: 255}}).
 		Add(components.Pos{X: 100, Y: 100}),
 	)

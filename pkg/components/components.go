@@ -41,3 +41,11 @@ type Pos struct {
 }
 
 var PosType = reflect.TypeOf(Pos{})
+
+type GameSettings struct {
+	Width  int
+	Height int
+	Title  string
+}
+
+var GameSettingsType = reflect.TypeOf(GameSettings{})

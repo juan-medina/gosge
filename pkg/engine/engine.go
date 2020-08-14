@@ -26,6 +26,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/juan-medina/goecs/pkg/entitiy"
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/render"
 	"github.com/juan-medina/gosge/pkg/systems"
 	"log"
@@ -42,7 +43,8 @@ type gameEngine struct {
 
 //goland:noinspection GoUnusedParameter
 func (eng *gameEngine) layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 640, 480
+	settings := eng.world.Entity(components.GameSettingsType).Get(components.GameSettingsType).(components.GameSettings)
+	return settings.Width, settings.Height
 }
 
 //goland:noinspection GoUnusedParameter
@@ -59,13 +61,25 @@ func (eng *gameEngine) draw(screen *ebiten.Image) {
 }
 
 func (eng *gameEngine) run() {
-	ebiten.SetWindowSize(640, 480)
-	ebiten.SetWindowTitle("Render an image")
-
 	eng.world.Add(entitiy.New().Add(render.NewContext(nil)))
 	eng.world.AddSystemToGroup(systems.TextRenderingSystem(), renderingGroup)
 
 	eng.game.Init(eng)
+
+	settings := components.GameSettings{
+		Width:  640,
+		Height: 480,
+		Title:  "Go Simple Game Engine",
+	}
+
+	if settingsEnt := eng.world.Entity(components.GameSettingsType); settingsEnt == nil {
+		eng.world.Add(entitiy.New().Add(settings))
+	} else {
+		settings = settingsEnt.Get(components.GameSettingsType).(components.GameSettings)
+	}
+
+	ebiten.SetWindowSize(settings.Width, settings.Height)
+	ebiten.SetWindowTitle(settings.Title)
 
 	if err := ebiten.RunGame(newEbitenGameWrapper(eng)); err != nil {
 		log.Fatal(err)
