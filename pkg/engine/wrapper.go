@@ -20,25 +20,28 @@
  *  THE SOFTWARE.
  */
 
-package main
+package engine
 
-import (
-	"github.com/juan-medina/goecs/pkg/entitiy"
-	"github.com/juan-medina/gosge/pkg/components"
-	"github.com/juan-medina/gosge/pkg/engine"
-	"image/color"
-)
+import "github.com/hajimehoshi/ebiten"
 
-type myGame struct {
+type ebitenGameWrapper struct {
+	eng *gameEngine
 }
 
-func (m *myGame) Init(e engine.Engine) {
-	e.World().Add(entitiy.New().
-		Add(components.Text{String: "Hello world", Size: 50, Color: color.RGBA{R: 255, G: 0, B: 0, A: 255}}).
-		Add(components.Pos{X: 100, Y: 100}),
-	)
+func newEbitenGameWrapper(eng *gameEngine) ebiten.Game {
+	return &ebitenGameWrapper{
+		eng: eng,
+	}
 }
 
-func main() {
-	engine.Run(&myGame{})
+func (ebg *ebitenGameWrapper) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return ebg.eng.layout(outsideWidth, outsideHeight)
+}
+
+func (ebg *ebitenGameWrapper) Update(screen *ebiten.Image) error {
+	return ebg.eng.update(screen)
+}
+
+func (ebg *ebitenGameWrapper) Draw(screen *ebiten.Image) {
+	ebg.eng.draw(screen)
 }

@@ -20,25 +20,24 @@
  *  THE SOFTWARE.
  */
 
-package main
+package components
 
 import (
-	"github.com/juan-medina/goecs/pkg/entitiy"
-	"github.com/juan-medina/gosge/pkg/components"
-	"github.com/juan-medina/gosge/pkg/engine"
 	"image/color"
+	"reflect"
 )
 
-type myGame struct {
+type Text struct {
+	String string
+	Size   int
+	Color  color.Color
 }
 
-func (m *myGame) Init(e engine.Engine) {
-	e.World().Add(entitiy.New().
-		Add(components.Text{String: "Hello world", Size: 50, Color: color.RGBA{R: 255, G: 0, B: 0, A: 255}}).
-		Add(components.Pos{X: 100, Y: 100}),
-	)
+var TextType = reflect.TypeOf(Text{})
+
+type Pos struct {
+	X float64
+	Y float64
 }
 
-func main() {
-	engine.Run(&myGame{})
-}
+var PosType = reflect.TypeOf(Pos{})

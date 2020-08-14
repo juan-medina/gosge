@@ -20,25 +20,15 @@
  *  THE SOFTWARE.
  */
 
-package main
+package engine
 
-import (
-	"github.com/juan-medina/goecs/pkg/entitiy"
-	"github.com/juan-medina/gosge/pkg/components"
-	"github.com/juan-medina/gosge/pkg/engine"
-	"image/color"
-)
+import "github.com/juan-medina/goecs/pkg/world"
 
-type myGame struct {
+type Engine interface {
+	run()
+	World() *world.World
 }
 
-func (m *myGame) Init(e engine.Engine) {
-	e.World().Add(entitiy.New().
-		Add(components.Text{String: "Hello world", Size: 50, Color: color.RGBA{R: 255, G: 0, B: 0, A: 255}}).
-		Add(components.Pos{X: 100, Y: 100}),
-	)
-}
-
-func main() {
-	engine.Run(&myGame{})
+type Game interface {
+	Init(eng Engine)
 }
