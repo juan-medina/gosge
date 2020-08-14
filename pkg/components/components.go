@@ -30,7 +30,6 @@ import (
 type Text struct {
 	String string
 	Size   int
-	Color  color.Color
 }
 
 var TextType = reflect.TypeOf(Text{})
@@ -49,3 +48,5 @@ type GameSettings struct {
 }
 
 var GameSettingsType = reflect.TypeOf(GameSettings{})
+
+var ColorType = reflect.TypeOf(color.RGBA{})

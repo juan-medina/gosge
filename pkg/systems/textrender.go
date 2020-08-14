@@ -31,6 +31,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/render"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
+	"image/color"
 )
 
 type textRenderingSystem struct {
@@ -53,11 +54,12 @@ func (r textRenderingSystem) getFace(size float64) font.Face {
 
 func (r textRenderingSystem) Update(view *view.View) {
 	context := view.Entity(render.ContextType).Get(render.ContextType).(render.Context)
-	for _, v := range view.Entities(components.TextType, components.PosType) {
+	for _, v := range view.Entities(components.TextType, components.PosType, components.ColorType) {
 		textCmp := v.Get(components.TextType).(components.Text)
 		posCmp := v.Get(components.PosType).(components.Pos)
+		colorCmp := v.Get(components.ColorType).(color.Color)
 		ttFace := r.getFace(float64(textCmp.Size))
-		text.Draw(context.Image, textCmp.String, ttFace, int(posCmp.X), int(posCmp.Y), textCmp.Color)
+		text.Draw(context.Image, textCmp.String, ttFace, int(posCmp.X), int(posCmp.Y), colorCmp)
 	}
 }
 

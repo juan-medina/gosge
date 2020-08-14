@@ -15,6 +15,8 @@ github.com/jfreymuth/oggvorbis v1.0.0/go.mod h1:abe6F9QRjuU9l+2jek3gj46lu40N4qlY
 github.com/jfreymuth/vorbis v1.0.0/go.mod h1:8zy3lUAm9K/rJJk223RKy6vjCZTWC61NA2QD06bfOE0=
 github.com/juan-medina/goecs v0.1.0 h1:8mL7gsaBBCiPXUpIyXd9WMntmN3kxlG5+XTGpuLL+6w=
 github.com/juan-medina/goecs v0.1.0/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
+github.com/juan-medina/goecs v0.1.1 h1:zHxGcXpmWk8qOMOqjGTSD9dqia2SK06h7Viy+CH3UEs=
+github.com/juan-medina/goecs v0.1.1/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
