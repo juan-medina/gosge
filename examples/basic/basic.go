@@ -32,14 +32,18 @@ import (
 type myGame struct {
 }
 
-func (m *myGame) Init(e engine.Engine) {
-	e.World().Add(entitiy.New(
-		components.GameSettings{Width: 640, Height: 480, Title: "Basic Game"}),
+func (m *myGame) Load(eng engine.Engine) {
+	eng.World().Add(entitiy.New(
+		components.GameSettings{Width: 1920, Height: 1080, Title: "Basic Game"}),
 	)
-	e.World().Add(entitiy.New(
-		components.Text{String: "Hello world", Size: 50},
+}
+
+func (m *myGame) Init(eng engine.Engine) {
+	settings := eng.World().Entity(components.GameSettingsType).Get(components.GameSettingsType).(components.GameSettings)
+	eng.World().Add(entitiy.New(
+		components.Text{String: "Hello world", Size: 100},
 		color.RGBA{R: 255, G: 255, B: 255, A: 255},
-		components.Pos{X: 100, Y: 100}),
+		components.Pos{X: float64(settings.Width) / 2, Y: float64(settings.Height) / 2}),
 	)
 }
 

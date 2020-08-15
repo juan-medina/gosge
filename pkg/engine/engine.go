@@ -23,6 +23,7 @@
 package engine
 
 import (
+	"errors"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/juan-medina/goecs/pkg/entitiy"
 	"github.com/juan-medina/goecs/pkg/world"
@@ -36,41 +37,69 @@ const (
 	renderingGroup = "RENDERING_GROUP"
 )
 
+type engineState int
+
+const (
+	initializing = engineState(iota)
+	running      = engineState(iota)
+)
+
 type gameEngine struct {
 	game  Game
 	world *world.World
+	state engineState
 }
 
-//goland:noinspection GoUnusedParameter
+var (
+	normalExit = errors.New("normal exit")
+)
+
 func (eng *gameEngine) layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	settings := eng.world.Entity(components.GameSettingsType).Get(components.GameSettingsType).(components.GameSettings)
-	return settings.Width, settings.Height
+	s := ebiten.DeviceScaleFactor()
+	return int(float64(outsideWidth) * s), int(float64(outsideHeight) * s)
 }
 
 //goland:noinspection GoUnusedParameter
 func (eng *gameEngine) update(screen *ebiten.Image) error {
-	eng.World().Update()
+	switch eng.state {
+	case initializing:
+		eng.game.Init(eng)
+
+		eng.state = running
+	case running:
+		eng.World().Update()
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+		return normalExit
+	}
+
 	return nil
 }
 
 func (eng *gameEngine) draw(screen *ebiten.Image) {
-	context := eng.World().Entity(render.ContextType)
-	context.Set(render.NewContext(screen))
+	switch eng.state {
+	case initializing:
+		break
+	case running:
+		context := eng.World().Entity(render.ContextType)
+		context.Set(render.NewContext(screen))
 
-	eng.World().UpdateGroup(renderingGroup)
+		eng.World().UpdateGroup(renderingGroup)
+	}
 }
 
 func (eng *gameEngine) run() {
 	eng.world.Add(entitiy.New().Add(render.NewContext(nil)))
 	eng.world.AddSystemToGroup(systems.TextRenderingSystem(), renderingGroup)
 
-	eng.game.Init(eng)
-
 	settings := components.GameSettings{
 		Width:  640,
 		Height: 480,
 		Title:  "Go Simple Game Engine",
 	}
+
+	eng.game.Load(eng)
 
 	if settingsEnt := eng.world.Entity(components.GameSettingsType); settingsEnt == nil {
 		eng.world.Add(entitiy.New().Add(settings))
@@ -81,7 +110,7 @@ func (eng *gameEngine) run() {
 	ebiten.SetWindowSize(settings.Width, settings.Height)
 	ebiten.SetWindowTitle(settings.Title)
 
-	if err := ebiten.RunGame(newEbitenGameWrapper(eng)); err != nil {
+	if err := ebiten.RunGame(newEbitenGameWrapper(eng)); err != nil && err != normalExit {
 		log.Fatal(err)
 	}
 }
@@ -94,6 +123,7 @@ func newEngine(game Game) Engine {
 	return &gameEngine{
 		game:  game,
 		world: world.New(),
+		state: initializing,
 	}
 }
 

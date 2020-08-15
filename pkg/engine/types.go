@@ -31,4 +31,5 @@ type Engine interface {
 
 type Game interface {
 	Init(eng Engine)
+	Load(eng Engine)
 }
