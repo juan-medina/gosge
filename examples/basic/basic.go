@@ -41,7 +41,12 @@ func (m *myGame) Load(eng engine.Engine) {
 func (m *myGame) Init(eng engine.Engine) {
 	settings := eng.World().Entity(components.GameSettingsType).Get(components.GameSettingsType).(components.GameSettings)
 	eng.World().Add(entitiy.New(
-		components.Text{String: "Hello world", Size: 100},
+		components.Text{
+			String:     "Hello world",
+			Size:       100,
+			HAlignment: components.CenterHAlignment,
+			VAlignment: components.MiddleVAlignment,
+		},
 		color.RGBA{R: 255, G: 255, B: 255, A: 255},
 		components.Pos{X: float64(settings.Width) / 2, Y: float64(settings.Height) / 2}),
 	)

@@ -27,9 +27,27 @@ import (
 	"reflect"
 )
 
+type HAlignment int
+
+const (
+	LeftHAlignment   = HAlignment(iota)
+	RightHAlignment  = HAlignment(iota)
+	CenterHAlignment = HAlignment(iota)
+)
+
+type VAlignment int
+
+const (
+	BottomVAlignment = VAlignment(iota)
+	TopVAlignment    = VAlignment(iota)
+	MiddleVAlignment = VAlignment(iota)
+)
+
 type Text struct {
-	String string
-	Size   int
+	String     string
+	Size       int
+	VAlignment VAlignment
+	HAlignment HAlignment
 }
 
 var TextType = reflect.TypeOf(Text{})
