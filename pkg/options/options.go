@@ -26,7 +26,7 @@ import "image/color"
 
 type Options struct {
 	Title      string
-	Width      int32
-	Height     int32
+	Width      int
+	Height     int
 	ClearColor color.Color
 }

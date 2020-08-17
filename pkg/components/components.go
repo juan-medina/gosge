@@ -43,14 +43,15 @@ const (
 	MiddleVAlignment
 )
 
-type Text struct {
+type UiText struct {
 	String     string
-	Size       int
+	Size       float64
+	Spacing    float64
 	VAlignment VAlignment
 	HAlignment HAlignment
 }
 
-var TextType = reflect.TypeOf(Text{})
+var UiTextType = reflect.TypeOf(UiText{})
 
 type Pos struct {
 	X float64
@@ -62,8 +63,15 @@ var PosType = reflect.TypeOf(Pos{})
 var ColorType = reflect.TypeOf(color.RGBA{})
 
 type GameSettings struct {
-	Width  int
-	Height int
+	Current struct {
+		Width  int
+		Height int
+	}
+	Original struct {
+		Width  int
+		Height int
+	}
+	Scale float64
 }
 
 var GameSettingsType = reflect.TypeOf(GameSettings{})

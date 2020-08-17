@@ -33,32 +33,70 @@ import (
 )
 
 var opt = options.Options{
-	Title:      "simple game",
+	Title:      "Simple Game",
 	Width:      1920,
 	Height:     1080,
 	ClearColor: color.RGBA{R: 0, G: 0, B: 0, A: 255},
 }
 
-var centerTet *entitiy.Entity
+var centerText *entitiy.Entity
+var bottomText *entitiy.Entity
 
 type centerTextSystem struct {
 }
 
 func (cts centerTextSystem) Update(view *view.View) {
+	// get settings, including original and current screen size and the scale from original to current
 	settings := view.Entity(components.GameSettingsType).Get(components.GameSettingsType).(components.GameSettings)
-	pos := centerTet.Get(components.PosType).(components.Pos)
-	pos.X = float64(settings.Width) / 2
-	pos.Y = float64(settings.Height) / 2
-	centerTet.Set(pos)
+
+	// get the center text components
+	pos := centerText.Get(components.PosType).(components.Pos)
+	text := centerText.Get(components.UiTextType).(components.UiText)
+
+	// calculate center text position base on current screen size
+	pos.X = float64(settings.Current.Width) / 2
+	pos.Y = float64(settings.Current.Height) / 2
+	centerText.Set(pos)
+
+	// change center text size & spacing from current scale
+	text.Size = 300 * settings.Scale
+	text.Spacing = 10 * settings.Scale
+	centerText.Set(text)
+
+	// get the bottom text components
+	pos = bottomText.Get(components.PosType).(components.Pos)
+	text = bottomText.Get(components.UiTextType).(components.UiText)
+
+	// calculate bottom text position base on current screen size
+	pos.X = float64(settings.Current.Width) / 2
+	pos.Y = float64(settings.Current.Height)
+	bottomText.Set(pos)
+
+	// change bottom text size & spacing from current scale
+	text.Size = 60 * settings.Scale
+	text.Spacing = 10 * settings.Scale
+	bottomText.Set(text)
 }
 
 func loadGame(gWorld *world.World) {
-	centerTet = gWorld.Add(entitiy.New(
-		components.Text{
+	centerText = gWorld.Add(entitiy.New(
+		components.UiText{
 			String:     "Hello world",
-			Size:       100,
+			Size:       300,
+			Spacing:    10,
 			HAlignment: components.CenterHAlignment,
 			VAlignment: components.MiddleVAlignment,
+		},
+		components.Pos{X: 0, Y: 0},
+		color.RGBA{R: 255, G: 255, B: 255, A: 255},
+	))
+	bottomText = gWorld.Add(entitiy.New(
+		components.UiText{
+			String:     "press <ESC> to close",
+			Size:       60,
+			Spacing:    10,
+			HAlignment: components.CenterHAlignment,
+			VAlignment: components.BottomVAlignment,
 		},
 		components.Pos{X: 0, Y: 0},
 		color.RGBA{R: 255, G: 255, B: 255, A: 255},

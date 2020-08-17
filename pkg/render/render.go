@@ -34,7 +34,7 @@ var saveOpts = options.Options{}
 func Init(opt options.Options) {
 	saveOpts = opt
 	rl.SetConfigFlags(rl.FlagWindowResizable)
-	rl.InitWindow(opt.Width, opt.Height, opt.Title)
+	rl.InitWindow(int32(opt.Width), int32(opt.Height), opt.Title)
 }
 
 func End() {
@@ -58,7 +58,7 @@ func GetScreenSize() (width int, height int) {
 	return rl.GetScreenWidth(), rl.GetScreenHeight()
 }
 
-func DrawText(text components.Text, pos components.Pos, txColor color.Color) {
+func DrawText(text components.UiText, pos components.Pos, txColor color.Color) {
 	font := rl.GetFontDefault()
 
 	vec := rl.Vector2{
@@ -67,7 +67,7 @@ func DrawText(text components.Text, pos components.Pos, txColor color.Color) {
 	}
 
 	if text.HAlignment != components.LeftHAlignment || text.VAlignment != components.BottomVAlignment {
-		av := rl.MeasureTextEx(font, text.String, float32(text.Size), 10)
+		av := rl.MeasureTextEx(font, text.String, float32(text.Size), float32(text.Spacing))
 
 		switch text.HAlignment {
 		case components.LeftHAlignment:
@@ -80,18 +80,18 @@ func DrawText(text components.Text, pos components.Pos, txColor color.Color) {
 
 		switch text.VAlignment {
 		case components.BottomVAlignment:
-			av.Y = 0
+			av.Y = -av.Y
 		case components.MiddleVAlignment:
 			av.Y = -av.Y / 2
 		case components.TopVAlignment:
-			av.Y = -av.Y
+			av.Y = 0
 			break
 		}
 		vec.X += av.X
 		vec.Y += av.Y
 	}
 
-	rl.DrawTextEx(font, text.String, vec, float32(text.Size), 10, color2RayColor(txColor))
+	rl.DrawTextEx(font, text.String, vec, float32(text.Size), float32(text.Spacing), color2RayColor(txColor))
 }
 
 func color2RayColor(color color.Color) rl.Color {

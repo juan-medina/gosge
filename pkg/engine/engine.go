@@ -29,6 +29,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/options"
 	"github.com/juan-medina/gosge/pkg/render"
 	"github.com/juan-medina/gosge/pkg/systems"
+	"math"
 )
 
 type engineStatus int
@@ -61,7 +62,26 @@ func (es *engineState) updateGameSettings() {
 		gsEnt = es.gWorld.Add(entitiy.New(components.GameSettings{}))
 	}
 	w, h := render.GetScreenSize()
-	gs := components.GameSettings{Width: w, Height: h}
+	gs := components.GameSettings{
+		Current: struct {
+			Width  int
+			Height int
+		}{
+			Width:  w,
+			Height: h,
+		},
+		Original: struct {
+			Width  int
+			Height int
+		}{
+			Width:  es.opt.Width,
+			Height: es.opt.Height,
+		},
+	}
+	sx := float64(gs.Current.Width) / float64(gs.Original.Width)
+	sy := float64(gs.Current.Height) / float64(gs.Original.Height)
+	gs.Scale = math.Min(sx, sy)
+
 	gsEnt.Add(gs)
 }
 

@@ -34,8 +34,8 @@ type uiRenderingSystem struct {
 }
 
 func (ui uiRenderingSystem) Update(view *view.View) {
-	for _, v := range view.Entities(components.TextType, components.PosType, components.ColorType) {
-		textCmp := v.Get(components.TextType).(components.Text)
+	for _, v := range view.Entities(components.UiTextType, components.PosType, components.ColorType) {
+		textCmp := v.Get(components.UiTextType).(components.UiText)
 		posCmp := v.Get(components.PosType).(components.Pos)
 		colorCmp := v.Get(components.ColorType).(color.Color)
 
