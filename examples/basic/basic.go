@@ -24,34 +24,48 @@ package main
 
 import (
 	"github.com/juan-medina/goecs/pkg/entitiy"
+	"github.com/juan-medina/goecs/pkg/view"
+	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/engine"
+	"github.com/juan-medina/gosge/pkg/options"
 	"image/color"
 )
 
-type myGame struct {
+var opt = options.Options{
+	Title:      "simple game",
+	Width:      1920,
+	Height:     1080,
+	ClearColor: color.RGBA{R: 0, G: 0, B: 0, A: 255},
 }
 
-func (m *myGame) Load(eng engine.Engine) {
-	eng.World().Add(entitiy.New(
-		components.GameSettings{Width: 1920, Height: 1080, Title: "Basic Game"}),
-	)
+var centerTet *entitiy.Entity
+
+type centerTextSystem struct {
 }
 
-func (m *myGame) Init(eng engine.Engine) {
-	settings := eng.World().Entity(components.GameSettingsType).Get(components.GameSettingsType).(components.GameSettings)
-	eng.World().Add(entitiy.New(
+func (cts centerTextSystem) Update(view *view.View) {
+	settings := view.Entity(components.GameSettingsType).Get(components.GameSettingsType).(components.GameSettings)
+	pos := centerTet.Get(components.PosType).(components.Pos)
+	pos.X = float64(settings.Width) / 2
+	pos.Y = float64(settings.Height) / 2
+	centerTet.Set(pos)
+}
+
+func loadGame(gWorld *world.World) {
+	centerTet = gWorld.Add(entitiy.New(
 		components.Text{
 			String:     "Hello world",
 			Size:       100,
 			HAlignment: components.CenterHAlignment,
 			VAlignment: components.MiddleVAlignment,
 		},
+		components.Pos{X: 0, Y: 0},
 		color.RGBA{R: 255, G: 255, B: 255, A: 255},
-		components.Pos{X: float64(settings.Width) / 2, Y: float64(settings.Height) / 2}),
-	)
+	))
+	gWorld.AddSystem(centerTextSystem{})
 }
 
 func main() {
-	engine.Run(&myGame{})
+	engine.Run(opt, loadGame)
 }

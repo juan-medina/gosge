@@ -20,28 +20,29 @@
  *  THE SOFTWARE.
  */
 
-package engine
+package systems
 
-import "github.com/hajimehoshi/ebiten"
+import (
+	"github.com/juan-medina/goecs/pkg/system"
+	"github.com/juan-medina/goecs/pkg/view"
+	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/render"
+	"image/color"
+)
 
-type ebitenGameWrapper struct {
-	eng *gameEngine
+type uiRenderingSystem struct {
 }
 
-func newEbitenGameWrapper(eng *gameEngine) ebiten.Game {
-	return &ebitenGameWrapper{
-		eng: eng,
+func (ui uiRenderingSystem) Update(view *view.View) {
+	for _, v := range view.Entities(components.TextType, components.PosType, components.ColorType) {
+		textCmp := v.Get(components.TextType).(components.Text)
+		posCmp := v.Get(components.PosType).(components.Pos)
+		colorCmp := v.Get(components.ColorType).(color.Color)
+
+		render.DrawText(textCmp, posCmp, colorCmp)
 	}
 }
 
-func (ebg *ebitenGameWrapper) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return ebg.eng.layout(outsideWidth, outsideHeight)
-}
-
-func (ebg *ebitenGameWrapper) Update(screen *ebiten.Image) error {
-	return ebg.eng.update(screen)
-}
-
-func (ebg *ebitenGameWrapper) Draw(screen *ebiten.Image) {
-	ebg.eng.draw(screen)
+func UiRenderingSystem() system.System {
+	return uiRenderingSystem{}
 }

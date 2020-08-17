@@ -23,16 +23,78 @@
 package render
 
 import (
-	"github.com/hajimehoshi/ebiten"
-	"reflect"
+	"github.com/gen2brain/raylib-go/raylib"
+	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/options"
+	"image/color"
 )
 
-type Context struct {
-	Image *ebiten.Image
+var saveOpts = options.Options{}
+
+func Init(opt options.Options) {
+	saveOpts = opt
+	rl.SetConfigFlags(rl.FlagWindowResizable)
+	rl.InitWindow(opt.Width, opt.Height, opt.Title)
 }
 
-var ContextType = reflect.TypeOf(Context{})
+func End() {
+	rl.CloseWindow()
+}
 
-func NewContext(image *ebiten.Image) Context {
-	return Context{Image: image}
+func BeginFrame() {
+	rl.BeginDrawing()
+	rl.ClearBackground(color2RayColor(saveOpts.ClearColor))
+}
+
+func EndFrame() {
+	rl.EndDrawing()
+}
+
+func ShouldClose() bool {
+	return rl.WindowShouldClose()
+}
+
+func GetScreenSize() (width int, height int) {
+	return rl.GetScreenWidth(), rl.GetScreenHeight()
+}
+
+func DrawText(text components.Text, pos components.Pos, txColor color.Color) {
+	font := rl.GetFontDefault()
+
+	vec := rl.Vector2{
+		X: float32(pos.X),
+		Y: float32(pos.Y),
+	}
+
+	if text.HAlignment != components.LeftHAlignment || text.VAlignment != components.BottomVAlignment {
+		av := rl.MeasureTextEx(font, text.String, float32(text.Size), 10)
+
+		switch text.HAlignment {
+		case components.LeftHAlignment:
+			av.X = 0
+		case components.CenterHAlignment:
+			av.X = -av.X / 2
+		case components.RightHAlignment:
+			av.X = -av.X
+		}
+
+		switch text.VAlignment {
+		case components.BottomVAlignment:
+			av.Y = 0
+		case components.MiddleVAlignment:
+			av.Y = -av.Y / 2
+		case components.TopVAlignment:
+			av.Y = -av.Y
+			break
+		}
+		vec.X += av.X
+		vec.Y += av.Y
+	}
+
+	rl.DrawTextEx(font, text.String, vec, float32(text.Size), 10, color2RayColor(txColor))
+}
+
+func color2RayColor(color color.Color) rl.Color {
+	r, g, b, a := color.RGBA()
+	return rl.NewColor(uint8(r), uint8(g), uint8(b), uint8(a))
 }

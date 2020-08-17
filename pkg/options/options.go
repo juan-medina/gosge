@@ -20,16 +20,13 @@
  *  THE SOFTWARE.
  */
 
-package engine
+package options
 
-import "github.com/juan-medina/goecs/pkg/world"
+import "image/color"
 
-type Engine interface {
-	run()
-	World() *world.World
-}
-
-type Game interface {
-	Init(eng Engine)
-	Load(eng Engine)
+type Options struct {
+	Title      string
+	Width      int32
+	Height     int32
+	ClearColor color.Color
 }

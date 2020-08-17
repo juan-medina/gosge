@@ -23,110 +23,88 @@
 package engine
 
 import (
-	"errors"
-	"github.com/hajimehoshi/ebiten"
 	"github.com/juan-medina/goecs/pkg/entitiy"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/options"
 	"github.com/juan-medina/gosge/pkg/render"
 	"github.com/juan-medina/gosge/pkg/systems"
-	"log"
 )
+
+type engineStatus int
 
 const (
-	renderingGroup = "RENDERING_GROUP"
+	statusInitializing = engineStatus(iota)
+	statusRunning
+	statusEnding
 )
 
-type engineState int
-
-const (
-	initializing = engineState(iota)
-	running      = engineState(iota)
-)
-
-type gameEngine struct {
-	game  Game
-	world *world.World
-	state engineState
+type engineState struct {
+	opt    options.Options
+	gWorld *world.World
+	status engineStatus
+	init   func(gWorld *world.World)
 }
 
-var (
-	normalExit = errors.New("normal exit")
-)
-
-func (eng *gameEngine) layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	s := ebiten.DeviceScaleFactor()
-	return int(float64(outsideWidth) * s), int(float64(outsideHeight) * s)
-}
-
-//goland:noinspection GoUnusedParameter
-func (eng *gameEngine) update(screen *ebiten.Image) error {
-	switch eng.state {
-	case initializing:
-		eng.game.Init(eng)
-
-		eng.state = running
-	case running:
-		eng.World().Update()
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyQ) {
-		return normalExit
-	}
-
-	return nil
-}
-
-func (eng *gameEngine) draw(screen *ebiten.Image) {
-	switch eng.state {
-	case initializing:
-		break
-	case running:
-		context := eng.World().Entity(render.ContextType)
-		context.Set(render.NewContext(screen))
-
-		eng.World().UpdateGroup(renderingGroup)
+func newEngineState(opt options.Options, init func(gWorld *world.World)) *engineState {
+	return &engineState{
+		opt:    opt,
+		gWorld: world.New(),
+		status: statusInitializing,
+		init:   init,
 	}
 }
 
-func (eng *gameEngine) run() {
-	eng.world.Add(entitiy.New().Add(render.NewContext(nil)))
-	eng.world.AddSystemToGroup(systems.TextRenderingSystem(), renderingGroup)
-
-	settings := components.GameSettings{
-		Width:  640,
-		Height: 480,
-		Title:  "Go Simple Game Engine",
+func (es *engineState) updateGameSettings() {
+	gsEnt := es.gWorld.Entity(components.GameSettingsType)
+	if gsEnt == nil {
+		gsEnt = es.gWorld.Add(entitiy.New(components.GameSettings{}))
 	}
+	w, h := render.GetScreenSize()
+	gs := components.GameSettings{Width: w, Height: h}
+	gsEnt.Add(gs)
+}
 
-	eng.game.Load(eng)
+func (es *engineState) initialize() {
+	render.Init(es.opt)
 
-	if settingsEnt := eng.world.Entity(components.GameSettingsType); settingsEnt == nil {
-		eng.world.Add(entitiy.New().Add(settings))
-	} else {
-		settings = settingsEnt.Get(components.GameSettingsType).(components.GameSettings)
-	}
+	es.updateGameSettings()
+	render.BeginFrame()
+	es.init(es.gWorld)
+	render.EndFrame()
 
-	ebiten.SetWindowSize(settings.Width, settings.Height)
-	ebiten.SetWindowTitle(settings.Title)
+	es.gWorld.AddSystem(systems.UiRenderingSystem())
+	es.status = statusRunning
+}
 
-	if err := ebiten.RunGame(newEbitenGameWrapper(eng)); err != nil && err != normalExit {
-		log.Fatal(err)
+func (es *engineState) running() {
+	es.updateGameSettings()
+	render.BeginFrame()
+	es.gWorld.Update()
+	render.EndFrame()
+
+	if render.ShouldClose() {
+		es.status = statusEnding
 	}
 }
 
-func (eng *gameEngine) World() *world.World {
-	return eng.world
+func (es *engineState) end() {
+	render.End()
 }
 
-func newEngine(game Game) Engine {
-	return &gameEngine{
-		game:  game,
-		world: world.New(),
-		state: initializing,
+func (es *engineState) run() {
+	for es.status != statusEnding {
+		switch es.status {
+		case statusInitializing:
+			es.initialize()
+		case statusRunning:
+			es.running()
+		case statusEnding:
+			es.end()
+		}
 	}
 }
 
-func Run(game Game) {
-	newEngine(game).run()
+func Run(opt options.Options, init func(gWorld *world.World)) {
+	newEngineState(opt, init).run()
 }

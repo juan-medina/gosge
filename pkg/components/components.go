@@ -30,17 +30,17 @@ import (
 type HAlignment int
 
 const (
-	LeftHAlignment   = HAlignment(iota)
-	RightHAlignment  = HAlignment(iota)
-	CenterHAlignment = HAlignment(iota)
+	LeftHAlignment = HAlignment(iota)
+	RightHAlignment
+	CenterHAlignment
 )
 
 type VAlignment int
 
 const (
 	BottomVAlignment = VAlignment(iota)
-	TopVAlignment    = VAlignment(iota)
-	MiddleVAlignment = VAlignment(iota)
+	TopVAlignment
+	MiddleVAlignment
 )
 
 type Text struct {
@@ -59,12 +59,11 @@ type Pos struct {
 
 var PosType = reflect.TypeOf(Pos{})
 
+var ColorType = reflect.TypeOf(color.RGBA{})
+
 type GameSettings struct {
 	Width  int
 	Height int
-	Title  string
 }
 
 var GameSettingsType = reflect.TypeOf(GameSettings{})
-
-var ColorType = reflect.TypeOf(color.RGBA{})
