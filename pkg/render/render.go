@@ -50,6 +50,28 @@ func EndFrame() {
 	rl.EndDrawing()
 }
 
+func Begin2D() {
+	w, h := GetScreenSize()
+	camera := rl.Camera2D{
+		Offset: rl.Vector2{
+			X: float32(w) / 2,
+			Y: float32(h) / 2,
+		},
+		Target: rl.Vector2{
+			X: 0,
+			Y: 0,
+		},
+		Rotation: 0,
+		Zoom:     1,
+	}
+
+	rl.BeginMode2D(camera)
+}
+
+func End2D() {
+	rl.EndMode2D()
+}
+
 func ShouldClose() bool {
 	return rl.WindowShouldClose()
 }

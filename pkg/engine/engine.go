@@ -40,6 +40,11 @@ const (
 	statusEnding
 )
 
+const (
+	uiGroup        = "UI_GROUP"
+	renderingGroup = "RENDERING_GROUP"
+)
+
 type engineState struct {
 	opt    options.Options
 	gWorld *world.World
@@ -93,14 +98,30 @@ func (es *engineState) initialize() {
 	es.init(es.gWorld)
 	render.EndFrame()
 
-	es.gWorld.AddSystem(systems.UiRenderingSystem())
+	//es.gWorld.AddSystemToGroup(systems.xxxRenderingSystem(), renderingGroup)
+	es.gWorld.AddSystemToGroup(systems.UiRenderingSystem(), uiGroup)
+
 	es.status = statusRunning
+}
+
+func (es *engineState) render2D() {
+	render.Begin2D()
+	es.gWorld.UpdateGroup(renderingGroup)
+	render.End2D()
+}
+
+func (es *engineState) renderUI() {
+	es.gWorld.UpdateGroup(uiGroup)
 }
 
 func (es *engineState) running() {
 	es.updateGameSettings()
 	render.BeginFrame()
+
 	es.gWorld.Update()
+	es.render2D()
+	es.renderUI()
+
 	render.EndFrame()
 
 	if render.ShouldClose() {
