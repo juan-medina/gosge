@@ -33,7 +33,11 @@ import (
 type uiRenderingSystem struct {
 }
 
-func (ui uiRenderingSystem) Update(view *view.View) {
+func (ui uiRenderingSystem) Notify(_ *view.View, _ interface{}, _ float64) error {
+	return nil
+}
+
+func (ui uiRenderingSystem) Update(view *view.View, _ float64) error {
 	for _, v := range view.Entities(components.UiTextType, components.PosType, components.ColorType) {
 		textCmp := v.Get(components.UiTextType).(components.UiText)
 		posCmp := v.Get(components.PosType).(components.Pos)
@@ -41,6 +45,7 @@ func (ui uiRenderingSystem) Update(view *view.View) {
 
 		render.DrawText(textCmp, posCmp, colorCmp)
 	}
+	return nil
 }
 
 func UiRenderingSystem() system.System {

@@ -49,10 +49,10 @@ type engineState struct {
 	opt    options.Options
 	gWorld *world.World
 	status engineStatus
-	init   func(gWorld *world.World)
+	init   func(gWorld *world.World) error
 }
 
-func newEngineState(opt options.Options, init func(gWorld *world.World)) *engineState {
+func newEngineState(opt options.Options, init func(gWorld *world.World) error) *engineState {
 	return &engineState{
 		opt:    opt,
 		gWorld: world.New(),
@@ -90,62 +90,78 @@ func (es *engineState) updateGameSettings() {
 	gsEnt.Add(gs)
 }
 
-func (es *engineState) initialize() {
+func (es *engineState) initialize() error {
 	render.Init(es.opt)
 
 	es.updateGameSettings()
 	render.BeginFrame()
-	es.init(es.gWorld)
+	err := es.init(es.gWorld)
 	render.EndFrame()
 
-	//es.gWorld.AddSystemToGroup(systems.xxxRenderingSystem(), renderingGroup)
-	es.gWorld.AddSystemToGroup(systems.UiRenderingSystem(), uiGroup)
+	if err == nil {
+		//es.gWorld.AddSystemToGroup(systems.xxxRenderingSystem(), renderingGroup)
+		es.gWorld.AddSystemToGroup(systems.UiRenderingSystem(), uiGroup)
 
-	es.status = statusRunning
+		es.status = statusRunning
+	}
+	return err
 }
 
-func (es *engineState) render2D() {
+func (es *engineState) render2D() error {
 	render.Begin2D()
-	es.gWorld.UpdateGroup(renderingGroup)
+	err := es.gWorld.UpdateGroup(renderingGroup, 0)
 	render.End2D()
+	return err
 }
 
-func (es *engineState) renderUI() {
-	es.gWorld.UpdateGroup(uiGroup)
+func (es *engineState) renderUI() error {
+	return es.gWorld.UpdateGroup(uiGroup, 0)
 }
 
-func (es *engineState) running() {
+func (es *engineState) running() error {
 	es.updateGameSettings()
 	render.BeginFrame()
 
-	es.gWorld.Update()
-	es.render2D()
-	es.renderUI()
+	var err error
+	if err = es.gWorld.Update(0); err == nil {
+		if err = es.render2D(); err == nil {
+			err = es.renderUI()
+		}
+	}
 
 	render.EndFrame()
 
-	if render.ShouldClose() {
-		es.status = statusEnding
-	}
-}
-
-func (es *engineState) end() {
-	render.End()
-}
-
-func (es *engineState) run() {
-	for es.status != statusEnding {
-		switch es.status {
-		case statusInitializing:
-			es.initialize()
-		case statusRunning:
-			es.running()
-		case statusEnding:
-			es.end()
+	if err == nil {
+		if render.ShouldClose() {
+			es.status = statusEnding
 		}
 	}
+	return err
 }
 
-func Run(opt options.Options, init func(gWorld *world.World)) {
-	newEngineState(opt, init).run()
+func (es *engineState) end() error {
+	render.End()
+	return nil
+}
+
+func (es *engineState) run() error {
+	var err error = nil
+	for es.status != statusEnding && err == nil {
+		switch es.status {
+		case statusInitializing:
+			err = es.initialize()
+		case statusRunning:
+			err = es.running()
+		case statusEnding:
+			err = es.end()
+		}
+	}
+	if err != nil && es.status == statusRunning {
+		_ = es.end()
+	}
+	return err
+}
+
+func Run(opt options.Options, init func(gWorld *world.World) error) error {
+	return newEngineState(opt, init).run()
 }

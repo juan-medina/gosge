@@ -30,6 +30,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/options"
 	"image/color"
+	"log"
 )
 
 var opt = options.Options{
@@ -42,10 +43,13 @@ var opt = options.Options{
 var centerText *entitiy.Entity
 var bottomText *entitiy.Entity
 
-type centerTextSystem struct {
+type centerTextSystem struct{}
+
+func (cts centerTextSystem) Notify(_ *view.View, _ interface{}, _ float64) error {
+	return nil
 }
 
-func (cts centerTextSystem) Update(view *view.View) {
+func (cts centerTextSystem) Update(view *view.View, _ float64) error {
 	// get settings, including original and current screen size and the scale from original to current
 	settings := view.Entity(components.GameSettingsType).Get(components.GameSettingsType).(components.GameSettings)
 
@@ -76,9 +80,11 @@ func (cts centerTextSystem) Update(view *view.View) {
 	text.Size = 60 * settings.Scale
 	text.Spacing = 10 * settings.Scale
 	bottomText.Set(text)
+
+	return nil
 }
 
-func loadGame(gWorld *world.World) {
+func loadGame(gWorld *world.World) error {
 	centerText = gWorld.Add(entitiy.New(
 		components.UiText{
 			String:     "Hello world",
@@ -102,8 +108,11 @@ func loadGame(gWorld *world.World) {
 		color.RGBA{R: 255, G: 255, B: 255, A: 255},
 	))
 	gWorld.AddSystem(centerTextSystem{})
+	return nil
 }
 
 func main() {
-	engine.Run(opt, loadGame)
+	if err := engine.Run(opt, loadGame); err != nil {
+		log.Fatalf("error running the game: %v", err)
+	}
 }
