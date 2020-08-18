@@ -56,9 +56,9 @@ type stickText struct {
 
 var stickTextType = reflect.TypeOf(stickText{})
 
-type centerTextSystem struct{}
+type stickyTextSystem struct{}
 
-func (cts centerTextSystem) Notify(wld *world.World, event interface{}, _ float64) error {
+func (cts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float64) error {
 	switch e := event.(type) {
 	case events.ScreenSizeChangeEvent:
 		// get all our texts
@@ -89,7 +89,7 @@ func (cts centerTextSystem) Notify(wld *world.World, event interface{}, _ float6
 	return nil
 }
 
-func (cts centerTextSystem) Update(_ *world.World, _ float64) error {
+func (cts stickyTextSystem) Update(_ *world.World, _ float64) error {
 	return nil
 }
 
@@ -118,7 +118,7 @@ func loadGame(gWorld *world.World) error {
 		components.Pos{X: float64(opt.Width / 2), Y: float64(opt.Height)},
 		color.RGBA{R: 255, G: 255, B: 255, A: 255},
 	))
-	gWorld.AddSystem(centerTextSystem{})
+	gWorld.AddSystem(stickyTextSystem{})
 	return nil
 }
 
