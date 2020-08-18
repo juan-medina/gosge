@@ -26,6 +26,7 @@ GOTOOL=$(GOCMD) tool
 COVERAGE=$(GOTOOL) cover
 GOFORMAT=$(GOCMD) fmt
 GOVET=$(GOCMD) vet
+GORUN=$(GOCMD) run
 
 default: test
 
@@ -37,3 +38,5 @@ coverage: test
 	$(COVERAGE) -html=coverage.out
 format:
 	$(GOFORMAT) ./...
+run:
+	$(GORUN) examples/$(example)/$(example).go

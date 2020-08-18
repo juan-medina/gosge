@@ -35,7 +35,7 @@ import (
 )
 
 var opt = options.Options{
-	Title:      "Simple Game",
+	Title:      "Hello Game",
 	Width:      1920,
 	Height:     1080,
 	ClearColor: color.RGBA{R: 0, G: 0, B: 0, A: 255},
