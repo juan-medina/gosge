@@ -33,9 +33,9 @@ var saveOpts = options.Options{}
 
 func Init(opt options.Options) {
 	saveOpts = opt
+	rl.SetTraceLog(rl.LogNone)
 	rl.SetConfigFlags(rl.FlagWindowResizable)
 	rl.InitWindow(int32(opt.Width), int32(opt.Height), opt.Title)
-	rl.SetTargetFPS(60)
 }
 
 func End() {
