@@ -24,13 +24,14 @@ package main
 
 import (
 	"github.com/juan-medina/goecs/pkg/entitiy"
-	"github.com/juan-medina/goecs/pkg/view"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/engine"
+	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/options"
 	"image/color"
 	"log"
+	"reflect"
 )
 
 var opt = options.Options{
@@ -40,52 +41,60 @@ var opt = options.Options{
 	ClearColor: color.RGBA{R: 0, G: 0, B: 0, A: 255},
 }
 
-var centerText *entitiy.Entity
-var bottomText *entitiy.Entity
+type stickPosition int
+
+const (
+	stickToCenter = iota
+	stickToBottom
+)
+
+type stickText struct {
+	size    float64
+	spacing float64
+	stick   stickPosition
+}
+
+var stickTextType = reflect.TypeOf(stickText{})
 
 type centerTextSystem struct{}
 
-func (cts centerTextSystem) Notify(_ *view.View, _ interface{}, _ float64) error {
+func (cts centerTextSystem) Notify(wld *world.World, event interface{}, _ float64) error {
+	switch e := event.(type) {
+	case events.ScreenSizeChangeEvent:
+		// get all our texts
+		for _, v := range wld.Entities(components.PosType, components.UiTextType, stickTextType) {
+			// get the text components
+			pos := v.Get(components.PosType).(components.Pos)
+			text := v.Get(components.UiTextType).(components.UiText)
+			st := v.Get(stickTextType).(stickText)
+
+			// calculate position based on current screen size and stick
+			switch st.stick {
+			case stickToCenter:
+				pos.X = float64(e.Current.Width) / 2
+				pos.Y = float64(e.Current.Height) / 2
+			case stickToBottom:
+				pos.X = float64(e.Current.Width) / 2
+				pos.Y = float64(e.Current.Height)
+			}
+			v.Set(pos)
+
+			// change text size & spacing from current scale
+			text.Size = st.size * e.Scale
+			text.Spacing = st.spacing * e.Scale
+			v.Set(text)
+		}
+	}
+
 	return nil
 }
 
-func (cts centerTextSystem) Update(view *view.View, _ float64) error {
-	// get settings, including original and current screen size and the scale from original to current
-	settings := view.Entity(components.GameSettingsType).Get(components.GameSettingsType).(components.GameSettings)
-
-	// get the center text components
-	pos := centerText.Get(components.PosType).(components.Pos)
-	text := centerText.Get(components.UiTextType).(components.UiText)
-
-	// calculate center text position base on current screen size
-	pos.X = float64(settings.Current.Width) / 2
-	pos.Y = float64(settings.Current.Height) / 2
-	centerText.Set(pos)
-
-	// change center text size & spacing from current scale
-	text.Size = 300 * settings.Scale
-	text.Spacing = 10 * settings.Scale
-	centerText.Set(text)
-
-	// get the bottom text components
-	pos = bottomText.Get(components.PosType).(components.Pos)
-	text = bottomText.Get(components.UiTextType).(components.UiText)
-
-	// calculate bottom text position base on current screen size
-	pos.X = float64(settings.Current.Width) / 2
-	pos.Y = float64(settings.Current.Height)
-	bottomText.Set(pos)
-
-	// change bottom text size & spacing from current scale
-	text.Size = 60 * settings.Scale
-	text.Spacing = 10 * settings.Scale
-	bottomText.Set(text)
-
+func (cts centerTextSystem) Update(_ *world.World, _ float64) error {
 	return nil
 }
 
 func loadGame(gWorld *world.World) error {
-	centerText = gWorld.Add(entitiy.New(
+	gWorld.Add(entitiy.New(
 		components.UiText{
 			String:     "Hello world",
 			Size:       300,
@@ -93,10 +102,11 @@ func loadGame(gWorld *world.World) error {
 			HAlignment: components.CenterHAlignment,
 			VAlignment: components.MiddleVAlignment,
 		},
-		components.Pos{X: 0, Y: 0},
+		stickText{size: 300, spacing: 10, stick: stickToCenter},
+		components.Pos{X: float64(opt.Width / 2), Y: float64(opt.Height / 2)},
 		color.RGBA{R: 255, G: 255, B: 255, A: 255},
 	))
-	bottomText = gWorld.Add(entitiy.New(
+	gWorld.Add(entitiy.New(
 		components.UiText{
 			String:     "press <ESC> to close",
 			Size:       60,
@@ -104,7 +114,8 @@ func loadGame(gWorld *world.World) error {
 			HAlignment: components.CenterHAlignment,
 			VAlignment: components.BottomVAlignment,
 		},
-		components.Pos{X: 0, Y: 0},
+		stickText{size: 60, spacing: 10, stick: stickToBottom},
+		components.Pos{X: float64(opt.Width / 2), Y: float64(opt.Height)},
 		color.RGBA{R: 255, G: 255, B: 255, A: 255},
 	))
 	gWorld.AddSystem(centerTextSystem{})

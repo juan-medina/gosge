@@ -23,13 +23,11 @@
 package engine
 
 import (
-	"github.com/juan-medina/goecs/pkg/entitiy"
 	"github.com/juan-medina/goecs/pkg/world"
-	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/options"
 	"github.com/juan-medina/gosge/pkg/render"
 	"github.com/juan-medina/gosge/pkg/systems"
-	"math"
 )
 
 type engineStatus int
@@ -46,10 +44,23 @@ const (
 )
 
 type engineState struct {
-	opt    options.Options
-	gWorld *world.World
-	status engineStatus
-	init   func(gWorld *world.World) error
+	opt       options.Options
+	gWorld    *world.World
+	status    engineStatus
+	init      func(gWorld *world.World) error
+	frameTime float64
+}
+
+func (es *engineState) Update(_ *world.World, _ float64) error {
+	return nil
+}
+
+func (es *engineState) Notify(_ *world.World, event interface{}, _ float64) error {
+	switch event.(type) {
+	case events.GameCloseEvent:
+		es.status = statusEnding
+	}
+	return nil
 }
 
 func newEngineState(opt options.Options, init func(gWorld *world.World) error) *engineState {
@@ -61,44 +72,15 @@ func newEngineState(opt options.Options, init func(gWorld *world.World) error) *
 	}
 }
 
-func (es *engineState) updateGameSettings() {
-	gsEnt := es.gWorld.Entity(components.GameSettingsType)
-	if gsEnt == nil {
-		gsEnt = es.gWorld.Add(entitiy.New(components.GameSettings{}))
-	}
-	w, h := render.GetScreenSize()
-	gs := components.GameSettings{
-		Current: struct {
-			Width  int
-			Height int
-		}{
-			Width:  w,
-			Height: h,
-		},
-		Original: struct {
-			Width  int
-			Height int
-		}{
-			Width:  es.opt.Width,
-			Height: es.opt.Height,
-		},
-	}
-	sx := float64(gs.Current.Width) / float64(gs.Original.Width)
-	sy := float64(gs.Current.Height) / float64(gs.Original.Height)
-	gs.Scale = math.Min(sx, sy)
-
-	gsEnt.Add(gs)
-}
-
 func (es *engineState) initialize() error {
 	render.Init(es.opt)
-
-	es.updateGameSettings()
 	render.BeginFrame()
 	err := es.init(es.gWorld)
 	render.EndFrame()
 
 	if err == nil {
+		es.gWorld.AddSystem(es)
+		es.gWorld.AddSystem(systems.EventSystem())
 		//es.gWorld.AddSystemToGroup(systems.xxxRenderingSystem(), renderingGroup)
 		es.gWorld.AddSystemToGroup(systems.UiRenderingSystem(), uiGroup)
 
@@ -109,21 +91,20 @@ func (es *engineState) initialize() error {
 
 func (es *engineState) render2D() error {
 	render.Begin2D()
-	err := es.gWorld.UpdateGroup(renderingGroup, 0)
+	err := es.gWorld.UpdateGroup(renderingGroup, es.frameTime)
 	render.End2D()
 	return err
 }
 
 func (es *engineState) renderUI() error {
-	return es.gWorld.UpdateGroup(uiGroup, 0)
+	return es.gWorld.UpdateGroup(uiGroup, es.frameTime)
 }
 
 func (es *engineState) running() error {
-	es.updateGameSettings()
 	render.BeginFrame()
 
 	var err error
-	if err = es.gWorld.Update(0); err == nil {
+	if err = es.gWorld.Update(es.frameTime); err == nil {
 		if err = es.render2D(); err == nil {
 			err = es.renderUI()
 		}
@@ -147,6 +128,7 @@ func (es *engineState) end() error {
 func (es *engineState) run() error {
 	var err error = nil
 	for es.status != statusEnding && err == nil {
+		es.frameTime = render.GetFrameTime()
 		switch es.status {
 		case statusInitializing:
 			err = es.initialize()

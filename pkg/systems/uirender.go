@@ -20,44 +20,33 @@
  *  THE SOFTWARE.
  */
 
-package components
+package systems
 
 import (
+	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/render"
 	"image/color"
-	"reflect"
 )
 
-type HAlignment int
-
-const (
-	LeftHAlignment = HAlignment(iota)
-	RightHAlignment
-	CenterHAlignment
-)
-
-type VAlignment int
-
-const (
-	BottomVAlignment = VAlignment(iota)
-	TopVAlignment
-	MiddleVAlignment
-)
-
-type UiText struct {
-	String     string
-	Size       float64
-	Spacing    float64
-	VAlignment VAlignment
-	HAlignment HAlignment
+type uiRenderingSystem struct {
 }
 
-var UiTextType = reflect.TypeOf(UiText{})
-
-type Pos struct {
-	X float64
-	Y float64
+func (ui uiRenderingSystem) Notify(_ *world.World, _ interface{}, _ float64) error {
+	return nil
 }
 
-var PosType = reflect.TypeOf(Pos{})
+func (ui uiRenderingSystem) Update(world *world.World, _ float64) error {
+	for _, v := range world.Entities(components.UiTextType, components.PosType, components.ColorType) {
+		textCmp := v.Get(components.UiTextType).(components.UiText)
+		posCmp := v.Get(components.PosType).(components.Pos)
+		colorCmp := v.Get(components.ColorType).(color.Color)
 
-var ColorType = reflect.TypeOf(color.RGBA{})
+		render.DrawText(textCmp, posCmp, colorCmp)
+	}
+	return nil
+}
+
+func UiRenderingSystem() world.System {
+	return uiRenderingSystem{}
+}

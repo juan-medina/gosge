@@ -35,6 +35,7 @@ func Init(opt options.Options) {
 	saveOpts = opt
 	rl.SetConfigFlags(rl.FlagWindowResizable)
 	rl.InitWindow(int32(opt.Width), int32(opt.Height), opt.Title)
+	rl.SetTargetFPS(60)
 }
 
 func End() {
@@ -119,4 +120,12 @@ func DrawText(text components.UiText, pos components.Pos, txColor color.Color) {
 func color2RayColor(color color.Color) rl.Color {
 	r, g, b, a := color.RGBA()
 	return rl.NewColor(uint8(r), uint8(g), uint8(b), uint8(a))
+}
+
+func IsScreenScaleChange() bool {
+	return rl.IsWindowResized()
+}
+
+func GetFrameTime() float64 {
+	return float64(rl.GetFrameTime())
 }

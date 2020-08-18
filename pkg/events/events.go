@@ -20,34 +20,18 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package events
 
-import (
-	"github.com/juan-medina/goecs/pkg/system"
-	"github.com/juan-medina/goecs/pkg/view"
-	"github.com/juan-medina/gosge/pkg/components"
-	"github.com/juan-medina/gosge/pkg/render"
-	"image/color"
-)
+type GameCloseEvent struct{}
 
-type uiRenderingSystem struct {
-}
-
-func (ui uiRenderingSystem) Notify(_ *view.View, _ interface{}, _ float64) error {
-	return nil
-}
-
-func (ui uiRenderingSystem) Update(view *view.View, _ float64) error {
-	for _, v := range view.Entities(components.UiTextType, components.PosType, components.ColorType) {
-		textCmp := v.Get(components.UiTextType).(components.UiText)
-		posCmp := v.Get(components.PosType).(components.Pos)
-		colorCmp := v.Get(components.ColorType).(color.Color)
-
-		render.DrawText(textCmp, posCmp, colorCmp)
+type ScreenSizeChangeEvent struct {
+	Current struct {
+		Width  int
+		Height int
 	}
-	return nil
-}
-
-func UiRenderingSystem() system.System {
-	return uiRenderingSystem{}
+	Original struct {
+		Width  int
+		Height int
+	}
+	Scale float64
 }
