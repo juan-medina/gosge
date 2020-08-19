@@ -91,6 +91,8 @@ func NewColor(r, g, b, a uint8) RGBAColor {
 	return RGBAColor{R: r, G: g, B: b, A: a}
 }
 
+var WhiteColor = NewColor(255, 255, 255, 255)
+
 type AlternateColor struct {
 	From    RGBAColor
 	To      RGBAColor
@@ -99,3 +101,11 @@ type AlternateColor struct {
 }
 
 var AlternateColorType = reflect.TypeOf(AlternateColor{})
+
+type Sprite struct {
+	FileName string
+	Rotation float64
+	Scale    float64
+}
+
+var SpriteType = reflect.TypeOf(Sprite{})

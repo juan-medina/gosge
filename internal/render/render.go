@@ -23,6 +23,8 @@
 package render
 
 import (
+	"errors"
+	"fmt"
 	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/options"
@@ -32,12 +34,13 @@ var saveOpts = options.Options{}
 
 func Init(opt options.Options) {
 	saveOpts = opt
-	rl.SetTraceLog(rl.LogNone)
+	//rl.SetTraceLog(rl.LogNone)
 	rl.SetConfigFlags(rl.FlagWindowResizable)
 	rl.InitWindow(int32(opt.Width), int32(opt.Height), opt.Title)
 }
 
 func End() {
+	UnloadAllTextures()
 	rl.CloseWindow()
 }
 
@@ -48,28 +51,6 @@ func BeginFrame() {
 
 func EndFrame() {
 	rl.EndDrawing()
-}
-
-func Begin2D() {
-	w, h := GetScreenSize()
-	camera := rl.Camera2D{
-		Offset: rl.Vector2{
-			X: float32(w) / 2,
-			Y: float32(h) / 2,
-		},
-		Target: rl.Vector2{
-			X: 0,
-			Y: 0,
-		},
-		Rotation: 0,
-		Zoom:     1,
-	}
-
-	rl.BeginMode2D(camera)
-}
-
-func End2D() {
-	rl.EndMode2D()
 }
 
 func ShouldClose() bool {
@@ -126,4 +107,40 @@ func IsScreenScaleChange() bool {
 
 func GetFrameTime() float64 {
 	return float64(rl.GetFrameTime())
+}
+
+var textureHold = make(map[string]rl.Texture2D, 0)
+
+func LoadTexture(fileName string) error {
+	if t := rl.LoadTexture(fileName); t.ID != 0 {
+		textureHold[fileName] = t
+		return nil
+	}
+	return errors.New(fmt.Sprintf("error loading texture: %q", fileName))
+}
+
+func UnloadAllTextures() {
+	for k, v := range textureHold {
+		delete(textureHold, k)
+		rl.UnloadTexture(v)
+	}
+}
+
+func DrawSprite(sprite components.Sprite, pos components.Pos, tint components.RGBAColor) error {
+	if val, ok := textureHold[sprite.FileName]; ok {
+		scale := float32(sprite.Scale)
+		px := float32(val.Width) / 2
+		py := float32(val.Height) / 2
+		vec := rl.Vector2{
+			X: float32(pos.X) - (px * scale),
+			Y: float32(pos.Y) - (py * scale),
+		}
+		color := color2RayColor(tint)
+		rotation := float32(sprite.Rotation)
+		rl.DrawTextureEx(val, vec, rotation, scale, color)
+	} else {
+		return errors.New(fmt.Sprintf("error drawing sprite, texture not found: %q", sprite.FileName))
+	}
+
+	return nil
 }

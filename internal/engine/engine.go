@@ -56,6 +56,10 @@ type engineImpl struct {
 	frameTime float64
 }
 
+func (ei *engineImpl) LoadTexture(fileName string) error {
+	return render.LoadTexture(fileName)
+}
+
 func (ei *engineImpl) World() *world.World {
 	return ei.gWorld
 }
@@ -91,6 +95,7 @@ func (ei *engineImpl) initialize() error {
 		ei.gWorld.AddSystem(ei)
 		ei.gWorld.AddSystem(systems.EventSystem())
 		ei.gWorld.AddSystem(systems.AlternateColorSystem())
+		ei.gWorld.AddSystemToGroup(systems.SpriteRenderingSystem(), renderingGroup)
 		ei.gWorld.AddSystemToGroup(systems.UiRenderingSystem(), uiGroup)
 
 		ei.status = statusRunning
@@ -98,10 +103,8 @@ func (ei *engineImpl) initialize() error {
 	return err
 }
 
-func (ei *engineImpl) render2D() error {
-	render.Begin2D()
+func (ei *engineImpl) render() error {
 	err := ei.gWorld.UpdateGroup(renderingGroup, ei.frameTime)
-	render.End2D()
 	return err
 }
 
@@ -114,7 +117,7 @@ func (ei *engineImpl) running() error {
 
 	var err error
 	if err = ei.gWorld.Update(ei.frameTime); err == nil {
-		if err = ei.render2D(); err == nil {
+		if err = ei.render(); err == nil {
 			err = ei.renderUI()
 		}
 	}

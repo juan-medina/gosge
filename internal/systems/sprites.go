@@ -20,15 +20,41 @@
  *  THE SOFTWARE.
  */
 
-package engine
+package systems
 
 import (
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/internal/render"
+	"github.com/juan-medina/gosge/pkg/components"
 )
 
-type Engine interface {
-	World() *world.World
-	LoadTexture(fileName string) error
+type spriteRenderingSystem struct{}
+
+var noTint = components.WhiteColor
+
+func (s spriteRenderingSystem) Update(world *world.World, _ float64) error {
+	for _, v := range world.Entities(components.SpriteType, components.PosType) {
+		sprite := v.Get(components.SpriteType).(components.Sprite)
+		pos := v.Get(components.PosType).(components.Pos)
+
+		var tint components.RGBAColor
+		if v.Contains(components.RGBAColorType) {
+			tint = v.Get(components.RGBAColorType).(components.RGBAColor)
+		} else {
+			tint = noTint
+		}
+
+		if err := render.DrawSprite(sprite, pos, tint); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-type InitFunc func(eng Engine) error
+func (s spriteRenderingSystem) Notify(_ *world.World, _ interface{}, _ float64) error {
+	return nil
+}
+
+func SpriteRenderingSystem() world.System {
+	return spriteRenderingSystem{}
+}
