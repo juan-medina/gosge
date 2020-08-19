@@ -43,12 +43,22 @@ const (
 	renderingGroup = "RENDERING_GROUP"
 )
 
+type Engine interface {
+	World() *world.World
+}
+
+type InitFunc func(eng Engine) error
+
 type engineState struct {
 	opt       options.Options
 	gWorld    *world.World
 	status    engineStatus
-	init      func(gWorld *world.World) error
+	init      InitFunc
 	frameTime float64
+}
+
+func (es *engineState) World() *world.World {
+	return es.gWorld
 }
 
 func (es *engineState) Update(_ *world.World, _ float64) error {
@@ -63,7 +73,7 @@ func (es *engineState) Notify(_ *world.World, event interface{}, _ float64) erro
 	return nil
 }
 
-func newEngineState(opt options.Options, init func(gWorld *world.World) error) *engineState {
+func newEngineState(opt options.Options, init InitFunc) *engineState {
 	return &engineState{
 		opt:    opt,
 		gWorld: world.New(),
@@ -75,7 +85,7 @@ func newEngineState(opt options.Options, init func(gWorld *world.World) error) *
 func (es *engineState) initialize() error {
 	render.Init(es.opt)
 	render.BeginFrame()
-	err := es.init(es.gWorld)
+	err := es.init(es)
 	render.EndFrame()
 
 	if err == nil {
@@ -144,6 +154,6 @@ func (es *engineState) run() error {
 	return err
 }
 
-func Run(opt options.Options, init func(gWorld *world.World) error) error {
+func Run(opt options.Options, init InitFunc) error {
 	return newEngineState(opt, init).run()
 }

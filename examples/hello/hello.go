@@ -57,11 +57,11 @@ var stickyTextType = reflect.TypeOf(stickyText{})
 
 type stickyTextSystem struct{}
 
-func (cts stickyTextSystem) Update(_ *world.World, _ float64) error {
+func (sts stickyTextSystem) Update(_ *world.World, _ float64) error {
 	return nil
 }
 
-func (cts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float64) error {
+func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float64) error {
 	switch e := event.(type) {
 	case events.ScreenSizeChangeEvent:
 		// get all our texts
@@ -92,7 +92,8 @@ func (cts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 	return nil
 }
 
-func loadGame(gWorld *world.World) error {
+func loadGame(eng engine.Engine) error {
+	gWorld := eng.World()
 	gWorld.Add(entitiy.New(
 		components.UiText{
 			String:     "Hello World",
