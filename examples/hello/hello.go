@@ -28,6 +28,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
+	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
 	"log"
 	"reflect"
@@ -131,7 +132,7 @@ func loadGame(eng engine.Engine) error {
 }
 
 func main() {
-	if err := engine.Run(opt, loadGame); err != nil {
+	if err := game.Run(opt, loadGame); err != nil {
 		log.Fatalf("error running the game: %v", err)
 	}
 }

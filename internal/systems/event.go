@@ -2,8 +2,8 @@ package systems
 
 import (
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/events"
-	"github.com/juan-medina/gosge/pkg/render"
 	"math"
 )
 

@@ -24,8 +24,8 @@ package systems
 
 import (
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/components"
-	"github.com/juan-medina/gosge/pkg/render"
 )
 
 type uiRenderingSystem struct {
