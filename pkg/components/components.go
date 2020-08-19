@@ -23,7 +23,6 @@
 package components
 
 import (
-	"image/color"
 	"reflect"
 )
 
@@ -60,4 +59,43 @@ type Pos struct {
 
 var PosType = reflect.TypeOf(Pos{})
 
-var ColorType = reflect.TypeOf(color.RGBA{})
+type RGBAColor struct {
+	R uint8
+	G uint8
+	B uint8
+	A uint8
+}
+
+var RGBAColorType = reflect.TypeOf(RGBAColor{})
+
+func (rc RGBAColor) Blend(other RGBAColor, scale float64) RGBAColor {
+	r1 := float64(rc.R)
+	g1 := float64(rc.G)
+	b1 := float64(rc.B)
+	a1 := float64(rc.A)
+
+	r2 := float64(other.R)
+	g2 := float64(other.G)
+	b2 := float64(other.B)
+	a2 := float64(other.A)
+
+	r := r1 + ((r2 - r1) * scale)
+	g := g1 + ((g2 - g1) * scale)
+	b := b1 + ((b2 - b1) * scale)
+	a := a1 + ((a2 - a1) * scale)
+
+	return NewColor(uint8(r), uint8(g), uint8(b), uint8(a))
+}
+
+func NewColor(r, g, b, a uint8) RGBAColor {
+	return RGBAColor{R: r, G: g, B: b, A: a}
+}
+
+type AlternateColor struct {
+	From    RGBAColor
+	To      RGBAColor
+	Time    float64
+	Current float64
+}
+
+var AlternateColorType = reflect.TypeOf(AlternateColor{})

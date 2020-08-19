@@ -81,7 +81,7 @@ func (es *engineState) initialize() error {
 	if err == nil {
 		es.gWorld.AddSystem(es)
 		es.gWorld.AddSystem(systems.EventSystem())
-		//es.gWorld.AddSystemToGroup(systems.xxxRenderingSystem(), renderingGroup)
+		es.gWorld.AddSystem(systems.AlternateColorSystem())
 		es.gWorld.AddSystemToGroup(systems.UiRenderingSystem(), uiGroup)
 
 		es.status = statusRunning

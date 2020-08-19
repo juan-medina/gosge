@@ -22,11 +22,13 @@
 
 package options
 
-import "image/color"
+import (
+	"github.com/juan-medina/gosge/pkg/components"
+)
 
 type Options struct {
 	Title      string
 	Width      int
 	Height     int
-	ClearColor color.Color
+	ClearColor components.RGBAColor
 }

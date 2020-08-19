@@ -26,7 +26,6 @@ import (
 	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/options"
-	"image/color"
 )
 
 var saveOpts = options.Options{}
@@ -81,7 +80,7 @@ func GetScreenSize() (width int, height int) {
 	return rl.GetScreenWidth(), rl.GetScreenHeight()
 }
 
-func DrawText(text components.UiText, pos components.Pos, txColor color.Color) {
+func DrawText(text components.UiText, pos components.Pos, txColor components.RGBAColor) {
 	font := rl.GetFontDefault()
 
 	vec := rl.Vector2{
@@ -117,9 +116,8 @@ func DrawText(text components.UiText, pos components.Pos, txColor color.Color) {
 	rl.DrawTextEx(font, text.String, vec, float32(text.Size), float32(text.Spacing), color2RayColor(txColor))
 }
 
-func color2RayColor(color color.Color) rl.Color {
-	r, g, b, a := color.RGBA()
-	return rl.NewColor(uint8(r), uint8(g), uint8(b), uint8(a))
+func color2RayColor(color components.RGBAColor) rl.Color {
+	return rl.NewColor(color.R, color.G, color.B, color.A)
 }
 
 func IsScreenScaleChange() bool {

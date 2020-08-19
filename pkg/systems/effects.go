@@ -25,27 +25,33 @@ package systems
 import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components"
-	"github.com/juan-medina/gosge/pkg/render"
 )
 
-type uiRenderingSystem struct {
-}
+type alternateColorSystem struct{}
 
-func (ui uiRenderingSystem) Notify(_ *world.World, _ interface{}, _ float64) error {
-	return nil
-}
+func (rcs alternateColorSystem) Update(world *world.World, delta float64) error {
+	for _, v := range world.Entities(components.AlternateColorType) {
+		ac := v.Get(components.AlternateColorType).(components.AlternateColor)
+		clr := ac.From.Blend(ac.To, ac.Current/ac.Time)
 
-func (ui uiRenderingSystem) Update(world *world.World, _ float64) error {
-	for _, v := range world.Entities(components.UiTextType, components.PosType, components.RGBAColorType) {
-		textCmp := v.Get(components.UiTextType).(components.UiText)
-		posCmp := v.Get(components.PosType).(components.Pos)
-		colorCmp := v.Get(components.RGBAColorType).(components.RGBAColor)
+		ac.Current += delta
+		if ac.Current > ac.Time {
+			ac.Current = 0
+			aux := ac.From
+			ac.From = ac.To
+			ac.To = aux
+		}
 
-		render.DrawText(textCmp, posCmp, colorCmp)
+		v.Set(clr)
+		v.Set(ac)
 	}
 	return nil
 }
 
-func UiRenderingSystem() world.System {
-	return uiRenderingSystem{}
+func (rcs alternateColorSystem) Notify(_ *world.World, _ interface{}, _ float64) error {
+	return nil
+}
+
+func AlternateColorSystem() world.System {
+	return &alternateColorSystem{}
 }
