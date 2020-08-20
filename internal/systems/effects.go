@@ -24,6 +24,7 @@ package systems
 
 import (
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 )
 
@@ -32,14 +33,32 @@ type alternateColorSystem struct{}
 func (rcs alternateColorSystem) Update(world *world.World, delta float64) error {
 	for _, v := range world.Entities(effects.TYPES.AlternateColor) {
 		ac := v.Get(effects.TYPES.AlternateColor).(effects.AlternateColor)
-		clr := ac.From.Blend(ac.To, ac.Current/ac.Time)
+
+		var clr color.Color
+
+		switch ac.State {
+		case effects.NoState, effects.StateStopped:
+			clr = ac.From
+		case effects.StateRunning:
+			clr = ac.From.Blend(ac.To, ac.Current/ac.Time)
+		}
 
 		ac.Current += delta
-		if ac.Current > ac.Time {
-			ac.Current = 0
-			aux := ac.From
-			ac.From = ac.To
-			ac.To = aux
+
+		switch ac.State {
+		case effects.NoState, effects.StateStopped:
+			if ac.Current > ac.Delay {
+				ac.State = effects.StateRunning
+				ac.Current = 0
+			}
+		case effects.StateRunning:
+			if ac.Current > ac.Time {
+				ac.State = effects.StateStopped
+				ac.Current = 0
+				aux := ac.From
+				ac.From = ac.To
+				ac.To = aux
+			}
 		}
 
 		v.Set(clr)

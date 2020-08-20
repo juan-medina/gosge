@@ -107,9 +107,10 @@ func loadGame(eng engine.Engine) error {
 			VAlignment: text.MiddleVAlignment,
 		},
 		effects.AlternateColor{
-			Time: 2,
-			From: color.Red,
-			To:   color.Yellow,
+			Time:  2,
+			Delay: 1,
+			From:  color.Red,
+			To:    color.Yellow,
 		},
 		stickyText{size: 300, spacing: 10, stick: stickToCenter},
 	))

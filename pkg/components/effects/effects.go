@@ -27,11 +27,21 @@ import (
 	"reflect"
 )
 
+type EffectState int
+
+const (
+	NoState = EffectState(iota)
+	StateStopped
+	StateRunning
+)
+
 type AlternateColor struct {
 	From    color.Color
 	To      color.Color
 	Time    float64
+	Delay   float64
 	Current float64
+	State   EffectState
 }
 
 type types struct {
