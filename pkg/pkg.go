@@ -20,16 +20,5 @@
  *  THE SOFTWARE.
  */
 
-// Package position handle the components for Position components
-package position
-
-import "reflect"
-
-// Position represent an X and Y screen position
-type Position struct {
-	X float64 // The x screen position
-	Y float64 // The y screen position
-}
-
-// TYPE is the reflect.Type of the Position component
-var TYPE = reflect.TypeOf(Position{})
+// Package pkg holds the public API for gosge
+package pkg

@@ -20,32 +20,39 @@
  *  THE SOFTWARE.
  */
 
+// Package text handles the Text component
 package text
 
 import "reflect"
 
+// HAlignment horizontal alignment for a Text
 type HAlignment int
 
+// Horizontal Text alignments
 const (
-	LeftHAlignment = HAlignment(iota)
-	RightHAlignment
-	CenterHAlignment
+	LeftHAlignment   = HAlignment(iota) // LeftHAlignment indicates left Text HAlignment
+	RightHAlignment                     // RightHAlignment indicates right Text HAlignment
+	CenterHAlignment                    // RightHAlignment indicates center Text HAlignment
 )
 
+// VAlignment vertical alignment for a Text
 type VAlignment int
 
+// Vertical Text alignments
 const (
-	BottomVAlignment = VAlignment(iota)
-	TopVAlignment
-	MiddleVAlignment
+	BottomVAlignment = VAlignment(iota) // BottomVAlignment indicates bottom text.VAlignment
+	TopVAlignment                       // TopVAlignment indicates top text.VAlignment
+	MiddleVAlignment                    // MiddleVAlignment indicates middle text.VAlignment
 )
 
+// Text is a graphical text to drawn on the screen
 type Text struct {
-	String     string
-	Size       float64
-	Spacing    float64
-	VAlignment VAlignment
-	HAlignment HAlignment
+	String     string     // String is the Text string
+	Size       float64    // Size is the Text size
+	Spacing    float64    // Spacing is the Text spacing
+	VAlignment VAlignment // VAlignment is the text.VAlignment
+	HAlignment HAlignment // HAlignment is the text.HAlignment
 }
 
+// TYPE is the reflect.Type of the Text component
 var TYPE = reflect.TypeOf(Text{})

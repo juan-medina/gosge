@@ -91,6 +91,7 @@ func (es *eventSystem) Update(world *world.World, delta float64) error {
 	return nil
 }
 
+// EventSystem returns a world.System that will handle events
 func EventSystem() world.System {
 	return &eventSystem{}
 }

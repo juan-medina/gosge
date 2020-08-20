@@ -20,15 +20,20 @@
  *  THE SOFTWARE.
  */
 
+// Package engine contains the definition of the Engine
 package engine
 
 import (
 	"github.com/juan-medina/goecs/pkg/world"
 )
 
+// Engine is the interface for the game engine
 type Engine interface {
+	// World returns the game world.World
 	World() *world.World
+	// LoadTexture preloads a texture
 	LoadTexture(fileName string) error
 }
 
+// InitFunc is a function that will get call for our game to load
 type InitFunc func(eng Engine) error

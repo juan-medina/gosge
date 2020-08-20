@@ -20,18 +20,24 @@
  *  THE SOFTWARE.
  */
 
+// Package events contain the events for our engine
 package events
 
+// GameCloseEvent is an event that indicates that game need to close
 type GameCloseEvent struct{}
 
+// ScreenSizeChangeEvent is an event that indicates that the screen size has change
 type ScreenSizeChangeEvent struct {
+	// Current is the current screen size
 	Current struct {
-		Width  int
-		Height int
+		Width  int // Width of the Current Screen
+		Height int // Height of the Current Screen
 	}
+	// Original is the original, from options.Options, screen size
 	Original struct {
-		Width  int
-		Height int
+		Width  int // Width of the Original Screen, from options.Options
+		Height int // Height of the Original Screen, from options.Options
 	}
+	// Scale is the current scale between Current and Original
 	Scale float64
 }

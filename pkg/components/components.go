@@ -20,4 +20,5 @@
  *  THE SOFTWARE.
  */
 
+// Package components contains the components already defined
 package components

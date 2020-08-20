@@ -20,6 +20,7 @@
  *  THE SOFTWARE.
  */
 
+// Package engine internal engine implementation
 package engine
 
 import (
@@ -44,7 +45,9 @@ const (
 	renderingGroup = "RENDERING_GROUP"
 )
 
+// Impl a engine internal implementation
 type Impl interface {
+	// Run the engine
 	Run() error
 }
 
@@ -76,6 +79,7 @@ func (ei *engineImpl) Notify(_ *world.World, event interface{}, _ float64) error
 	return nil
 }
 
+// New return a engine internal implementation
 func New(opt options.Options, init engine.InitFunc) Impl {
 	return &engineImpl{
 		opt:    opt,
@@ -96,7 +100,7 @@ func (ei *engineImpl) initialize() error {
 		ei.gWorld.AddSystem(systems.EventSystem())
 		ei.gWorld.AddSystem(systems.AlternateColorSystem())
 		ei.gWorld.AddSystemToGroup(systems.SpriteRenderingSystem(), renderingGroup)
-		ei.gWorld.AddSystemToGroup(systems.UiRenderingSystem(), uiGroup)
+		ei.gWorld.AddSystemToGroup(systems.UIRenderingSystem(), uiGroup)
 
 		ei.status = statusRunning
 	}

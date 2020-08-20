@@ -71,6 +71,7 @@ func (rcs alternateColorSystem) Notify(_ *world.World, _ interface{}, _ float64)
 	return nil
 }
 
+// AlternateColorSystem returns a world.System that handle effects.AlternateColor
 func AlternateColorSystem() world.System {
 	return &alternateColorSystem{}
 }

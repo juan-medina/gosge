@@ -57,6 +57,7 @@ func (s spriteRenderingSystem) Notify(_ *world.World, _ interface{}, _ float64) 
 	return nil
 }
 
+// SpriteRenderingSystem returns a world.System that will handle sprite.Sprite rendering
 func SpriteRenderingSystem() world.System {
 	return spriteRenderingSystem{}
 }

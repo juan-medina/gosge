@@ -20,14 +20,17 @@
  *  THE SOFTWARE.
  */
 
+// Package sprite handle the Sprite component
 package sprite
 
 import "reflect"
 
+// Sprite is a graphic image that will drawn on the screen
 type Sprite struct {
-	FileName string
-	Rotation float64
-	Scale    float64
+	FileName string  // FileName is the texture file name
+	Rotation float64 // Rotation is the Sprite rotation
+	Scale    float64 // Scale is the Sprite Scale
 }
 
+// TYPE is the reflect.Type of the Sprite
 var TYPE = reflect.TypeOf(Sprite{})

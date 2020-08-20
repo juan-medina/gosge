@@ -48,6 +48,7 @@ func (ui uiRenderingSystem) Update(world *world.World, _ float64) error {
 	return nil
 }
 
-func UiRenderingSystem() world.System {
+// UIRenderingSystem returns a world.System that handle UI rendering
+func UIRenderingSystem() world.System {
 	return uiRenderingSystem{}
 }

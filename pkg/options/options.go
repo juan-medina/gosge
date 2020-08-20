@@ -20,15 +20,17 @@
  *  THE SOFTWARE.
  */
 
+// Package options contains our game Options
 package options
 
 import (
 	"github.com/juan-medina/gosge/pkg/components/color"
 )
 
+// Options are our game options
 type Options struct {
-	Title      string
-	Width      int
-	Height     int
-	ClearColor color.Color
+	Title      string      // Title is the game title
+	Width      int         // Width is our Screen width
+	Height     int         // Height is our Screen height
+	ClearColor color.Color // ClearColor is the background color.Color
 }

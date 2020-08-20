@@ -20,6 +20,7 @@
  *  THE SOFTWARE.
  */
 
+// Package effects include different components for adding effects
 package effects
 
 import (
@@ -27,27 +28,32 @@ import (
 	"reflect"
 )
 
+// EffectState is the state for an effect
 type EffectState int
 
+// EffectState states
 const (
-	NoState = EffectState(iota)
-	StateStopped
-	StateRunning
+	NoState      = EffectState(iota) // NoState represents a not set EffectState
+	StateStopped                     // StateStopped represent an EffectState that is stopped
+	StateRunning                     // StateRunning represent an EffectState that is running
 )
 
+// AlternateColor effects will cycle between two colors From and To in given Time with an Optional Delay
 type AlternateColor struct {
-	From    color.Color
-	To      color.Color
-	Time    float64
-	Delay   float64
-	Current float64
-	State   EffectState
+	From    color.Color // From is color.Color that we start from
+	To      color.Color // To is the color.Color that we will end to
+	Time    float64     // Time is how long will be get to go from From to To in seconds
+	Delay   float64     // Delay is how long will stay in the final To until switching again to To
+	Current float64     // Current time that the effects is running
+	State   EffectState // State is the current EffectState
 }
 
 type types struct {
+	// AlternateColor is the reflect.Type for effects.AlternateColor
 	AlternateColor reflect.Type
 }
 
+// TYPES hold the reflect.Type for our effects components
 var TYPES = types{
 	AlternateColor: reflect.TypeOf(AlternateColor{}),
 }

@@ -27,6 +27,7 @@ COVERAGE=$(GOTOOL) cover
 GOFORMAT=$(GOCMD) fmt
 GOVET=$(GOCMD) vet
 GORUN=$(GOCMD) run
+GOLINT=golint
 
 default: test
 
@@ -40,3 +41,6 @@ format:
 	$(GOFORMAT) ./...
 run:
 	$(GORUN) examples/$(example)/$(example).go
+lint:
+	$(GOLINT) -set_exit_status ./...
+validate: lint

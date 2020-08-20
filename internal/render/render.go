@@ -20,10 +20,10 @@
  *  THE SOFTWARE.
  */
 
+// Package render device rendering implementation
 package render
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/components/color"
@@ -35,35 +35,41 @@ import (
 
 var saveOpts = options.Options{}
 
+// Init the rendering device
 func Init(opt options.Options) {
 	saveOpts = opt
-	//rl.SetTraceLog(rl.LogNone)
 	rl.SetConfigFlags(rl.FlagWindowResizable)
 	rl.InitWindow(int32(opt.Width), int32(opt.Height), opt.Title)
 }
 
+// End the rendering device
 func End() {
 	UnloadAllTextures()
 	rl.CloseWindow()
 }
 
+// BeginFrame for rendering
 func BeginFrame() {
 	rl.BeginDrawing()
 	rl.ClearBackground(color2RayColor(saveOpts.ClearColor))
 }
 
+// EndFrame for rendering
 func EndFrame() {
 	rl.EndDrawing()
 }
 
+// ShouldClose returns if th engine should close
 func ShouldClose() bool {
 	return rl.WindowShouldClose()
 }
 
+// GetScreenSize get the current screen size
 func GetScreenSize() (width int, height int) {
 	return rl.GetScreenWidth(), rl.GetScreenHeight()
 }
 
+// DrawText will draw a text.Text in the given position.Position with the correspondent color.Color
 func DrawText(txt text.Text, pos position.Position, color color.Color) {
 	font := rl.GetFontDefault()
 
@@ -104,24 +110,28 @@ func color2RayColor(color color.Color) rl.Color {
 	return rl.NewColor(color.R, color.G, color.B, color.A)
 }
 
+// IsScreenScaleChange returns if the current screen scale has changed
 func IsScreenScaleChange() bool {
 	return rl.IsWindowResized()
 }
 
+// GetFrameTime returns the time from the delta time for current frame
 func GetFrameTime() float64 {
 	return float64(rl.GetFrameTime())
 }
 
 var textureHold = make(map[string]rl.Texture2D, 0)
 
+// LoadTexture giving it file name into VRAM
 func LoadTexture(fileName string) error {
 	if t := rl.LoadTexture(fileName); t.ID != 0 {
 		textureHold[fileName] = t
 		return nil
 	}
-	return errors.New(fmt.Sprintf("error loading texture: %q", fileName))
+	return fmt.Errorf("error loading texture: %q", fileName)
 }
 
+// UnloadAllTextures from VRAM
 func UnloadAllTextures() {
 	for k, v := range textureHold {
 		delete(textureHold, k)
@@ -129,6 +139,7 @@ func UnloadAllTextures() {
 	}
 }
 
+// DrawSprite draws a sprite.Sprite in the given position.Position with the tint color.Color
 func DrawSprite(sprite sprite.Sprite, pos position.Position, tint color.Color) error {
 	if val, ok := textureHold[sprite.FileName]; ok {
 		scale := float32(sprite.Scale)
@@ -142,7 +153,7 @@ func DrawSprite(sprite sprite.Sprite, pos position.Position, tint color.Color) e
 		rotation := float32(sprite.Rotation)
 		rl.DrawTextureEx(val, vec, rotation, scale, rc)
 	} else {
-		return errors.New(fmt.Sprintf("error drawing sprite, texture not found: %q", sprite.FileName))
+		return fmt.Errorf("error drawing sprite, texture not found: %q", sprite.FileName)
 	}
 
 	return nil
