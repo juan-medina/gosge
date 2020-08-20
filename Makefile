@@ -40,7 +40,7 @@ coverage: test
 format:
 	$(GOFORMAT) ./...
 run:
-	$(GORUN) examples/$(example)/$(example).go
+	cd examples/$(example) && $(GORUN) $(example).go
 lint:
 	$(GOLINT) -set_exit_status ./...
 validate: lint
