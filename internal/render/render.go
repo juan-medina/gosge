@@ -26,8 +26,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gen2brain/raylib-go/raylib"
-	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/pkg/components/position"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/options"
@@ -64,7 +64,7 @@ func GetScreenSize() (width int, height int) {
 	return rl.GetScreenWidth(), rl.GetScreenHeight()
 }
 
-func DrawText(txt text.Text, pos components.Pos, color color.Color) {
+func DrawText(txt text.Text, pos position.Position, color color.Color) {
 	font := rl.GetFontDefault()
 
 	vec := rl.Vector2{
@@ -129,7 +129,7 @@ func UnloadAllTextures() {
 	}
 }
 
-func DrawSprite(sprite sprite.Sprite, pos components.Pos, tint color.Color) error {
+func DrawSprite(sprite sprite.Sprite, pos position.Position, tint color.Color) error {
 	if val, ok := textureHold[sprite.FileName]; ok {
 		scale := float32(sprite.Scale)
 		px := float32(val.Width) / 2

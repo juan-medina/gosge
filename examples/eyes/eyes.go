@@ -24,8 +24,8 @@ package main
 
 import (
 	"github.com/juan-medina/goecs/pkg/entitiy"
-	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/pkg/components/position"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/game"
@@ -51,15 +51,15 @@ func loadGame(eng engine.Engine) error {
 		return err
 	}
 
-	nosePos := components.Pos{
+	nosePos := position.Position{
 		X: float64(opt.Width / 2),
 		Y: float64(opt.Height - 300),
 	}
-	leftEyePos := components.Pos{
+	leftEyePos := position.Position{
 		X: nosePos.X - 400,
 		Y: nosePos.Y - 400,
 	}
-	rightEyePos := components.Pos{
+	rightEyePos := position.Position{
 		X: nosePos.X + 400,
 		Y: leftEyePos.Y,
 	}

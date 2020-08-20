@@ -24,14 +24,14 @@ package systems
 
 import (
 	"github.com/juan-medina/goecs/pkg/world"
-	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/components/effects"
 )
 
 type alternateColorSystem struct{}
 
 func (rcs alternateColorSystem) Update(world *world.World, delta float64) error {
-	for _, v := range world.Entities(components.AlternateColorType) {
-		ac := v.Get(components.AlternateColorType).(components.AlternateColor)
+	for _, v := range world.Entities(effects.TYPES.AlternateColor) {
+		ac := v.Get(effects.TYPES.AlternateColor).(effects.AlternateColor)
 		clr := ac.From.Blend(ac.To, ac.Current/ac.Time)
 
 		ac.Current += delta

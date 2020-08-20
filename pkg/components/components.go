@@ -21,24 +21,3 @@
  */
 
 package components
-
-import (
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"reflect"
-)
-
-type Pos struct {
-	X float64
-	Y float64
-}
-
-var PosType = reflect.TypeOf(Pos{})
-
-type AlternateColor struct {
-	From    color.Color
-	To      color.Color
-	Time    float64
-	Current float64
-}
-
-var AlternateColorType = reflect.TypeOf(AlternateColor{})

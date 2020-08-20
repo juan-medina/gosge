@@ -25,8 +25,9 @@ package main
 import (
 	"github.com/juan-medina/goecs/pkg/entitiy"
 	"github.com/juan-medina/goecs/pkg/world"
-	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/pkg/components/effects"
+	"github.com/juan-medina/gosge/pkg/components/position"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
@@ -79,7 +80,7 @@ func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 			v.Set(txt)
 
 			// calculate position based on current screen size and sticky
-			pos := components.Pos{}
+			pos := position.Position{}
 			switch st.stick {
 			case stickToCenter:
 				pos.X = float64(e.Current.Width) / 2
@@ -105,7 +106,7 @@ func loadGame(eng engine.Engine) error {
 			HAlignment: text.CenterHAlignment,
 			VAlignment: text.MiddleVAlignment,
 		},
-		components.AlternateColor{
+		effects.AlternateColor{
 			Time: 2,
 			From: color.Red,
 			To:   color.Yellow,
@@ -120,7 +121,7 @@ func loadGame(eng engine.Engine) error {
 			HAlignment: text.CenterHAlignment,
 			VAlignment: text.BottomVAlignment,
 		},
-		components.AlternateColor{
+		effects.AlternateColor{
 			Time: .25,
 			From: color.White,
 			To:   color.White.Alpha(0),

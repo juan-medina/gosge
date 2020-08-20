@@ -20,34 +20,24 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package effects
 
 import (
-	"github.com/juan-medina/goecs/pkg/world"
-	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/position"
-	"github.com/juan-medina/gosge/pkg/components/text"
+	"reflect"
 )
 
-type uiRenderingSystem struct {
+type AlternateColor struct {
+	From    color.Color
+	To      color.Color
+	Time    float64
+	Current float64
 }
 
-func (ui uiRenderingSystem) Notify(_ *world.World, _ interface{}, _ float64) error {
-	return nil
+type types struct {
+	AlternateColor reflect.Type
 }
 
-func (ui uiRenderingSystem) Update(world *world.World, _ float64) error {
-	for _, v := range world.Entities(text.TYPE, position.TYPE, color.TYPE) {
-		textCmp := v.Get(text.TYPE).(text.Text)
-		posCmp := v.Get(position.TYPE).(position.Position)
-		colorCmp := v.Get(color.TYPE).(color.Color)
-
-		render.DrawText(textCmp, posCmp, colorCmp)
-	}
-	return nil
-}
-
-func UiRenderingSystem() world.System {
-	return uiRenderingSystem{}
+var TYPES = types{
+	AlternateColor: reflect.TypeOf(AlternateColor{}),
 }

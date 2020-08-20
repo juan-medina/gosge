@@ -20,34 +20,13 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package position
 
-import (
-	"github.com/juan-medina/goecs/pkg/world"
-	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/position"
-	"github.com/juan-medina/gosge/pkg/components/text"
-)
+import "reflect"
 
-type uiRenderingSystem struct {
+type Position struct {
+	X float64
+	Y float64
 }
 
-func (ui uiRenderingSystem) Notify(_ *world.World, _ interface{}, _ float64) error {
-	return nil
-}
-
-func (ui uiRenderingSystem) Update(world *world.World, _ float64) error {
-	for _, v := range world.Entities(text.TYPE, position.TYPE, color.TYPE) {
-		textCmp := v.Get(text.TYPE).(text.Text)
-		posCmp := v.Get(position.TYPE).(position.Position)
-		colorCmp := v.Get(color.TYPE).(color.Color)
-
-		render.DrawText(textCmp, posCmp, colorCmp)
-	}
-	return nil
-}
-
-func UiRenderingSystem() world.System {
-	return uiRenderingSystem{}
-}
+var TYPE = reflect.TypeOf(Position{})
