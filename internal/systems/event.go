@@ -65,7 +65,7 @@ func (es *eventSystem) initialize(world *world.World) error {
 	es.sse.Current.Height = h
 	es.sse.Scale = 1
 
-	return nil
+	return es.sendScreenSizeChange()
 }
 
 func (es *eventSystem) Update(world *world.World, delta float64) error {
