@@ -24,15 +24,19 @@ package main
 
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/position"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
+	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
+	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
 	"log"
 )
 
+// our game options
 var opt = options.Options{
 	Title:      "Eyes Game",
 	Width:      1920,
@@ -40,7 +44,100 @@ var opt = options.Options{
 	ClearColor: color.Gopher,
 }
 
+// entities that we are going to create
+var (
+	nose          *entity.Entity
+	leftExterior  *entity.Entity
+	leftInterior  *entity.Entity
+	rightInterior *entity.Entity
+	rightExterior *entity.Entity
+	bottomText    *entity.Entity
+)
+
+// layout constants
+const (
+	noseVerticalGap = 300
+	eyesGap         = 400
+	textSize        = 40
+)
+
+// set the position and scale of the objects
+func setPosAndScale(ent *entity.Entity, pos position.Position, scale float64) {
+	// set pos
+	ent.Set(pos)
+
+	if ent.Contains(sprite.TYPE) {
+		// update sprite scale
+		sp := ent.Get(sprite.TYPE).(sprite.Sprite)
+		sp.Scale = scale
+		ent.Set(sp)
+	}
+
+	if ent.Contains(text.TYPE) {
+		// update text scale
+		tx := ent.Get(text.TYPE).(text.Text)
+		tx.Size = textSize * scale
+		tx.Spacing = textSize / 4 * scale
+		ent.Set(tx)
+	}
+}
+
+// layout our entities
+func positionElements(width int, height int, scale float64) {
+
+	// the nose is in the middle and a bit down
+	nosePos := position.Position{
+		X: float64(width / 2),
+		Y: float64(height/2) + (noseVerticalGap * scale),
+	}
+
+	// left eye is a bit up left of the nose
+	leftEyePos := position.Position{
+		X: nosePos.X - (eyesGap * scale),
+		Y: nosePos.Y - (eyesGap * scale),
+	}
+
+	// right eye is a bit up right of the nose
+	rightEyePos := position.Position{
+		X: nosePos.X + (eyesGap * scale),
+		Y: leftEyePos.Y,
+	}
+
+	// update sprites pos and scale
+	setPosAndScale(nose, nosePos, scale)
+	setPosAndScale(leftExterior, leftEyePos, scale)
+	setPosAndScale(leftInterior, leftEyePos, scale)
+	setPosAndScale(rightExterior, rightEyePos, scale)
+	setPosAndScale(rightInterior, rightEyePos, scale)
+
+	// the text is bottom center
+	textPos := position.Position{
+		X: float64(width) / 2,
+		Y: float64(height),
+	}
+	// update text pos and scale
+	setPosAndScale(bottomText, textPos, scale)
+}
+
+type layoutSystem struct{}
+
+func (ls layoutSystem) Update(_ *world.World, _ float64) error {
+	return nil
+}
+
+func (ls layoutSystem) Notify(_ *world.World, event interface{}, _ float64) error {
+	switch ev := event.(type) {
+	// if the screen has change size
+	case events.ScreenSizeChangeEvent:
+		// change layout
+		positionElements(ev.Current.Width, ev.Current.Height, ev.Scale.Max)
+	}
+
+	return nil
+}
+
 func loadGame(eng engine.Engine) error {
+	// pre load texture
 	if err := eng.LoadTexture("resources/nose.png"); err != nil {
 		return err
 	}
@@ -51,64 +148,28 @@ func loadGame(eng engine.Engine) error {
 		return err
 	}
 
-	nosePos := position.Position{
-		X: float64(opt.Width / 2),
-		Y: float64(opt.Height - 300),
-	}
-	leftEyePos := position.Position{
-		X: nosePos.X - 400,
-		Y: nosePos.Y - 400,
-	}
-	rightEyePos := position.Position{
-		X: nosePos.X + 400,
-		Y: leftEyePos.Y,
-	}
+	// get the world
+	gw := eng.World()
 
-	world := eng.World()
-	world.Add(entity.New(
-		sprite.Sprite{
-			FileName: "resources/nose.png",
-			Scale:    1,
-			Rotation: 0,
+	// add the sprites
+	nose = gw.Add(entity.New(sprite.Sprite{FileName: "resources/nose.png"}))
+	leftExterior = gw.Add(entity.New(sprite.Sprite{FileName: "resources/eye_exterior.png"}))
+	leftInterior = gw.Add(entity.New(sprite.Sprite{FileName: "resources/eye_interior.png"}))
+	rightExterior = gw.Add(entity.New(sprite.Sprite{FileName: "resources/eye_exterior.png"}))
+	rightInterior = gw.Add(entity.New(sprite.Sprite{FileName: "resources/eye_interior.png"}))
+
+	// add our text
+	bottomText = gw.Add(entity.New(
+		text.Text{
+			String:     "press <ESC> to close",
+			HAlignment: text.CenterHAlignment,
+			VAlignment: text.BottomVAlignment,
 		},
-		nosePos,
+		color.Black,
 	))
 
-	world.Add(entity.New(
-		sprite.Sprite{
-			FileName: "resources/eye_exterior.png",
-			Scale:    1,
-			Rotation: 0,
-		},
-		leftEyePos,
-	))
-
-	world.Add(entity.New(
-		sprite.Sprite{
-			FileName: "resources/eye_interior.png",
-			Scale:    1,
-			Rotation: 0,
-		},
-		leftEyePos,
-	))
-
-	world.Add(entity.New(
-		sprite.Sprite{
-			FileName: "resources/eye_exterior.png",
-			Scale:    1,
-			Rotation: 0,
-		},
-		rightEyePos,
-	))
-
-	world.Add(entity.New(
-		sprite.Sprite{
-			FileName: "resources/eye_interior.png",
-			Scale:    1,
-			Rotation: 0,
-		},
-		rightEyePos,
-	))
+	// add our layout system
+	gw.AddSystem(layoutSystem{})
 
 	return nil
 }

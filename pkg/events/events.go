@@ -39,5 +39,10 @@ type ScreenSizeChangeEvent struct {
 		Height int // Height of the Original Screen, from options.Options
 	}
 	// Scale is the current scale between Current and Original
-	Scale float64
+	Scale struct {
+		X   float64 // X is the Width Scale
+		Y   float64 // Y is the Height Scale
+		Min float64 // Min is the minimum scale between X and Y
+		Max float64 // Max is the maximum scale between X and Y
+	}
 }

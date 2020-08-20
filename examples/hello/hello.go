@@ -75,8 +75,8 @@ func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 			st := v.Get(tp.stickyText).(stickyText)
 
 			// change text size & spacing from current scale
-			txt.Size = st.size * e.Scale
-			txt.Spacing = st.spacing * e.Scale
+			txt.Size = st.size * e.Scale.Min
+			txt.Spacing = st.spacing * e.Scale.Min
 			v.Set(txt)
 
 			// calculate position based on current screen size and sticky

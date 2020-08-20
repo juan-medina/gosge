@@ -46,7 +46,10 @@ func (es *eventSystem) sendScreenSizeChange() error {
 
 	sx := float64(es.sse.Current.Width) / float64(es.sse.Original.Width)
 	sy := float64(es.sse.Current.Height) / float64(es.sse.Original.Height)
-	es.sse.Scale = math.Min(sx, sy)
+	es.sse.Scale.Min = math.Min(sx, sy)
+	es.sse.Scale.Max = math.Max(sx, sy)
+	es.sse.Scale.X = sx
+	es.sse.Scale.Y = sy
 
 	return es.wld.Notify(es.sse)
 }
@@ -59,11 +62,15 @@ func (es *eventSystem) initialize(world *world.World) error {
 	es.wld = world
 
 	w, h := render.GetScreenSize()
+
 	es.sse.Original.Width = w
 	es.sse.Original.Height = h
 	es.sse.Current.Width = w
 	es.sse.Current.Height = h
-	es.sse.Scale = 1
+	es.sse.Scale.Min = 1
+	es.sse.Scale.Max = 1
+	es.sse.Scale.X = 1
+	es.sse.Scale.Y = 1
 
 	return es.sendScreenSizeChange()
 }
