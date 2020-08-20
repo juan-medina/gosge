@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/options"
 )
 
@@ -61,7 +62,7 @@ func GetScreenSize() (width int, height int) {
 	return rl.GetScreenWidth(), rl.GetScreenHeight()
 }
 
-func DrawText(text components.UiText, pos components.Pos, txColor components.RGBAColor) {
+func DrawText(text components.UiText, pos components.Pos, color color.Color) {
 	font := rl.GetFontDefault()
 
 	vec := rl.Vector2{
@@ -94,10 +95,10 @@ func DrawText(text components.UiText, pos components.Pos, txColor components.RGB
 		vec.Y += av.Y
 	}
 
-	rl.DrawTextEx(font, text.String, vec, float32(text.Size), float32(text.Spacing), color2RayColor(txColor))
+	rl.DrawTextEx(font, text.String, vec, float32(text.Size), float32(text.Spacing), color2RayColor(color))
 }
 
-func color2RayColor(color components.RGBAColor) rl.Color {
+func color2RayColor(color color.Color) rl.Color {
 	return rl.NewColor(color.R, color.G, color.B, color.A)
 }
 
@@ -126,7 +127,7 @@ func UnloadAllTextures() {
 	}
 }
 
-func DrawSprite(sprite components.Sprite, pos components.Pos, tint components.RGBAColor) error {
+func DrawSprite(sprite components.Sprite, pos components.Pos, tint color.Color) error {
 	if val, ok := textureHold[sprite.FileName]; ok {
 		scale := float32(sprite.Scale)
 		px := float32(val.Width) / 2
@@ -135,9 +136,9 @@ func DrawSprite(sprite components.Sprite, pos components.Pos, tint components.RG
 			X: float32(pos.X) - (px * scale),
 			Y: float32(pos.Y) - (py * scale),
 		}
-		color := color2RayColor(tint)
+		rc := color2RayColor(tint)
 		rotation := float32(sprite.Rotation)
-		rl.DrawTextureEx(val, vec, rotation, scale, color)
+		rl.DrawTextureEx(val, vec, rotation, scale, rc)
 	} else {
 		return errors.New(fmt.Sprintf("error drawing sprite, texture not found: %q", sprite.FileName))
 	}

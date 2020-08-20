@@ -23,12 +23,12 @@
 package options
 
 import (
-	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/components/color"
 )
 
 type Options struct {
 	Title      string
 	Width      int
 	Height     int
-	ClearColor components.RGBAColor
+	ClearColor color.Color
 }

@@ -26,6 +26,7 @@ import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/components/color"
 )
 
 type uiRenderingSystem struct {
@@ -36,10 +37,10 @@ func (ui uiRenderingSystem) Notify(_ *world.World, _ interface{}, _ float64) err
 }
 
 func (ui uiRenderingSystem) Update(world *world.World, _ float64) error {
-	for _, v := range world.Entities(components.UiTextType, components.PosType, components.RGBAColorType) {
+	for _, v := range world.Entities(components.UiTextType, components.PosType, color.TYPE) {
 		textCmp := v.Get(components.UiTextType).(components.UiText)
 		posCmp := v.Get(components.PosType).(components.Pos)
-		colorCmp := v.Get(components.RGBAColorType).(components.RGBAColor)
+		colorCmp := v.Get(color.TYPE).(color.Color)
 
 		render.DrawText(textCmp, posCmp, colorCmp)
 	}

@@ -26,6 +26,7 @@ import (
 	"github.com/juan-medina/goecs/pkg/entitiy"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/game"
@@ -38,7 +39,7 @@ var opt = options.Options{
 	Title:      "Hello Game",
 	Width:      1920,
 	Height:     1080,
-	ClearColor: components.BlackColor,
+	ClearColor: color.Black,
 }
 
 type stickPosition int
@@ -105,8 +106,8 @@ func loadGame(eng engine.Engine) error {
 		},
 		components.AlternateColor{
 			Time: 2,
-			From: components.RedColor,
-			To:   components.YellowColor,
+			From: color.Red,
+			To:   color.Yellow,
 		},
 		stickyText{size: 300, spacing: 10, stick: stickToCenter},
 	))
@@ -120,8 +121,8 @@ func loadGame(eng engine.Engine) error {
 		},
 		components.AlternateColor{
 			Time: .25,
-			From: components.WhiteColor,
-			To:   components.WhiteColor.Alpha(0),
+			From: color.White,
+			To:   color.White.Alpha(0),
 		},
 		stickyText{size: 60, spacing: 10, stick: stickToBottom},
 	))

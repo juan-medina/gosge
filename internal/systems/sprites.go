@@ -26,20 +26,21 @@ import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/components/color"
 )
 
 type spriteRenderingSystem struct{}
 
-var noTint = components.WhiteColor
+var noTint = color.White
 
 func (s spriteRenderingSystem) Update(world *world.World, _ float64) error {
 	for _, v := range world.Entities(components.SpriteType, components.PosType) {
 		sprite := v.Get(components.SpriteType).(components.Sprite)
 		pos := v.Get(components.PosType).(components.Pos)
 
-		var tint components.RGBAColor
-		if v.Contains(components.RGBAColorType) {
-			tint = v.Get(components.RGBAColorType).(components.RGBAColor)
+		var tint color.Color
+		if v.Contains(color.TYPE) {
+			tint = v.Get(color.TYPE).(color.Color)
 		} else {
 			tint = noTint
 		}

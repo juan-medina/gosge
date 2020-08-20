@@ -25,6 +25,7 @@ package main
 import (
 	"github.com/juan-medina/goecs/pkg/entitiy"
 	"github.com/juan-medina/gosge/pkg/components"
+	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
@@ -35,7 +36,7 @@ var opt = options.Options{
 	Title:      "Eyes Game",
 	Width:      1920,
 	Height:     1080,
-	ClearColor: components.NewColor(106, 215, 229, 255),
+	ClearColor: color.Gopher,
 }
 
 func loadGame(eng engine.Engine) error {
