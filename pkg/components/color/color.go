@@ -33,12 +33,8 @@ type Color struct {
 
 var TYPE = reflect.TypeOf(Color{})
 
-func New(r, g, b, a uint8) Color {
-	return Color{R: r, G: g, B: b, A: a}
-}
-
 func (rc Color) Alpha(alpha uint8) Color {
-	return New(rc.R, rc.G, rc.B, alpha)
+	return Color{R: rc.R, G: rc.G, B: rc.B, A: alpha}
 }
 
 func (rc Color) Blend(other Color, scale float64) Color {
@@ -57,34 +53,34 @@ func (rc Color) Blend(other Color, scale float64) Color {
 	b := b1 + ((b2 - b1) * scale)
 	a := a1 + ((a2 - a1) * scale)
 
-	return New(uint8(r), uint8(g), uint8(b), uint8(a))
+	return Color{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
 //goland:noinspection GoUnusedGlobalVariable
 var (
-	Black      = New(0, 0, 0, 255)
-	White      = New(255, 255, 255, 255)
-	Magenta    = New(255, 0, 255, 255)
-	LightGray  = New(200, 200, 200, 25)
-	Gray       = New(130, 130, 130, 255)
-	DarkGray   = New(80, 80, 80, 255)
-	Yellow     = New(253, 249, 0, 255)
-	Gold       = New(255, 203, 0, 255)
-	Orange     = New(255, 161, 0, 255)
-	Pink       = New(255, 109, 194, 255)
-	Red        = New(230, 41, 55, 255)
-	Maroon     = New(190, 33, 55, 255)
-	Green      = New(0, 228, 48, 255)
-	Lime       = New(0, 158, 47, 255)
-	DarkGreen  = New(0, 117, 44, 255)
-	SkyBlue    = New(102, 191, 255, 255)
-	Blue       = New(0, 121, 241, 255)
-	DarkBlue   = New(0, 82, 172, 255)
-	Purple     = New(200, 122, 255, 255)
-	Violet     = New(135, 60, 190, 255)
-	DarkPurple = New(112, 31, 126, 255)
-	Beige      = New(211, 176, 131, 255)
-	Brown      = New(127, 106, 79, 255)
-	DarkBrown  = New(76, 63, 47, 255)
-	Gopher     = New(106, 215, 229, 255)
+	Black      = Color{A: 255}
+	White      = Color{R: 255, G: 255, B: 255, A: 255}
+	Magenta    = Color{R: 255, B: 255, A: 255}
+	LightGray  = Color{R: 200, G: 200, B: 200, A: 25}
+	Gray       = Color{R: 130, G: 130, B: 130, A: 255}
+	DarkGray   = Color{R: 80, G: 80, B: 80, A: 255}
+	Yellow     = Color{R: 253, G: 249, A: 255}
+	Gold       = Color{R: 255, G: 203, A: 255}
+	Orange     = Color{R: 255, G: 161, A: 255}
+	Pink       = Color{R: 255, G: 109, B: 194, A: 255}
+	Red        = Color{R: 230, G: 41, B: 55, A: 255}
+	Maroon     = Color{R: 190, G: 33, B: 55, A: 255}
+	Green      = Color{G: 228, B: 48, A: 255}
+	Lime       = Color{G: 158, B: 47, A: 255}
+	DarkGreen  = Color{G: 117, B: 44, A: 255}
+	SkyBlue    = Color{R: 102, G: 191, B: 255, A: 255}
+	Blue       = Color{G: 121, B: 241, A: 255}
+	DarkBlue   = Color{G: 82, B: 172, A: 255}
+	Purple     = Color{R: 200, G: 122, B: 255, A: 255}
+	Violet     = Color{R: 135, G: 60, B: 190, A: 255}
+	DarkPurple = Color{R: 112, G: 31, B: 126, A: 255}
+	Beige      = Color{R: 211, G: 176, B: 131, A: 255}
+	Brown      = Color{R: 127, G: 106, B: 79, A: 255}
+	DarkBrown  = Color{R: 76, G: 63, B: 47, A: 255}
+	Gopher     = Color{R: 106, G: 215, B: 229, A: 255}
 )
