@@ -23,7 +23,7 @@
 package main
 
 import (
-	"github.com/juan-medina/goecs/pkg/entitiy"
+	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
@@ -98,7 +98,7 @@ func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 
 func loadGame(eng engine.Engine) error {
 	gWorld := eng.World()
-	gWorld.Add(entitiy.New(
+	gWorld.Add(entity.New(
 		text.Text{
 			String:     "Hello World",
 			HAlignment: text.CenterHAlignment,
@@ -112,7 +112,7 @@ func loadGame(eng engine.Engine) error {
 		},
 		stickyText{size: 300, spacing: 10, stick: stickToCenter},
 	))
-	gWorld.Add(entitiy.New(
+	gWorld.Add(entity.New(
 		text.Text{
 			String:     "press <ESC> to close",
 			HAlignment: text.CenterHAlignment,

@@ -48,11 +48,11 @@ func (es *eventSystem) sendScreenSizeChange() error {
 	sy := float64(es.sse.Current.Height) / float64(es.sse.Original.Height)
 	es.sse.Scale = math.Min(sx, sy)
 
-	return es.wld.Notify(es.sse, es.tt)
+	return es.wld.Notify(es.sse)
 }
 
 func (es eventSystem) sendGameClose() error {
-	return es.wld.Notify(es.sse, es.tt)
+	return es.wld.Notify(es.sse)
 }
 
 func (es *eventSystem) initialize(world *world.World) error {
