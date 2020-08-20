@@ -1,0 +1,43 @@
+{
+    "software": {
+        "name": "rTexPacker v1.0",
+        "url": "https://www.raylibtech.com/rtexpacker"
+    },
+    "atlas": {
+        "imagePath": "gopher.png",
+        "width": 1024,
+        "height": 1024,
+        "spriteCount": 3,
+        "isFont": false,
+        "fontSize": 32
+    },
+    "sprites": [
+        {
+            "nameId": "eye_exterior",
+            "origin": { "x": 0, "y": 0 },
+            "position": { "x": 0, "y": 0 },
+            "sourceSize": { "width": 428, "height": 397 },
+            "padding": 0,
+            "trimmed": true,
+            "trimRec": { "x": 0, "y": 0, "width": 428, "height": 397 }
+        },
+        {
+            "nameId": "eye_interior",
+            "origin": { "x": 0, "y": 0 },
+            "position": { "x": 428, "y": 345 },
+            "sourceSize": { "width": 122, "height": 134 },
+            "padding": 0,
+            "trimmed": true,
+            "trimRec": { "x": 0, "y": 0, "width": 122, "height": 134 }
+        },
+        {
+            "nameId": "nose",
+            "origin": { "x": 0, "y": 0 },
+            "position": { "x": 428, "y": 0 },
+            "sourceSize": { "width": 342, "height": 345 },
+            "padding": 0,
+            "trimmed": true,
+            "trimRec": { "x": 0, "y": 0, "width": 342, "height": 345 }
+        }
+    ]
+}
