@@ -101,8 +101,6 @@ func loadGame(eng engine.Engine) error {
 	gWorld.Add(entitiy.New(
 		text.Text{
 			String:     "Hello World",
-			Size:       300,
-			Spacing:    10,
 			HAlignment: text.CenterHAlignment,
 			VAlignment: text.MiddleVAlignment,
 		},
@@ -117,8 +115,6 @@ func loadGame(eng engine.Engine) error {
 	gWorld.Add(entitiy.New(
 		text.Text{
 			String:     "press <ESC> to close",
-			Size:       60,
-			Spacing:    10,
 			HAlignment: text.CenterHAlignment,
 			VAlignment: text.BottomVAlignment,
 		},
