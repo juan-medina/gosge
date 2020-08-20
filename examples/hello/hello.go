@@ -38,7 +38,7 @@ var opt = options.Options{
 	Title:      "Hello Game",
 	Width:      1920,
 	Height:     1080,
-	ClearColor: components.NewColor(0, 0, 0, 255),
+	ClearColor: components.BlackColor,
 }
 
 type stickPosition int
@@ -66,13 +66,18 @@ func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 	switch e := event.(type) {
 	case events.ScreenSizeChangeEvent:
 		// get all our texts
-		for _, v := range wld.Entities(components.PosType, components.UiTextType, stickyTextType) {
+		for _, v := range wld.Entities(components.UiTextType, stickyTextType) {
 			// get the text components
-			pos := v.Get(components.PosType).(components.Pos)
 			text := v.Get(components.UiTextType).(components.UiText)
 			st := v.Get(stickyTextType).(stickyText)
 
-			// calculate position based on current screen size and stick
+			// change text size & spacing from current scale
+			text.Size = st.size * e.Scale
+			text.Spacing = st.spacing * e.Scale
+			v.Set(text)
+
+			// calculate position based on current screen size and sticky
+			pos := components.Pos{}
 			switch st.stick {
 			case stickToCenter:
 				pos.X = float64(e.Current.Width) / 2
@@ -82,11 +87,6 @@ func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 				pos.Y = float64(e.Current.Height)
 			}
 			v.Set(pos)
-
-			// change text size & spacing from current scale
-			text.Size = st.size * e.Scale
-			text.Spacing = st.spacing * e.Scale
-			v.Set(text)
 		}
 	}
 
@@ -103,11 +103,10 @@ func loadGame(eng engine.Engine) error {
 			HAlignment: components.CenterHAlignment,
 			VAlignment: components.MiddleVAlignment,
 		},
-		components.Pos{X: float64(opt.Width / 2), Y: float64(opt.Height / 2)},
 		components.AlternateColor{
-			Time: 1,
-			From: components.NewColor(0, 255, 255, 255),
-			To:   components.NewColor(255, 0, 0, 255),
+			Time: 2,
+			From: components.RedColor,
+			To:   components.YellowColor,
 		},
 		stickyText{size: 300, spacing: 10, stick: stickToCenter},
 	))
@@ -119,11 +118,10 @@ func loadGame(eng engine.Engine) error {
 			HAlignment: components.CenterHAlignment,
 			VAlignment: components.BottomVAlignment,
 		},
-		components.Pos{X: float64(opt.Width / 2), Y: float64(opt.Height)},
 		components.AlternateColor{
 			Time: .25,
-			From: components.NewColor(255, 255, 255, 255),
-			To:   components.NewColor(255, 255, 255, 0),
+			From: components.WhiteColor,
+			To:   components.WhiteColor.Alpha(0),
 		},
 		stickyText{size: 60, spacing: 10, stick: stickToBottom},
 	))
