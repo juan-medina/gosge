@@ -27,6 +27,7 @@ import (
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/pkg/components/sprite"
 )
 
 type spriteRenderingSystem struct{}
@@ -34,8 +35,8 @@ type spriteRenderingSystem struct{}
 var noTint = color.White
 
 func (s spriteRenderingSystem) Update(world *world.World, _ float64) error {
-	for _, v := range world.Entities(components.SpriteType, components.PosType) {
-		sprite := v.Get(components.SpriteType).(components.Sprite)
+	for _, v := range world.Entities(sprite.TYPE, components.PosType) {
+		spr := v.Get(sprite.TYPE).(sprite.Sprite)
 		pos := v.Get(components.PosType).(components.Pos)
 
 		var tint color.Color
@@ -45,7 +46,7 @@ func (s spriteRenderingSystem) Update(world *world.World, _ float64) error {
 			tint = noTint
 		}
 
-		if err := render.DrawSprite(sprite, pos, tint); err != nil {
+		if err := render.DrawSprite(spr, pos, tint); err != nil {
 			return err
 		}
 	}

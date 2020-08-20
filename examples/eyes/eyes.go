@@ -26,6 +26,7 @@ import (
 	"github.com/juan-medina/goecs/pkg/entitiy"
 	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
@@ -65,7 +66,7 @@ func loadGame(eng engine.Engine) error {
 
 	world := eng.World()
 	world.Add(entitiy.New(
-		components.Sprite{
+		sprite.Sprite{
 			FileName: "resources/nose.png",
 			Scale:    1,
 			Rotation: 0,
@@ -74,7 +75,7 @@ func loadGame(eng engine.Engine) error {
 	))
 
 	world.Add(entitiy.New(
-		components.Sprite{
+		sprite.Sprite{
 			FileName: "resources/eye_exterior.png",
 			Scale:    1,
 			Rotation: 0,
@@ -83,7 +84,7 @@ func loadGame(eng engine.Engine) error {
 	))
 
 	world.Add(entitiy.New(
-		components.Sprite{
+		sprite.Sprite{
 			FileName: "resources/eye_interior.png",
 			Scale:    1,
 			Rotation: 0,
@@ -92,7 +93,7 @@ func loadGame(eng engine.Engine) error {
 	))
 
 	world.Add(entitiy.New(
-		components.Sprite{
+		sprite.Sprite{
 			FileName: "resources/eye_exterior.png",
 			Scale:    1,
 			Rotation: 0,
@@ -101,7 +102,7 @@ func loadGame(eng engine.Engine) error {
 	))
 
 	world.Add(entitiy.New(
-		components.Sprite{
+		sprite.Sprite{
 			FileName: "resources/eye_interior.png",
 			Scale:    1,
 			Rotation: 0,
