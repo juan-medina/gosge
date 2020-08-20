@@ -68,6 +68,10 @@ type RGBAColor struct {
 
 var RGBAColorType = reflect.TypeOf(RGBAColor{})
 
+func (rc RGBAColor) Alpha(alpha uint8) RGBAColor {
+	return NewColor(rc.R, rc.G, rc.B, alpha)
+}
+
 func (rc RGBAColor) Blend(other RGBAColor, scale float64) RGBAColor {
 	r1 := float64(rc.R)
 	g1 := float64(rc.G)
@@ -91,7 +95,33 @@ func NewColor(r, g, b, a uint8) RGBAColor {
 	return RGBAColor{R: r, G: g, B: b, A: a}
 }
 
-var WhiteColor = NewColor(255, 255, 255, 255)
+//goland:noinspection GoUnusedGlobalVariable
+var (
+	BlackColor      = NewColor(0, 0, 0, 255)
+	WhiteColor      = NewColor(255, 255, 255, 255)
+	MagentaColor    = NewColor(255, 0, 255, 255)
+	LightGrayColor  = NewColor(200, 200, 200, 25)
+	GrayColor       = NewColor(130, 130, 130, 255)
+	DarkGrayColor   = NewColor(80, 80, 80, 255)
+	YellowColor     = NewColor(253, 249, 0, 255)
+	GoldColor       = NewColor(255, 203, 0, 255)
+	OrangeColor     = NewColor(255, 161, 0, 255)
+	PinkColor       = NewColor(255, 109, 194, 255)
+	RedColor        = NewColor(230, 41, 55, 255)
+	MaroonColor     = NewColor(190, 33, 55, 255)
+	GreenColor      = NewColor(0, 228, 48, 255)
+	LimeColor       = NewColor(0, 158, 47, 255)
+	DarkGreenColor  = NewColor(0, 117, 44, 255)
+	SkyBlueColor    = NewColor(102, 191, 255, 255)
+	BlueColor       = NewColor(0, 121, 241, 255)
+	DarkBlueColor   = NewColor(0, 82, 172, 255)
+	PurpleColor     = NewColor(200, 122, 255, 255)
+	VioletColor     = NewColor(135, 60, 190, 255)
+	DarkPurpleColor = NewColor(112, 31, 126, 255)
+	BeigeColor      = NewColor(211, 176, 131, 255)
+	BrownColor      = NewColor(127, 106, 79, 255)
+	DarkBrownColor  = NewColor(76, 63, 47, 255)
+)
 
 type AlternateColor struct {
 	From    RGBAColor
