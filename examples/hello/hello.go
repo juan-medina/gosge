@@ -27,6 +27,7 @@ import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/game"
@@ -67,15 +68,15 @@ func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 	switch e := event.(type) {
 	case events.ScreenSizeChangeEvent:
 		// get all our texts
-		for _, v := range wld.Entities(components.UiTextType, stickyTextType) {
+		for _, v := range wld.Entities(text.TYPE, stickyTextType) {
 			// get the text components
-			text := v.Get(components.UiTextType).(components.UiText)
+			txt := v.Get(text.TYPE).(text.Text)
 			st := v.Get(stickyTextType).(stickyText)
 
 			// change text size & spacing from current scale
-			text.Size = st.size * e.Scale
-			text.Spacing = st.spacing * e.Scale
-			v.Set(text)
+			txt.Size = st.size * e.Scale
+			txt.Spacing = st.spacing * e.Scale
+			v.Set(txt)
 
 			// calculate position based on current screen size and sticky
 			pos := components.Pos{}
@@ -97,12 +98,12 @@ func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 func loadGame(eng engine.Engine) error {
 	gWorld := eng.World()
 	gWorld.Add(entitiy.New(
-		components.UiText{
+		text.Text{
 			String:     "Hello World",
 			Size:       300,
 			Spacing:    10,
-			HAlignment: components.CenterHAlignment,
-			VAlignment: components.MiddleVAlignment,
+			HAlignment: text.CenterHAlignment,
+			VAlignment: text.MiddleVAlignment,
 		},
 		components.AlternateColor{
 			Time: 2,
@@ -112,12 +113,12 @@ func loadGame(eng engine.Engine) error {
 		stickyText{size: 300, spacing: 10, stick: stickToCenter},
 	))
 	gWorld.Add(entitiy.New(
-		components.UiText{
+		text.Text{
 			String:     "press <ESC> to close",
 			Size:       60,
 			Spacing:    10,
-			HAlignment: components.CenterHAlignment,
-			VAlignment: components.BottomVAlignment,
+			HAlignment: text.CenterHAlignment,
+			VAlignment: text.BottomVAlignment,
 		},
 		components.AlternateColor{
 			Time: .25,

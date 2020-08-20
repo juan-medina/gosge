@@ -20,25 +20,32 @@
  *  THE SOFTWARE.
  */
 
-package components
+package text
 
-import (
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"reflect"
+import "reflect"
+
+type HAlignment int
+
+const (
+	LeftHAlignment = HAlignment(iota)
+	RightHAlignment
+	CenterHAlignment
 )
 
-type Pos struct {
-	X float64
-	Y float64
+type VAlignment int
+
+const (
+	BottomVAlignment = VAlignment(iota)
+	TopVAlignment
+	MiddleVAlignment
+)
+
+type Text struct {
+	String     string
+	Size       float64
+	Spacing    float64
+	VAlignment VAlignment
+	HAlignment HAlignment
 }
 
-var PosType = reflect.TypeOf(Pos{})
-
-type AlternateColor struct {
-	From    color.Color
-	To      color.Color
-	Time    float64
-	Current float64
-}
-
-var AlternateColorType = reflect.TypeOf(AlternateColor{})
+var TYPE = reflect.TypeOf(Text{})

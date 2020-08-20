@@ -29,6 +29,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
+	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/options"
 )
 
@@ -63,7 +64,7 @@ func GetScreenSize() (width int, height int) {
 	return rl.GetScreenWidth(), rl.GetScreenHeight()
 }
 
-func DrawText(text components.UiText, pos components.Pos, color color.Color) {
+func DrawText(txt text.Text, pos components.Pos, color color.Color) {
 	font := rl.GetFontDefault()
 
 	vec := rl.Vector2{
@@ -71,24 +72,24 @@ func DrawText(text components.UiText, pos components.Pos, color color.Color) {
 		Y: float32(pos.Y),
 	}
 
-	if text.HAlignment != components.LeftHAlignment || text.VAlignment != components.BottomVAlignment {
-		av := rl.MeasureTextEx(font, text.String, float32(text.Size), float32(text.Spacing))
+	if txt.HAlignment != text.LeftHAlignment || txt.VAlignment != text.BottomVAlignment {
+		av := rl.MeasureTextEx(font, txt.String, float32(txt.Size), float32(txt.Spacing))
 
-		switch text.HAlignment {
-		case components.LeftHAlignment:
+		switch txt.HAlignment {
+		case text.LeftHAlignment:
 			av.X = 0
-		case components.CenterHAlignment:
+		case text.CenterHAlignment:
 			av.X = -av.X / 2
-		case components.RightHAlignment:
+		case text.RightHAlignment:
 			av.X = -av.X
 		}
 
-		switch text.VAlignment {
-		case components.BottomVAlignment:
+		switch txt.VAlignment {
+		case text.BottomVAlignment:
 			av.Y = -av.Y
-		case components.MiddleVAlignment:
+		case text.MiddleVAlignment:
 			av.Y = -av.Y / 2
-		case components.TopVAlignment:
+		case text.TopVAlignment:
 			av.Y = 0
 			break
 		}
@@ -96,7 +97,7 @@ func DrawText(text components.UiText, pos components.Pos, color color.Color) {
 		vec.Y += av.Y
 	}
 
-	rl.DrawTextEx(font, text.String, vec, float32(text.Size), float32(text.Spacing), color2RayColor(color))
+	rl.DrawTextEx(font, txt.String, vec, float32(txt.Size), float32(txt.Spacing), color2RayColor(color))
 }
 
 func color2RayColor(color color.Color) rl.Color {
