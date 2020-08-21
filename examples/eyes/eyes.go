@@ -324,25 +324,34 @@ type dizzyBarSystem struct {
 }
 
 func (dbs *dizzyBarSystem) Update(_ *world.World, delta float32) error {
+	// in each frame we reduce how dizzy we are
 	dbs.dizzy = float32(math.Max(float64(dbs.dizzy-(delta/dizzyReduceRate)), 0))
+
+	// calculate how dizzy we are in 0..1
 	percent := 1 - (dbs.dizzy / maxDizzy)
 
+	// if we have position
 	if dizzyBar.Contains(geometry.TYPE.Position) {
+		// get the position of the regular dizzy bar
 		dizzyBarPosition := geometry.Get.Position(dizzyBar)
+		// get the position
 		box := shapes.Get.Box(dizzyBar)
-		cut := box.Size.Width * percent
-		dizzyBarPosition.X += box.Size.Width - cut
-		box.Size.Width = cut
 
+		// calculate position and width
+		box.Size.Width = box.Size.Width * percent
+		dizzyBarPosition.X = dizzyBarPosition.X - (dizzyBarWith * box.Scale * (percent - 1))
+
+		// set components
 		dizzyBarEmpty.Set(dizzyBarPosition)
 		dizzyBarEmpty.Set(box)
 
+		// make the dizzy text to blink faster
 		ac := effects.Get.AlternateColor(dizzyText)
 		ac.Delay = 0.25 * percent
-		ac.Time = 0.25 * percent
-
+		ac.Time = 0.25 * (percent * 8)
 		dizzyText.Set(ac)
 
+		// color the eyes red
 		clr := color.White.Blend(color.Red, (1-percent)/2)
 		leftExterior.Set(clr)
 		rightExterior.Set(clr)
