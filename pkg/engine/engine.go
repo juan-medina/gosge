@@ -25,6 +25,7 @@ package engine
 
 import (
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/pkg/components/geometry"
 )
 
 // Engine is the interface for the game engine
@@ -35,6 +36,8 @@ type Engine interface {
 	LoadTexture(fileName string) error
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(fileName string) error
+	//GetSpriteSize returns the geometry.Size of a given sprite
+	GetSpriteSize(sheet string, name string) (geometry.Size, error)
 }
 
 // InitFunc is a function that will get call for our game to load

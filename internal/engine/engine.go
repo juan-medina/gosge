@@ -27,6 +27,7 @@ import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/internal/systems"
+	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/options"
@@ -58,6 +59,10 @@ type engineImpl struct {
 	init      engine.InitFunc
 	frameTime float32
 	spriteRS  systems.SpriteRendering
+}
+
+func (ei *engineImpl) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
+	return ei.spriteRS.GetSpriteSize(sheet, name)
 }
 
 func (ei *engineImpl) LoadSpriteSheet(fileName string) error {

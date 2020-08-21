@@ -72,6 +72,8 @@ type SpriteRendering interface {
 	Notify(world *world.World, event interface{}, delta float32) error
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(fileName string) error
+	//GetSpriteSize returns the geometry.Size of a given sprite
+	GetSpriteSize(sheet string, name string) (geometry.Size, error)
 }
 
 func (s spriteRenderingSystem) Update(world *world.World, _ float32) error {
@@ -86,16 +88,12 @@ func (s spriteRenderingSystem) Update(world *world.World, _ float32) error {
 			tint = noTint
 		}
 
-		if sheet, ok := s.sheets[spr.Sheet]; ok {
-			if def, ok := sheet[spr.Name]; ok {
-				if err := render.DrawSprite(def, spr, pos, tint); err != nil {
-					return err
-				}
-			} else {
-				return fmt.Errorf("can not find sprite %q in sheet %q", spr.Name, spr.Sheet)
+		if def, err := s.getSpriteDef(spr.Sheet, spr.Name); err == nil {
+			if err := render.DrawSprite(def, spr, pos, tint); err != nil {
+				return err
 			}
 		} else {
-			return fmt.Errorf("can not find sprite sheet %q", spr.Sheet)
+			return err
 		}
 
 	}
@@ -146,6 +144,22 @@ func (s *spriteRenderingSystem) LoadSpriteSheet(fileName string) (err error) {
 	if err = s.loadSpriteSheetFile(fileName, &ss); err == nil {
 	}
 	return
+}
+
+func (s spriteRenderingSystem) getSpriteDef(sheet string, name string) (components.SpriteDef, error) {
+	if sh, ok := s.sheets[sheet]; ok {
+		if def, ok := sh[name]; ok {
+			return def, nil
+		}
+		return components.SpriteDef{}, fmt.Errorf("can not find sprite %q in sheet %q", name, sheet)
+	}
+	return components.SpriteDef{}, fmt.Errorf("can not find sprite sheet %q", sheet)
+}
+
+func (s spriteRenderingSystem) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
+	def, err := s.getSpriteDef(sheet, name)
+	//goland:noinspection GoNilness
+	return def.Origin.Size, err
 }
 
 // SpriteRenderingSystem returns a world.System that will handle sprite.Sprite rendering
