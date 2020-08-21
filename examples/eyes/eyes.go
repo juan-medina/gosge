@@ -23,7 +23,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
@@ -35,6 +34,8 @@ import (
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
 	"log"
+	"math"
+	"reflect"
 )
 
 // our game options
@@ -55,98 +56,14 @@ var (
 	bottomText    *entity.Entity
 )
 
-// layout constants
+// game constants
 const (
 	noseVerticalGap = 300
 	eyesGap         = 400
 	textSize        = 40
+	eyeRadiusWidth  = 100
+	eyeRadiusHeight = 90
 )
-
-type layoutSystem struct {
-	lastSize events.ScreenSizeChangeEvent
-	mousePos events.MouseMoveEvent
-}
-
-func (ls layoutSystem) Update(_ *world.World, _ float64) error {
-	return nil
-}
-
-func (ls *layoutSystem) Notify(_ *world.World, event interface{}, _ float64) error {
-	switch ev := event.(type) {
-	// if the screen has change size
-	case events.ScreenSizeChangeEvent:
-		// change layout
-		ls.lastSize = ev
-		ls.positionElements()
-	case events.MouseMoveEvent:
-		ls.mousePos = ev
-		ls.moveEyes()
-	}
-
-	return nil
-}
-
-// move eyes
-func (ls layoutSystem) moveEyes() {
-	fmt.Printf("mouse move :%f, %f\n", ls.mousePos.X/ls.lastSize.Scale.Y, ls.mousePos.Y/ls.lastSize.Scale.Y)
-}
-
-// layout our entities
-func (ls layoutSystem) positionElements() {
-	// the nose is in the middle and a bit down
-	nosePos := position.Position{
-		X: float64(ls.lastSize.Current.Width / 2),
-		Y: float64(ls.lastSize.Current.Height/2) + (noseVerticalGap * ls.lastSize.Scale.Max),
-	}
-
-	// left eye is a bit up left of the nose
-	leftEyePos := position.Position{
-		X: nosePos.X - (eyesGap * ls.lastSize.Scale.Max),
-		Y: nosePos.Y - (eyesGap * ls.lastSize.Scale.Max),
-	}
-
-	// right eye is a bit up right of the nose
-	rightEyePos := position.Position{
-		X: nosePos.X + (eyesGap * ls.lastSize.Scale.Max),
-		Y: leftEyePos.Y,
-	}
-
-	// update sprites pos and scale
-	ls.setPosAndScale(nose, nosePos)
-	ls.setPosAndScale(leftExterior, leftEyePos)
-	ls.setPosAndScale(leftInterior, leftEyePos)
-	ls.setPosAndScale(rightExterior, rightEyePos)
-	ls.setPosAndScale(rightInterior, rightEyePos)
-
-	// the text is bottom center
-	textPos := position.Position{
-		X: float64(ls.lastSize.Current.Width) / 2,
-		Y: float64(ls.lastSize.Current.Height),
-	}
-	// update text pos and scale
-	ls.setPosAndScale(bottomText, textPos)
-}
-
-// set the position and scale of the objects
-func (ls layoutSystem) setPosAndScale(ent *entity.Entity, pos position.Position) {
-	// set pos
-	ent.Set(pos)
-
-	if ent.Contains(sprite.TYPE) {
-		// update sprite scale
-		sp := sprite.Get(ent)
-		sp.Scale = ls.lastSize.Scale.Max
-		ent.Set(sp)
-	}
-
-	if ent.Contains(text.TYPE) {
-		// update text scale
-		tx := text.Get(ent)
-		tx.Size = textSize * ls.lastSize.Scale.Max
-		tx.Spacing = textSize / 4 * ls.lastSize.Scale.Max
-		ent.Set(tx)
-	}
-}
 
 func loadGame(eng engine.Engine) error {
 	// pre load sprites
@@ -160,9 +77,21 @@ func loadGame(eng engine.Engine) error {
 	// add the sprites
 	nose = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "nose"}))
 	leftExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior"}))
-	leftInterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior"}))
+	leftInterior = gw.Add(entity.New(
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior"},
+		lookAtMouse{
+			pivot:  leftExterior,
+			radius: position.Position{X: eyeRadiusWidth, Y: eyeRadiusHeight},
+		},
+	))
 	rightExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior"}))
-	rightInterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior"}))
+	rightInterior = gw.Add(entity.New(
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior"},
+		lookAtMouse{
+			pivot:  rightExterior,
+			radius: position.Position{X: eyeRadiusWidth, Y: eyeRadiusHeight},
+		},
+	))
 
 	// add our text
 	bottomText = gw.Add(entity.New(
@@ -176,6 +105,8 @@ func loadGame(eng engine.Engine) error {
 
 	// add our layout system
 	gw.AddSystem(&layoutSystem{})
+	// add our look at mouse system
+	gw.AddSystem(&lookAtMouseSystem{})
 
 	return nil
 }
@@ -183,5 +114,137 @@ func loadGame(eng engine.Engine) error {
 func main() {
 	if err := game.Run(opt, loadGame); err != nil {
 		log.Fatalf("error running the game: %v", err)
+	}
+}
+
+type lookAtMouse struct {
+	pivot  *entity.Entity
+	radius position.Position
+}
+
+var types = struct{ lookAtMouse reflect.Type }{lookAtMouse: reflect.TypeOf(lookAtMouse{})}
+
+func getLookAtMouse(e *entity.Entity) lookAtMouse {
+	return e.Get(types.lookAtMouse).(lookAtMouse)
+}
+
+type lookAtMouseSystem struct {
+	scaleX float64
+	scaleY float64
+}
+
+func (lam lookAtMouseSystem) Update(_ *world.World, _ float64) error {
+	return nil
+}
+
+func (lam *lookAtMouseSystem) Notify(gw *world.World, event interface{}, _ float64) error {
+	switch ev := event.(type) {
+	// if the screen has change size
+	case events.ScreenSizeChangeEvent:
+		// save the scale
+		lam.scaleX = ev.Scale.X
+		lam.scaleY = ev.Scale.Y
+	// if we move the mouse
+	case events.MouseMoveEvent:
+		// get the entities that look at the mouse
+		for _, v := range gw.Entities(types.lookAtMouse) {
+			la := getLookAtMouse(v)
+			// make this entity to look at the mouse
+			lam.lookAt(v, la, ev.Position)
+		}
+	}
+	return nil
+}
+
+func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse position.Position) {
+	pos := position.Get(la.pivot)
+
+	dx := mouse.X - pos.X
+	dy := mouse.Y - pos.Y
+	angle := math.Atan2(dy, dx)
+
+	ax := la.radius.X * lam.scaleX * math.Cos(angle)
+	ay := la.radius.Y * lam.scaleY * math.Sin(angle)
+
+	np := position.Position{
+		X: pos.X + ax,
+		Y: pos.Y + ay,
+	}
+
+	ent.Set(np)
+}
+
+type layoutSystem struct{}
+
+func (ls layoutSystem) Update(_ *world.World, _ float64) error {
+	return nil
+}
+
+func (ls *layoutSystem) Notify(_ *world.World, event interface{}, _ float64) error {
+	switch ev := event.(type) {
+	// if the screen has change size
+	case events.ScreenSizeChangeEvent:
+		// change layout
+		ls.positionElements(ev)
+	}
+
+	return nil
+}
+
+// layout our entities
+func (ls layoutSystem) positionElements(event events.ScreenSizeChangeEvent) {
+	scale := event.Scale.Max
+	// the nose is in the middle and a bit down
+	nosePos := position.Position{
+		X: float64(event.Current.Width / 2),
+		Y: float64(event.Current.Height/2) + (noseVerticalGap * event.Scale.Max),
+	}
+
+	// left eye is a bit up left of the nose
+	leftEyePos := position.Position{
+		X: nosePos.X - (eyesGap * event.Scale.Max),
+		Y: nosePos.Y - (eyesGap * event.Scale.Max),
+	}
+
+	// right eye is a bit up right of the nose
+	rightEyePos := position.Position{
+		X: nosePos.X + (eyesGap * event.Scale.Max),
+		Y: leftEyePos.Y,
+	}
+
+	// update sprites pos and scale
+	ls.setPosAndScale(nose, nosePos, scale)
+	ls.setPosAndScale(leftExterior, leftEyePos, scale)
+	ls.setPosAndScale(leftInterior, leftEyePos, scale)
+	ls.setPosAndScale(rightExterior, rightEyePos, scale)
+	ls.setPosAndScale(rightInterior, rightEyePos, scale)
+
+	// the text is bottom center
+	textPos := position.Position{
+		X: float64(event.Current.Width) / 2,
+		Y: float64(event.Current.Height),
+	}
+	// update text pos and scale
+	ls.setPosAndScale(bottomText, textPos, scale)
+}
+
+// set the position and scale of the objects
+func (ls layoutSystem) setPosAndScale(ent *entity.Entity, pos position.Position, scale float64) {
+	// set pos
+	ent.Set(pos)
+
+	if ent.Contains(sprite.TYPE) {
+		// update sprite scale
+		sp := sprite.Get(ent)
+		sp.Scale = scale
+		ent.Set(sp)
+	}
+
+	if ent.Contains(text.TYPE) {
+		// update text scale
+		tx := text.Get(ent)
+		tx.Size = textSize * scale
+		tx.Spacing = textSize / 4 * scale
+		ent.Set(tx)
 	}
 }
