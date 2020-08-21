@@ -23,7 +23,7 @@
 // Package events contain the events for our engine
 package events
 
-import "github.com/juan-medina/gosge/pkg/components/position"
+import "github.com/juan-medina/gosge/pkg/components/geometry"
 
 // GameCloseEvent is an event that indicates that game need to close
 type GameCloseEvent struct{}
@@ -31,25 +31,18 @@ type GameCloseEvent struct{}
 // ScreenSizeChangeEvent is an event that indicates that the screen size has change
 type ScreenSizeChangeEvent struct {
 	// Current is the current screen size
-	Current struct {
-		Width  int // Width of the Current Screen
-		Height int // Height of the Current Screen
-	}
+	Current geometry.Size
 	// Original is the original, from options.Options, screen size
-	Original struct {
-		Width  int // Width of the Original Screen, from options.Options
-		Height int // Height of the Original Screen, from options.Options
-	}
+	Original geometry.Size
 	// Scale is the current scale between Current and Original
 	Scale struct {
-		X   float64 // X is the Width Scale
-		Y   float64 // Y is the Height Scale
-		Min float64 // Min is the minimum scale between X and Y
-		Max float64 // Max is the maximum scale between X and Y
+		Point geometry.Point //Point is the scale per point
+		Min   float32        // Min is the minimum scale between X and Y
+		Max   float32        // Max is the maximum scale between X and Y
 	}
 }
 
 // MouseMoveEvent is an event that indicates that the mouse is moving
 type MouseMoveEvent struct {
-	position.Position
+	geometry.Position
 }

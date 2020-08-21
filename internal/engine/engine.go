@@ -56,7 +56,7 @@ type engineImpl struct {
 	gWorld    *world.World
 	status    engineStatus
 	init      engine.InitFunc
-	frameTime float64
+	frameTime float32
 	spriteRS  systems.SpriteRendering
 }
 
@@ -72,11 +72,11 @@ func (ei *engineImpl) World() *world.World {
 	return ei.gWorld
 }
 
-func (ei *engineImpl) Update(_ *world.World, _ float64) error {
+func (ei *engineImpl) Update(_ *world.World, _ float32) error {
 	return nil
 }
 
-func (ei *engineImpl) Notify(_ *world.World, event interface{}, _ float64) error {
+func (ei *engineImpl) Notify(_ *world.World, event interface{}, _ float32) error {
 	switch event.(type) {
 	case events.GameCloseEvent:
 		ei.status = statusEnding

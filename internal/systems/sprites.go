@@ -29,7 +29,7 @@ import (
 	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/position"
+	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"io/ioutil"
 	"os"
@@ -44,14 +44,14 @@ type spriteSheetJSON struct {
 	Sprites []struct {
 		NameID   string `json:"nameId"`
 		Position struct {
-			X int `json:"x"`
-			Y int `json:"y"`
+			X float32 `json:"x"`
+			Y float32 `json:"y"`
 		} `json:"position"`
 		TrimRec struct {
-			X      int `json:"x"`
-			Y      int `json:"y"`
-			Width  int `json:"width"`
-			Height int `json:"height"`
+			X      float32 `json:"x"`
+			Y      float32 `json:"y"`
+			Width  float32 `json:"width"`
+			Height float32 `json:"height"`
 		} `json:"trimRec"`
 	} `json:"sprites"`
 }
@@ -67,17 +67,17 @@ var noTint = color.White
 // SpriteRendering is a world.System for rendering sprite.Sprite
 type SpriteRendering interface {
 	//Update the world.World
-	Update(world *world.World, delta float64) error
+	Update(world *world.World, delta float32) error
 	//Notify is trigger when new events are received
-	Notify(world *world.World, event interface{}, delta float64) error
+	Notify(world *world.World, event interface{}, delta float32) error
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(fileName string) error
 }
 
-func (s spriteRenderingSystem) Update(world *world.World, _ float64) error {
-	for _, v := range world.Entities(sprite.TYPE, position.TYPE) {
+func (s spriteRenderingSystem) Update(world *world.World, _ float32) error {
+	for _, v := range world.Entities(sprite.TYPE, geometry.TYPE.Position) {
 		spr := sprite.Get(v)
-		pos := position.Get(v)
+		pos := geometry.Get.Position(v)
 
 		var tint color.Color
 		if v.Contains(color.TYPE) {
@@ -102,7 +102,7 @@ func (s spriteRenderingSystem) Update(world *world.World, _ float64) error {
 	return nil
 }
 
-func (s spriteRenderingSystem) Notify(_ *world.World, _ interface{}, _ float64) error {
+func (s spriteRenderingSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
 	return nil
 }
 

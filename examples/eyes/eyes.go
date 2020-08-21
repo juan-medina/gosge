@@ -26,7 +26,7 @@ import (
 	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/position"
+	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
@@ -40,9 +40,11 @@ import (
 
 // our game options
 var opt = options.Options{
-	Title:      "Eyes Game",
-	Width:      1920,
-	Height:     1080,
+	Title: "Eyes Game",
+	Size: geometry.Size{
+		Width:  1920,
+		Height: 1080,
+	},
 	ClearColor: color.Gopher,
 }
 
@@ -81,7 +83,7 @@ func loadGame(eng engine.Engine) error {
 		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior"},
 		lookAtMouse{
 			pivot:  leftExterior,
-			radius: position.Position{X: eyeRadiusWidth, Y: eyeRadiusHeight},
+			radius: geometry.Position{X: eyeRadiusWidth, Y: eyeRadiusHeight},
 		},
 	))
 	rightExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior"}))
@@ -89,7 +91,7 @@ func loadGame(eng engine.Engine) error {
 		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior"},
 		lookAtMouse{
 			pivot:  rightExterior,
-			radius: position.Position{X: eyeRadiusWidth, Y: eyeRadiusHeight},
+			radius: geometry.Position{X: eyeRadiusWidth, Y: eyeRadiusHeight},
 		},
 	))
 
@@ -120,7 +122,7 @@ func main() {
 // component to make an entity to look at mouse with a pivot
 type lookAtMouse struct {
 	pivot  *entity.Entity
-	radius position.Position
+	radius geometry.Position
 }
 
 var types = struct{ lookAtMouse reflect.Type }{lookAtMouse: reflect.TypeOf(lookAtMouse{})}
@@ -131,21 +133,21 @@ func getLookAtMouse(e *entity.Entity) lookAtMouse {
 
 // system that make entities to look at the mouse
 type lookAtMouseSystem struct {
-	scaleX float64
-	scaleY float64
+	scaleX float32
+	scaleY float32
 }
 
-func (lam lookAtMouseSystem) Update(_ *world.World, _ float64) error {
+func (lam lookAtMouseSystem) Update(_ *world.World, _ float32) error {
 	return nil
 }
 
-func (lam *lookAtMouseSystem) Notify(gw *world.World, event interface{}, _ float64) error {
+func (lam *lookAtMouseSystem) Notify(gw *world.World, event interface{}, _ float32) error {
 	switch ev := event.(type) {
 	// if the screen has change size
 	case events.ScreenSizeChangeEvent:
 		// save the scale
-		lam.scaleX = ev.Scale.X
-		lam.scaleY = ev.Scale.Y
+		lam.scaleX = ev.Scale.Point.X
+		lam.scaleY = ev.Scale.Point.Y
 	// if we move the mouse
 	case events.MouseMoveEvent:
 		// get the entities that look at the mouse
@@ -158,17 +160,17 @@ func (lam *lookAtMouseSystem) Notify(gw *world.World, event interface{}, _ float
 	return nil
 }
 
-func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse position.Position) {
-	pos := position.Get(la.pivot)
+func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse geometry.Position) {
+	pos := geometry.Get.Position(la.pivot)
 
 	dx := mouse.X - pos.X
 	dy := mouse.Y - pos.Y
-	angle := math.Atan2(dy, dx)
+	angle := float32(math.Atan2(float64(dy), float64(dx)))
 
-	ax := la.radius.X * lam.scaleX * math.Cos(angle)
-	ay := la.radius.Y * lam.scaleY * math.Sin(angle)
+	ax := la.radius.X * lam.scaleX * float32(math.Cos(float64(angle)))
+	ay := la.radius.Y * lam.scaleY * float32(math.Sin(float64(angle)))
 
-	np := position.Position{
+	np := geometry.Position{
 		X: pos.X + ax,
 		Y: pos.Y + ay,
 	}
@@ -179,11 +181,11 @@ func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse po
 // system that layout/scale our entities when the screen size change
 type layoutSystem struct{}
 
-func (ls layoutSystem) Update(_ *world.World, _ float64) error {
+func (ls layoutSystem) Update(_ *world.World, _ float32) error {
 	return nil
 }
 
-func (ls *layoutSystem) Notify(_ *world.World, event interface{}, _ float64) error {
+func (ls *layoutSystem) Notify(_ *world.World, event interface{}, _ float32) error {
 	switch ev := event.(type) {
 	// if the screen has change size
 	case events.ScreenSizeChangeEvent:
@@ -198,19 +200,19 @@ func (ls *layoutSystem) Notify(_ *world.World, event interface{}, _ float64) err
 func (ls layoutSystem) positionElements(event events.ScreenSizeChangeEvent) {
 	scale := event.Scale.Max
 	// the nose is in the middle and a bit down
-	nosePos := position.Position{
-		X: float64(event.Current.Width / 2),
-		Y: float64(event.Current.Height/2) + (noseVerticalGap * scale),
+	nosePos := geometry.Position{
+		X: event.Current.Width / 2,
+		Y: event.Current.Height/2 + (noseVerticalGap * scale),
 	}
 
 	// left eye is a bit up left of the nose
-	leftEyePos := position.Position{
+	leftEyePos := geometry.Position{
 		X: nosePos.X - (eyesGap * scale),
 		Y: nosePos.Y - (eyesGap * scale),
 	}
 
 	// right eye is a bit up right of the nose
-	rightEyePos := position.Position{
+	rightEyePos := geometry.Position{
 		X: nosePos.X + (eyesGap * scale),
 		Y: leftEyePos.Y,
 	}
@@ -223,16 +225,16 @@ func (ls layoutSystem) positionElements(event events.ScreenSizeChangeEvent) {
 	ls.setPosAndScale(rightInterior, rightEyePos, scale)
 
 	// the text is bottom center
-	textPos := position.Position{
-		X: float64(event.Current.Width) / 2,
-		Y: float64(event.Current.Height),
+	textPos := geometry.Position{
+		X: event.Current.Width / 2,
+		Y: event.Current.Height,
 	}
 	// update text pos and scale
 	ls.setPosAndScale(bottomText, textPos, scale)
 }
 
 // set the position and scale of the objects
-func (ls layoutSystem) setPosAndScale(ent *entity.Entity, pos position.Position, scale float64) {
+func (ls layoutSystem) setPosAndScale(ent *entity.Entity, pos geometry.Position, scale float32) {
 	// set pos
 	ent.Set(pos)
 

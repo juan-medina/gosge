@@ -30,8 +30,8 @@ import (
 
 type alternateColorSystem struct{}
 
-func (rcs alternateColorSystem) Update(world *world.World, delta float64) error {
-	for _, v := range world.Entities(effects.TYPES.AlternateColor) {
+func (rcs alternateColorSystem) Update(world *world.World, delta float32) error {
+	for _, v := range world.Entities(effects.TYPE.AlternateColor) {
 		ac := effects.Get.AlternateColor(v)
 
 		var clr color.Color
@@ -67,7 +67,7 @@ func (rcs alternateColorSystem) Update(world *world.World, delta float64) error 
 	return nil
 }
 
-func (rcs alternateColorSystem) Notify(_ *world.World, _ interface{}, _ float64) error {
+func (rcs alternateColorSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
 	return nil
 }
 

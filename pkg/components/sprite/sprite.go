@@ -32,8 +32,8 @@ import (
 type Sprite struct {
 	Sheet    string  // Sheet is the Sprite sheet
 	Name     string  // Name is the Sprite name
-	Rotation float64 // Rotation is the Sprite rotation
-	Scale    float64 // Scale is the Sprite scale
+	Rotation float32 // Rotation is the Sprite rotation
+	Scale    float32 // Scale is the Sprite scale
 }
 
 // TYPE is the reflect.Type of the Sprite

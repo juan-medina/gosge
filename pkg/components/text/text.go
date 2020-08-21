@@ -51,8 +51,8 @@ const (
 // Text is a graphical text to drawn on the screen
 type Text struct {
 	String     string     // String is the Text string
-	Size       float64    // Size is the Text size
-	Spacing    float64    // Spacing is the Text spacing
+	Size       float32    // Size is the Text size
+	Spacing    float32    // Spacing is the Text spacing
 	VAlignment VAlignment // VAlignment is the text.VAlignment
 	HAlignment HAlignment // HAlignment is the text.HAlignment
 }

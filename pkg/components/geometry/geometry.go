@@ -20,24 +20,48 @@
  *  THE SOFTWARE.
  */
 
-// Package position handle the components for Position components
-package position
+// Package geometry handle components with geometry concepts
+package geometry
 
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
 	"reflect"
 )
 
-// Position represent an X and Y screen position
-type Position struct {
-	X float64 // The x screen position
-	Y float64 // The y screen position
+// Point represent a x/y coordinate
+type Point struct {
+	X float32 // The x coordinate
+	Y float32 // The y coordinate
 }
 
-// TYPE is the reflect.Type of the Position component
-var TYPE = reflect.TypeOf(Position{})
+// Size represent the size of an object
+type Size struct {
+	Width  float32
+	Height float32
+}
 
-// Get gets a Position from an entity.Entity
-func Get(e *entity.Entity) Position {
-	return e.Get(TYPE).(Position)
+// Position represent an X and Y screen position
+type Position Point
+
+type types struct {
+	// Position is the reflect.Type for geometry.Position
+	Position reflect.Type
+}
+
+// TYPE hold the reflect.Type for our geometry components
+var TYPE = types{
+	Position: reflect.TypeOf(Position{}),
+}
+
+type gets struct {
+	// Position is the reflect.Type for geometry.Position
+	Position func(e *entity.Entity) Position
+}
+
+// Get hold the reflect.Type for our geometry components
+var Get = gets{
+	// Position gets a geometry.Position from a entity.Entity
+	Position: func(e *entity.Entity) Position {
+		return e.Get(TYPE.Position).(Position)
+	},
 }

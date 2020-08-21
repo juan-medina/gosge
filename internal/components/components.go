@@ -24,9 +24,9 @@ package components
 
 // SpriteDef defines an sprite.Sprite
 type SpriteDef struct {
-	Texture string // Texture is the texture file name
-	X       int    // X is the x origin in the texture
-	Y       int    // Y is the y origin in the texture
-	Width   int    // Width is the with of the sprite
-	Height  int    // Height is the height of the sprite
+	Texture string  // Texture is the texture file name
+	X       float32 // X is the x origin in the texture
+	Y       float32 // Y is the y origin in the texture
+	Width   float32 // Width is the with of the sprite
+	Height  float32 // Height is the height of the sprite
 }

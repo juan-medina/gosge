@@ -50,16 +50,16 @@ func (rc Color) Alpha(alpha uint8) Color {
 }
 
 // Blend the Color with a given Color using an scale
-func (rc Color) Blend(other Color, scale float64) Color {
-	r1 := float64(rc.R)
-	g1 := float64(rc.G)
-	b1 := float64(rc.B)
-	a1 := float64(rc.A)
+func (rc Color) Blend(other Color, scale float32) Color {
+	r1 := float32(rc.R)
+	g1 := float32(rc.G)
+	b1 := float32(rc.B)
+	a1 := float32(rc.A)
 
-	r2 := float64(other.R)
-	g2 := float64(other.G)
-	b2 := float64(other.B)
-	a2 := float64(other.A)
+	r2 := float32(other.R)
+	g2 := float32(other.G)
+	b2 := float32(other.B)
+	a2 := float32(other.A)
 
 	r := r1 + ((r2 - r1) * scale)
 	g := g1 + ((g2 - g1) * scale)

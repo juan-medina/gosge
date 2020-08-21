@@ -3,7 +3,7 @@ package systems
 import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/pkg/components/position"
+	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/events"
 	"math"
 )
@@ -31,27 +31,27 @@ import (
  */
 
 type eventSystem struct {
-	tt  float64
+	tt  float32
 	wld *world.World
 	sse events.ScreenSizeChangeEvent
 	mme events.MouseMoveEvent
 }
 
-func (es eventSystem) Notify(_ *world.World, _ interface{}, _ float64) error {
+func (es eventSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
 	return nil
 }
 
 func (es *eventSystem) sendScreenSizeChange() error {
 	w, h := render.GetScreenSize()
-	es.sse.Current.Width = w
-	es.sse.Current.Height = h
+	es.sse.Current.Width = float32(w)
+	es.sse.Current.Height = float32(h)
 
-	sx := float64(es.sse.Current.Width) / float64(es.sse.Original.Width)
-	sy := float64(es.sse.Current.Height) / float64(es.sse.Original.Height)
-	es.sse.Scale.Min = math.Min(sx, sy)
-	es.sse.Scale.Max = math.Max(sx, sy)
-	es.sse.Scale.X = sx
-	es.sse.Scale.Y = sy
+	sx := es.sse.Current.Width / es.sse.Original.Width
+	sy := es.sse.Current.Height / es.sse.Original.Height
+	es.sse.Scale.Min = float32(math.Min(float64(sx), float64(sy)))
+	es.sse.Scale.Max = float32(math.Max(float64(sx), float64(sy)))
+	es.sse.Scale.Point.X = sx
+	es.sse.Scale.Point.Y = sy
 
 	return es.wld.Notify(es.sse)
 }
@@ -69,19 +69,19 @@ func (es *eventSystem) initialize(world *world.World) error {
 
 	w, h := render.GetScreenSize()
 
-	es.sse.Original.Width = w
-	es.sse.Original.Height = h
-	es.sse.Current.Width = w
-	es.sse.Current.Height = h
+	es.sse.Original.Width = float32(w)
+	es.sse.Original.Height = float32(h)
+	es.sse.Current.Width = float32(w)
+	es.sse.Current.Height = float32(h)
 	es.sse.Scale.Min = 1
 	es.sse.Scale.Max = 1
-	es.sse.Scale.X = 1
-	es.sse.Scale.Y = 1
+	es.sse.Scale.Point.X = 1
+	es.sse.Scale.Point.Y = 1
 
 	return es.sendScreenSizeChange()
 }
 
-func (es *eventSystem) Update(world *world.World, delta float64) error {
+func (es *eventSystem) Update(world *world.World, delta float32) error {
 	if es.tt == 0 {
 		if err := es.initialize(world); err != nil {
 			return err
@@ -117,7 +117,7 @@ func (es *eventSystem) Update(world *world.World, delta float64) error {
 func EventSystem() world.System {
 	return &eventSystem{
 		mme: events.MouseMoveEvent{
-			Position: position.Position{
+			Position: geometry.Position{
 				X: -1,
 				Y: -1,
 			},

@@ -27,7 +27,7 @@ import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
-	"github.com/juan-medina/gosge/pkg/components/position"
+	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
@@ -38,9 +38,11 @@ import (
 )
 
 var opt = options.Options{
-	Title:      "Hello Game",
-	Width:      1920,
-	Height:     1080,
+	Title: "Hello Game",
+	Size: geometry.Size{
+		Width:  1920,
+		Height: 1080,
+	},
 	ClearColor: color.Black,
 }
 
@@ -91,8 +93,8 @@ const (
 )
 
 type stickyText struct {
-	size    float64
-	spacing float64
+	size    float32
+	spacing float32
 	stick   stickPosition
 }
 
@@ -104,11 +106,11 @@ func getStickyText(e *entity.Entity) stickyText {
 
 type stickyTextSystem struct{}
 
-func (sts stickyTextSystem) Update(_ *world.World, _ float64) error {
+func (sts stickyTextSystem) Update(_ *world.World, _ float32) error {
 	return nil
 }
 
-func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float64) error {
+func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
 	case events.ScreenSizeChangeEvent:
 		// get all our texts
@@ -123,14 +125,14 @@ func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 			v.Set(txt)
 
 			// calculate position based on current screen size and sticky
-			pos := position.Position{}
+			pos := geometry.Position{}
 			switch st.stick {
 			case stickToCenter:
-				pos.X = float64(e.Current.Width) / 2
-				pos.Y = float64(e.Current.Height) / 2
+				pos.X = e.Current.Width / 2
+				pos.Y = e.Current.Height / 2
 			case stickToBottom:
-				pos.X = float64(e.Current.Width) / 2
-				pos.Y = float64(e.Current.Height)
+				pos.X = e.Current.Width / 2
+				pos.Y = e.Current.Height
 			}
 			v.Set(pos)
 		}
