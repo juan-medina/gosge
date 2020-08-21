@@ -61,6 +61,23 @@ func (rc Solid) Blend(other Solid, scale float32) Solid {
 	return Solid{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
+// GradientDirection is the direction of color.Gradient
+type GradientDirection int
+
+// Directions for a color.Gradient
+//goland:noinspection ALL
+const (
+	GradientHorizontal = GradientDirection(iota) // GradientHorizontal is a horizontal color.Gradient
+	GradientVertical                             // GradientHorizontal is a vertical color.Gradient
+)
+
+// Gradient represents a gradient color
+type Gradient struct {
+	From      Solid             // From what color.Solid the gradient stars
+	To        Solid             // To what color.Solid the gradient ends
+	Direction GradientDirection // Direction is GradientDirection for this color.Gradient
+}
+
 //goland:noinspection GoUnusedGlobalVariable
 var (
 	Black      = Solid{A: 255}                         // Black Color
@@ -93,22 +110,31 @@ var (
 type types struct {
 	// Solid is the reflect.Type for color.Solid
 	Solid reflect.Type
+	// Gradient is the reflect.Type for color.Gradient
+	Gradient reflect.Type
 }
 
 // TYPE hold the reflect.Type for our color components
 var TYPE = types{
-	Solid: reflect.TypeOf(Solid{}),
+	Solid:    reflect.TypeOf(Solid{}),
+	Gradient: reflect.TypeOf(Gradient{}),
 }
 
 type gets struct {
-	// Solid is the reflect.Type for color.Solid
+	// Solid get a color.Solid from a entity.Entity
 	Solid func(e *entity.Entity) Solid
+	// Gradient get a color.Gradient from a entity.Entity
+	Gradient func(e *entity.Entity) Gradient
 }
 
-// Get hold the reflect.Type for our geometry components
+// Get a color component
 var Get = gets{
-	// Position gets a geometry.Position from a entity.Entity
+	// Solid get a color.Solid from a entity.Entity
 	Solid: func(e *entity.Entity) Solid {
 		return e.Get(TYPE.Solid).(Solid)
+	},
+	// Gradient get a color.Gradient from a entity.Entity
+	Gradient: func(e *entity.Entity) Gradient {
+		return e.Get(TYPE.Gradient).(Gradient)
 	},
 }
