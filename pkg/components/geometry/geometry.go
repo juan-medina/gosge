@@ -60,11 +60,11 @@ var TYPE = types{
 }
 
 type gets struct {
-	// Position is the reflect.Type for geometry.Position
+	// Position gets a geometry.Position from a entity.Entity
 	Position func(e *entity.Entity) Position
 }
 
-// Get hold the reflect.Type for our geometry components
+// Get a geometry component
 var Get = gets{
 	// Position gets a geometry.Position from a entity.Entity
 	Position: func(e *entity.Entity) Position {

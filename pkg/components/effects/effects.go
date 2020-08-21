@@ -60,11 +60,11 @@ var TYPE = types{
 }
 
 type gets struct {
-	// AlternateColor is the reflect.Type for effects.AlternateColor
+	// AlternateColor gets a AlternateColor from a entity.Entity
 	AlternateColor func(e *entity.Entity) AlternateColor
 }
 
-// Get hold the reflect.Type for our effects components
+// Get effect component
 var Get = gets{
 	// AlternateColor gets a AlternateColor from a entity.Entity
 	AlternateColor: func(e *entity.Entity) AlternateColor {
