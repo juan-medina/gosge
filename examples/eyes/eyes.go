@@ -117,6 +117,7 @@ func main() {
 	}
 }
 
+// component to make an entity to look at mouse with a pivot
 type lookAtMouse struct {
 	pivot  *entity.Entity
 	radius position.Position
@@ -128,6 +129,7 @@ func getLookAtMouse(e *entity.Entity) lookAtMouse {
 	return e.Get(types.lookAtMouse).(lookAtMouse)
 }
 
+// system that make entities to look at the mouse
 type lookAtMouseSystem struct {
 	scaleX float64
 	scaleY float64
