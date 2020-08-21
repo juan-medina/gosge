@@ -120,7 +120,6 @@ func (s *spriteRenderingSystem) loadSpriteSheetFile(fileName string, sheet *spri
 				texturePath := path.Join(dir, sheet.Atlas.ImagePath)
 				if err = render.LoadTexture(texturePath); err == nil {
 					for _, spr := range sheet.Sprites {
-						fmt.Println(spr.NameID)
 						st[spr.NameID] = components.SpriteDef{
 							Texture: texturePath,
 							X:       spr.TrimRec.X + spr.Position.X,
