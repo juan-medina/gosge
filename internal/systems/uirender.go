@@ -39,9 +39,9 @@ func (ui uiRenderingSystem) Notify(_ *world.World, _ interface{}, _ float64) err
 
 func (ui uiRenderingSystem) Update(world *world.World, _ float64) error {
 	for _, v := range world.Entities(text.TYPE, position.TYPE, color.TYPE) {
-		textCmp := v.Get(text.TYPE).(text.Text)
-		posCmp := v.Get(position.TYPE).(position.Position)
-		colorCmp := v.Get(color.TYPE).(color.Color)
+		textCmp := text.Get(v)
+		posCmp := position.Get(v)
+		colorCmp := color.Get(v)
 
 		render.DrawText(textCmp, posCmp, colorCmp)
 	}

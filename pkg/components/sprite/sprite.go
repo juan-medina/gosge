@@ -23,7 +23,10 @@
 // Package sprite handle the Sprite component
 package sprite
 
-import "reflect"
+import (
+	"github.com/juan-medina/goecs/pkg/entity"
+	"reflect"
+)
 
 // Sprite is a graphic image that will drawn on the screen
 type Sprite struct {
@@ -34,3 +37,8 @@ type Sprite struct {
 
 // TYPE is the reflect.Type of the Sprite
 var TYPE = reflect.TypeOf(Sprite{})
+
+// Get gets a Sprite from a entity.Entity
+func Get(e *entity.Entity) Sprite {
+	return e.Get(TYPE).(Sprite)
+}

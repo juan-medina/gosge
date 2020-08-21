@@ -23,7 +23,10 @@
 // Package text handles the Text component
 package text
 
-import "reflect"
+import (
+	"github.com/juan-medina/goecs/pkg/entity"
+	"reflect"
+)
 
 // HAlignment horizontal alignment for a Text
 type HAlignment int
@@ -56,3 +59,8 @@ type Text struct {
 
 // TYPE is the reflect.Type of the Text component
 var TYPE = reflect.TypeOf(Text{})
+
+// Get gets a Text from an entity.Entity
+func Get(e *entity.Entity) Text {
+	return e.Get(TYPE).(Text)
+}

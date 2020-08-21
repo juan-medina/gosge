@@ -23,7 +23,10 @@
 // Package color handles Color components
 package color
 
-import "reflect"
+import (
+	"github.com/juan-medina/goecs/pkg/entity"
+	"reflect"
+)
 
 // Color represents a RGBA color
 type Color struct {
@@ -35,6 +38,11 @@ type Color struct {
 
 // TYPE is the reflect.type for Color
 var TYPE = reflect.TypeOf(Color{})
+
+// Get gets a Color from an entity.Entity
+func Get(e *entity.Entity) Color {
+	return e.Get(TYPE).(Color)
+}
 
 // Alpha returns a new Color modifying the A component
 func (rc Color) Alpha(alpha uint8) Color {

@@ -23,7 +23,10 @@
 // Package position handle the components for Position components
 package position
 
-import "reflect"
+import (
+	"github.com/juan-medina/goecs/pkg/entity"
+	"reflect"
+)
 
 // Position represent an X and Y screen position
 type Position struct {
@@ -33,3 +36,8 @@ type Position struct {
 
 // TYPE is the reflect.Type of the Position component
 var TYPE = reflect.TypeOf(Position{})
+
+// Get gets a Position from an entity.Entity
+func Get(e *entity.Entity) Position {
+	return e.Get(TYPE).(Position)
+}

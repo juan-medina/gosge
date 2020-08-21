@@ -68,14 +68,14 @@ func setPosAndScale(ent *entity.Entity, pos position.Position, scale float64) {
 
 	if ent.Contains(sprite.TYPE) {
 		// update sprite scale
-		sp := ent.Get(sprite.TYPE).(sprite.Sprite)
+		sp := sprite.Get(ent)
 		sp.Scale = scale
 		ent.Set(sp)
 	}
 
 	if ent.Contains(text.TYPE) {
 		// update text scale
-		tx := ent.Get(text.TYPE).(text.Text)
+		tx := text.Get(ent)
 		tx.Size = textSize * scale
 		tx.Spacing = textSize / 4 * scale
 		ent.Set(tx)
@@ -84,7 +84,6 @@ func setPosAndScale(ent *entity.Entity, pos position.Position, scale float64) {
 
 // layout our entities
 func positionElements(width int, height int, scale float64) {
-
 	// the nose is in the middle and a bit down
 	nosePos := position.Position{
 		X: float64(width / 2),

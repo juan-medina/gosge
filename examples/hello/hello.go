@@ -57,7 +57,11 @@ type stickyText struct {
 	stick   stickPosition
 }
 
-var tp = struct{ stickyText reflect.Type }{stickyText: reflect.TypeOf(stickyText{})}
+var types = struct{ stickyText reflect.Type }{stickyText: reflect.TypeOf(stickyText{})}
+
+func getStickyText(e *entity.Entity) stickyText {
+	return e.Get(types.stickyText).(stickyText)
+}
 
 type stickyTextSystem struct{}
 
@@ -69,10 +73,10 @@ func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 	switch e := event.(type) {
 	case events.ScreenSizeChangeEvent:
 		// get all our texts
-		for _, v := range wld.Entities(text.TYPE, tp.stickyText) {
+		for _, v := range wld.Entities(text.TYPE, types.stickyText) {
 			// get the text components
-			txt := v.Get(text.TYPE).(text.Text)
-			st := v.Get(tp.stickyText).(stickyText)
+			txt := text.Get(v)
+			st := getStickyText(v)
 
 			// change text size & spacing from current scale
 			txt.Size = st.size * e.Scale.Min

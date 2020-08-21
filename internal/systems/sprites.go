@@ -36,12 +36,12 @@ var noTint = color.White
 
 func (s spriteRenderingSystem) Update(world *world.World, _ float64) error {
 	for _, v := range world.Entities(sprite.TYPE, position.TYPE) {
-		spr := v.Get(sprite.TYPE).(sprite.Sprite)
-		pos := v.Get(position.TYPE).(position.Position)
+		spr := sprite.Get(v)
+		pos := position.Get(v)
 
 		var tint color.Color
 		if v.Contains(color.TYPE) {
-			tint = v.Get(color.TYPE).(color.Color)
+			tint = color.Get(v)
 		} else {
 			tint = noTint
 		}

@@ -24,6 +24,7 @@
 package effects
 
 import (
+	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"reflect"
 )
@@ -56,4 +57,17 @@ type types struct {
 // TYPES hold the reflect.Type for our effects components
 var TYPES = types{
 	AlternateColor: reflect.TypeOf(AlternateColor{}),
+}
+
+type gets struct {
+	// AlternateColor is the reflect.Type for effects.AlternateColor
+	AlternateColor func(e *entity.Entity) AlternateColor
+}
+
+// Get hold the reflect.Type for our effects components
+var Get = gets{
+	// AlternateColor gets a AlternateColor from a entity.Entity
+	AlternateColor: func(e *entity.Entity) AlternateColor {
+		return e.Get(TYPES.AlternateColor).(AlternateColor)
+	},
 }
