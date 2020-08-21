@@ -20,22 +20,13 @@
  *  THE SOFTWARE.
  */
 
-// Package engine contains the definition of the Engine
-package engine
+package components
 
-import (
-	"github.com/juan-medina/goecs/pkg/world"
-)
-
-// Engine is the interface for the game engine
-type Engine interface {
-	// World returns the game world.World
-	World() *world.World
-	// LoadTexture preloads a texture
-	LoadTexture(fileName string) error
-	// LoadSpriteSheet preloads a sprite.Sprite sheet
-	LoadSpriteSheet(fileName string) error
+// SpriteDef defines an sprite.Sprite
+type SpriteDef struct {
+	Texture string // Texture is the texture file name
+	X       int    // X is the x origin in the texture
+	Y       int    // Y is the y origin in the texture
+	Width   int    // Width is the with of the sprite
+	Height  int    // Height is the height of the sprite
 }
-
-// InitFunc is a function that will get call for our game to load
-type InitFunc func(eng Engine) error

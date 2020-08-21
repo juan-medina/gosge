@@ -57,6 +57,11 @@ type engineImpl struct {
 	status    engineStatus
 	init      engine.InitFunc
 	frameTime float64
+	spriteRS  systems.SpriteRendering
+}
+
+func (ei *engineImpl) LoadSpriteSheet(fileName string) error {
+	return ei.spriteRS.LoadSpriteSheet(fileName)
 }
 
 func (ei *engineImpl) LoadTexture(fileName string) error {
@@ -82,10 +87,11 @@ func (ei *engineImpl) Notify(_ *world.World, event interface{}, _ float64) error
 // New return a engine internal implementation
 func New(opt options.Options, init engine.InitFunc) Impl {
 	return &engineImpl{
-		opt:    opt,
-		gWorld: world.New(),
-		status: statusInitializing,
-		init:   init,
+		opt:      opt,
+		gWorld:   world.New(),
+		status:   statusInitializing,
+		init:     init,
+		spriteRS: systems.SpriteRenderingSystem(),
 	}
 }
 
@@ -99,7 +105,7 @@ func (ei *engineImpl) initialize() error {
 		ei.gWorld.AddSystem(ei)
 		ei.gWorld.AddSystem(systems.EventSystem())
 		ei.gWorld.AddSystem(systems.AlternateColorSystem())
-		ei.gWorld.AddSystemToGroup(systems.SpriteRenderingSystem(), renderingGroup)
+		ei.gWorld.AddSystemToGroup(ei.spriteRS, renderingGroup)
 		ei.gWorld.AddSystemToGroup(systems.UIRenderingSystem(), uiGroup)
 
 		ei.status = statusRunning

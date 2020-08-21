@@ -30,9 +30,10 @@ import (
 
 // Sprite is a graphic image that will drawn on the screen
 type Sprite struct {
-	FileName string  // FileName is the texture file name
+	Sheet    string  // Sheet is the Sprite sheet
+	Name     string  // Name is the Sprite name
 	Rotation float64 // Rotation is the Sprite rotation
-	Scale    float64 // Scale is the Sprite Scale
+	Scale    float64 // Scale is the Sprite scale
 }
 
 // TYPE is the reflect.Type of the Sprite

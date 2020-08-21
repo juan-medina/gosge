@@ -26,6 +26,7 @@ package render
 import (
 	"fmt"
 	"github.com/gen2brain/raylib-go/raylib"
+	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/position"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
@@ -140,21 +141,29 @@ func UnloadAllTextures() {
 }
 
 // DrawSprite draws a sprite.Sprite in the given position.Position with the tint color.Color
-func DrawSprite(sprite sprite.Sprite, pos position.Position, tint color.Color) error {
-	if val, ok := textureHold[sprite.FileName]; ok {
+func DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos position.Position, tint color.Color) error {
+	if val, ok := textureHold[def.Texture]; ok {
 		scale := float32(sprite.Scale)
-		px := float32(val.Width) / 2
-		py := float32(val.Height) / 2
-		vec := rl.Vector2{
-			X: float32(pos.X) - (px * scale),
-			Y: float32(pos.Y) - (py * scale),
-		}
+		px := float32(def.Width) / 2
+		py := float32(def.Height) / 2
 		rc := color2RayColor(tint)
 		rotation := float32(sprite.Rotation)
-		rl.DrawTextureEx(val, vec, rotation, scale, rc)
+		sourceRec := rl.Rectangle{
+			X:      float32(def.X),
+			Y:      float32(def.Y),
+			Width:  float32(def.Width),
+			Height: float32(def.Height),
+		}
+		destRec := rl.Rectangle{
+			X:      float32(pos.X) - (px * scale),
+			Y:      float32(pos.Y) - (py * scale),
+			Width:  float32(def.Width) * scale,
+			Height: float32(def.Height) * scale,
+		}
+		origin := rl.Vector2{X: 0, Y: 0}
+		rl.DrawTexturePro(val, sourceRec, destRec, origin, rotation, rc)
 	} else {
-		return fmt.Errorf("error drawing sprite, texture not found: %q", sprite.FileName)
+		return fmt.Errorf("error drawing sprite, texture not found: %q", sprite.Name)
 	}
-
 	return nil
 }

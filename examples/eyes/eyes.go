@@ -136,14 +136,8 @@ func (ls layoutSystem) Notify(_ *world.World, event interface{}, _ float64) erro
 }
 
 func loadGame(eng engine.Engine) error {
-	// pre load texture
-	if err := eng.LoadTexture("resources/nose.png"); err != nil {
-		return err
-	}
-	if err := eng.LoadTexture("resources/eye_exterior.png"); err != nil {
-		return err
-	}
-	if err := eng.LoadTexture("resources/eye_interior.png"); err != nil {
+	// pre load sprites
+	if err := eng.LoadSpriteSheet("resources/gopher.json"); err != nil {
 		return err
 	}
 
@@ -151,11 +145,11 @@ func loadGame(eng engine.Engine) error {
 	gw := eng.World()
 
 	// add the sprites
-	nose = gw.Add(entity.New(sprite.Sprite{FileName: "resources/nose.png"}))
-	leftExterior = gw.Add(entity.New(sprite.Sprite{FileName: "resources/eye_exterior.png"}))
-	leftInterior = gw.Add(entity.New(sprite.Sprite{FileName: "resources/eye_interior.png"}))
-	rightExterior = gw.Add(entity.New(sprite.Sprite{FileName: "resources/eye_exterior.png"}))
-	rightInterior = gw.Add(entity.New(sprite.Sprite{FileName: "resources/eye_interior.png"}))
+	nose = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "nose"}))
+	leftExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior"}))
+	leftInterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior"}))
+	rightExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior"}))
+	rightInterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior"}))
 
 	// add our text
 	bottomText = gw.Add(entity.New(
