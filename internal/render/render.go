@@ -144,21 +144,21 @@ func UnloadAllTextures() {
 func DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Position, tint color.Color) error {
 	if val, ok := textureHold[def.Texture]; ok {
 		scale := sprite.Scale
-		px := def.Width / 2
-		py := def.Height / 2
+		px := def.Origin.Size.Width / 2
+		py := def.Origin.Size.Height / 2
 		rc := color2RayColor(tint)
 		rotation := sprite.Rotation
 		sourceRec := rl.Rectangle{
-			X:      def.X,
-			Y:      def.Y,
-			Width:  def.Width,
-			Height: def.Height,
+			X:      def.Origin.From.X,
+			Y:      def.Origin.From.Y,
+			Width:  def.Origin.Size.Width,
+			Height: def.Origin.Size.Height,
 		}
 		destRec := rl.Rectangle{
 			X:      pos.X - (px * scale),
 			Y:      pos.Y - (py * scale),
-			Width:  def.Width * scale,
-			Height: def.Height * scale,
+			Width:  def.Origin.Size.Width * scale,
+			Height: def.Origin.Size.Height * scale,
 		}
 		origin := rl.Vector2{X: 0, Y: 0}
 		rl.DrawTexturePro(val, sourceRec, destRec, origin, rotation, rc)

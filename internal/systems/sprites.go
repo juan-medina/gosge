@@ -122,10 +122,16 @@ func (s *spriteRenderingSystem) loadSpriteSheetFile(fileName string, sheet *spri
 					for _, spr := range sheet.Sprites {
 						st[spr.NameID] = components.SpriteDef{
 							Texture: texturePath,
-							X:       spr.TrimRec.X + spr.Position.X,
-							Y:       spr.TrimRec.Y + spr.Position.Y,
-							Width:   spr.TrimRec.Width,
-							Height:  spr.TrimRec.Height,
+							Origin: geometry.Rect{
+								From: geometry.Point{
+									X: spr.TrimRec.X + spr.Position.X,
+									Y: spr.TrimRec.Y + spr.Position.Y,
+								},
+								Size: geometry.Size{
+									Width:  spr.TrimRec.Width,
+									Height: spr.TrimRec.Height,
+								},
+							},
 						}
 					}
 				}

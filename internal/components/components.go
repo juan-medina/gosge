@@ -22,11 +22,10 @@
 
 package components
 
+import "github.com/juan-medina/gosge/pkg/components/geometry"
+
 // SpriteDef defines an sprite.Sprite
 type SpriteDef struct {
-	Texture string  // Texture is the texture file name
-	X       float32 // X is the x origin in the texture
-	Y       float32 // Y is the y origin in the texture
-	Width   float32 // Width is the with of the sprite
-	Height  float32 // Height is the height of the sprite
+	Texture string        // Texture is the texture file name
+	Origin  geometry.Rect // Origin is where the sprite is on the texture
 }

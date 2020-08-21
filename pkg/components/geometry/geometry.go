@@ -36,8 +36,14 @@ type Point struct {
 
 // Size represent the size of an object
 type Size struct {
-	Width  float32
-	Height float32
+	Width  float32 // Width is vertical length of the size
+	Height float32 // Height is the horizontal length of the size
+}
+
+// Rect is a rectangular area
+type Rect struct {
+	From Point // From is the origin of the area
+	Size Size  // Size is the size of the area
 }
 
 // Position represent an X and Y screen position
