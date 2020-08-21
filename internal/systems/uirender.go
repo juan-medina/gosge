@@ -38,10 +38,10 @@ func (ui uiRenderingSystem) Notify(_ *world.World, _ interface{}, _ float32) err
 }
 
 func (ui uiRenderingSystem) Update(world *world.World, _ float32) error {
-	for _, v := range world.Entities(text.TYPE, geometry.TYPE.Position, color.TYPE) {
+	for _, v := range world.Entities(text.TYPE, geometry.TYPE.Position, color.TYPE.Solid) {
 		textCmp := text.Get(v)
 		posCmp := geometry.Get.Position(v)
-		colorCmp := color.Get(v)
+		colorCmp := color.Get.Solid(v)
 
 		render.DrawText(textCmp, posCmp, colorCmp)
 	}

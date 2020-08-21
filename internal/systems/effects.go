@@ -34,7 +34,7 @@ func (rcs alternateColorSystem) Update(world *world.World, delta float32) error 
 	for _, v := range world.Entities(effects.TYPE.AlternateColor) {
 		ac := effects.Get.AlternateColor(v)
 
-		var clr color.Color
+		var clr color.Solid
 
 		switch ac.State {
 		case effects.NoState, effects.StateStopped:

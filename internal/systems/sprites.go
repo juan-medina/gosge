@@ -79,9 +79,9 @@ func (s spriteRenderingSystem) Update(world *world.World, _ float32) error {
 		spr := sprite.Get(v)
 		pos := geometry.Get.Position(v)
 
-		var tint color.Color
-		if v.Contains(color.TYPE) {
-			tint = color.Get(v)
+		var tint color.Solid
+		if v.Contains(color.TYPE.Solid) {
+			tint = color.Get.Solid(v)
 		} else {
 			tint = noTint
 		}

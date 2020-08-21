@@ -41,8 +41,8 @@ const (
 
 // AlternateColor effects will cycle between two colors From and To in given Time with an Optional Delay
 type AlternateColor struct {
-	From    color.Color // From is color.Color that we start from
-	To      color.Color // To is the color.Color that we will end to
+	From    color.Solid // From is color.Solid that we start from
+	To      color.Solid // To is the color.Solid that we will end to
 	Time    float32     // Time is how long will be get to go from From to To in seconds
 	Delay   float32     // Delay is how long will stay in the final To until switching again to To
 	Current float32     // Current time that the effects is running

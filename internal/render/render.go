@@ -71,7 +71,7 @@ func GetScreenSize() (width int, height int) {
 }
 
 // DrawText will draw a text.Text in the given geometry.Position with the correspondent color.Color
-func DrawText(txt text.Text, pos geometry.Position, color color.Color) {
+func DrawText(txt text.Text, pos geometry.Position, color color.Solid) {
 	font := rl.GetFontDefault()
 
 	vec := rl.Vector2{
@@ -107,7 +107,7 @@ func DrawText(txt text.Text, pos geometry.Position, color color.Color) {
 	rl.DrawTextEx(font, txt.String, vec, txt.Size, txt.Spacing, color2RayColor(color))
 }
 
-func color2RayColor(color color.Color) rl.Color {
+func color2RayColor(color color.Solid) rl.Color {
 	return rl.NewColor(color.R, color.G, color.B, color.A)
 }
 
@@ -141,7 +141,7 @@ func UnloadAllTextures() {
 }
 
 // DrawSprite draws a sprite.Sprite in the given geometry.Position with the tint color.Color
-func DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Position, tint color.Color) error {
+func DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Position, tint color.Solid) error {
 	if val, ok := textureHold[def.Texture]; ok {
 		scale := sprite.Scale
 		px := def.Origin.Size.Width / 2

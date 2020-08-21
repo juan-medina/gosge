@@ -32,5 +32,5 @@ import (
 type Options struct {
 	Title      string        // Title is the game title
 	Size       geometry.Size // Size is the screen size
-	ClearColor color.Color   // ClearColor is the background color.Color
+	ClearColor color.Solid   // ClearColor is the background color.Color
 }
