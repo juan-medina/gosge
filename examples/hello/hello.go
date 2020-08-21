@@ -44,6 +44,45 @@ var opt = options.Options{
 	ClearColor: color.Black,
 }
 
+func loadGame(eng engine.Engine) error {
+	gWorld := eng.World()
+	gWorld.Add(entity.New(
+		text.Text{
+			String:     "Hello World",
+			HAlignment: text.CenterHAlignment,
+			VAlignment: text.MiddleVAlignment,
+		},
+		effects.AlternateColor{
+			Time:  2,
+			Delay: 1,
+			From:  color.Red,
+			To:    color.Yellow,
+		},
+		stickyText{size: 300, spacing: 10, stick: stickToCenter},
+	))
+	gWorld.Add(entity.New(
+		text.Text{
+			String:     "press <ESC> to close",
+			HAlignment: text.CenterHAlignment,
+			VAlignment: text.BottomVAlignment,
+		},
+		effects.AlternateColor{
+			Time: .25,
+			From: color.White,
+			To:   color.White.Alpha(0),
+		},
+		stickyText{size: 60, spacing: 10, stick: stickToBottom},
+	))
+	gWorld.AddSystem(stickyTextSystem{})
+	return nil
+}
+
+func main() {
+	if err := game.Run(opt, loadGame); err != nil {
+		log.Fatalf("error running the game: %v", err)
+	}
+}
+
 type stickPosition int
 
 const (
@@ -98,43 +137,4 @@ func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float6
 	}
 
 	return nil
-}
-
-func loadGame(eng engine.Engine) error {
-	gWorld := eng.World()
-	gWorld.Add(entity.New(
-		text.Text{
-			String:     "Hello World",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.MiddleVAlignment,
-		},
-		effects.AlternateColor{
-			Time:  2,
-			Delay: 1,
-			From:  color.Red,
-			To:    color.Yellow,
-		},
-		stickyText{size: 300, spacing: 10, stick: stickToCenter},
-	))
-	gWorld.Add(entity.New(
-		text.Text{
-			String:     "press <ESC> to close",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.BottomVAlignment,
-		},
-		effects.AlternateColor{
-			Time: .25,
-			From: color.White,
-			To:   color.White.Alpha(0),
-		},
-		stickyText{size: 60, spacing: 10, stick: stickToBottom},
-	))
-	gWorld.AddSystem(stickyTextSystem{})
-	return nil
-}
-
-func main() {
-	if err := game.Run(opt, loadGame); err != nil {
-		log.Fatalf("error running the game: %v", err)
-	}
 }
