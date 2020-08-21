@@ -62,65 +62,9 @@ const (
 	textSize        = 40
 )
 
-// set the position and scale of the objects
-func setPosAndScale(ent *entity.Entity, pos position.Position, scale float64) {
-	// set pos
-	ent.Set(pos)
-
-	if ent.Contains(sprite.TYPE) {
-		// update sprite scale
-		sp := sprite.Get(ent)
-		sp.Scale = scale
-		ent.Set(sp)
-	}
-
-	if ent.Contains(text.TYPE) {
-		// update text scale
-		tx := text.Get(ent)
-		tx.Size = textSize * scale
-		tx.Spacing = textSize / 4 * scale
-		ent.Set(tx)
-	}
-}
-
-// layout our entities
-func positionElements(width int, height int, scale float64) {
-	// the nose is in the middle and a bit down
-	nosePos := position.Position{
-		X: float64(width / 2),
-		Y: float64(height/2) + (noseVerticalGap * scale),
-	}
-
-	// left eye is a bit up left of the nose
-	leftEyePos := position.Position{
-		X: nosePos.X - (eyesGap * scale),
-		Y: nosePos.Y - (eyesGap * scale),
-	}
-
-	// right eye is a bit up right of the nose
-	rightEyePos := position.Position{
-		X: nosePos.X + (eyesGap * scale),
-		Y: leftEyePos.Y,
-	}
-
-	// update sprites pos and scale
-	setPosAndScale(nose, nosePos, scale)
-	setPosAndScale(leftExterior, leftEyePos, scale)
-	setPosAndScale(leftInterior, leftEyePos, scale)
-	setPosAndScale(rightExterior, rightEyePos, scale)
-	setPosAndScale(rightInterior, rightEyePos, scale)
-
-	// the text is bottom center
-	textPos := position.Position{
-		X: float64(width) / 2,
-		Y: float64(height),
-	}
-	// update text pos and scale
-	setPosAndScale(bottomText, textPos, scale)
-}
-
 type layoutSystem struct {
 	lastSize events.ScreenSizeChangeEvent
+	mousePos events.MouseMoveEvent
 }
 
 func (ls layoutSystem) Update(_ *world.World, _ float64) error {
@@ -132,13 +76,76 @@ func (ls *layoutSystem) Notify(_ *world.World, event interface{}, _ float64) err
 	// if the screen has change size
 	case events.ScreenSizeChangeEvent:
 		// change layout
-		positionElements(ev.Current.Width, ev.Current.Height, ev.Scale.Max)
 		ls.lastSize = ev
+		ls.positionElements()
 	case events.MouseMoveEvent:
-		fmt.Printf("mouse move :%f, %f\n", ev.X/ls.lastSize.Scale.Y, ev.Y/ls.lastSize.Scale.Y)
+		ls.mousePos = ev
+		ls.moveEyes()
 	}
 
 	return nil
+}
+
+// move eyes
+func (ls layoutSystem) moveEyes() {
+	fmt.Printf("mouse move :%f, %f\n", ls.mousePos.X/ls.lastSize.Scale.Y, ls.mousePos.Y/ls.lastSize.Scale.Y)
+}
+
+// layout our entities
+func (ls layoutSystem) positionElements() {
+	// the nose is in the middle and a bit down
+	nosePos := position.Position{
+		X: float64(ls.lastSize.Current.Width / 2),
+		Y: float64(ls.lastSize.Current.Height/2) + (noseVerticalGap * ls.lastSize.Scale.Max),
+	}
+
+	// left eye is a bit up left of the nose
+	leftEyePos := position.Position{
+		X: nosePos.X - (eyesGap * ls.lastSize.Scale.Max),
+		Y: nosePos.Y - (eyesGap * ls.lastSize.Scale.Max),
+	}
+
+	// right eye is a bit up right of the nose
+	rightEyePos := position.Position{
+		X: nosePos.X + (eyesGap * ls.lastSize.Scale.Max),
+		Y: leftEyePos.Y,
+	}
+
+	// update sprites pos and scale
+	ls.setPosAndScale(nose, nosePos)
+	ls.setPosAndScale(leftExterior, leftEyePos)
+	ls.setPosAndScale(leftInterior, leftEyePos)
+	ls.setPosAndScale(rightExterior, rightEyePos)
+	ls.setPosAndScale(rightInterior, rightEyePos)
+
+	// the text is bottom center
+	textPos := position.Position{
+		X: float64(ls.lastSize.Current.Width) / 2,
+		Y: float64(ls.lastSize.Current.Height),
+	}
+	// update text pos and scale
+	ls.setPosAndScale(bottomText, textPos)
+}
+
+// set the position and scale of the objects
+func (ls layoutSystem) setPosAndScale(ent *entity.Entity, pos position.Position) {
+	// set pos
+	ent.Set(pos)
+
+	if ent.Contains(sprite.TYPE) {
+		// update sprite scale
+		sp := sprite.Get(ent)
+		sp.Scale = ls.lastSize.Scale.Max
+		ent.Set(sp)
+	}
+
+	if ent.Contains(text.TYPE) {
+		// update text scale
+		tx := text.Get(ent)
+		tx.Size = textSize * ls.lastSize.Scale.Max
+		tx.Spacing = textSize / 4 * ls.lastSize.Scale.Max
+		ent.Set(tx)
+	}
 }
 
 func loadGame(eng engine.Engine) error {
