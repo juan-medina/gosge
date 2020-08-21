@@ -23,6 +23,8 @@
 // Package events contain the events for our engine
 package events
 
+import "github.com/juan-medina/gosge/pkg/components/position"
+
 // GameCloseEvent is an event that indicates that game need to close
 type GameCloseEvent struct{}
 
@@ -45,4 +47,9 @@ type ScreenSizeChangeEvent struct {
 		Min float64 // Min is the minimum scale between X and Y
 		Max float64 // Max is the maximum scale between X and Y
 	}
+}
+
+// MouseMoveEvent is an event that indicates that the mouse is moving
+type MouseMoveEvent struct {
+	position.Position
 }

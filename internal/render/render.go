@@ -167,3 +167,9 @@ func DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos position.Pos
 	}
 	return nil
 }
+
+// GetMousePosition returns the current position of the mouse
+func GetMousePosition() (x, y float64) {
+	pos := rl.GetMousePosition()
+	return float64(pos.X), float64(pos.Y)
+}

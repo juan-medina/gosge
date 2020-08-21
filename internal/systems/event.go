@@ -3,6 +3,7 @@ package systems
 import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/render"
+	"github.com/juan-medina/gosge/pkg/components/position"
 	"github.com/juan-medina/gosge/pkg/events"
 	"math"
 )
@@ -31,8 +32,9 @@ import (
 
 type eventSystem struct {
 	tt  float64
-	sse events.ScreenSizeChangeEvent
 	wld *world.World
+	sse events.ScreenSizeChangeEvent
+	mme events.MouseMoveEvent
 }
 
 func (es eventSystem) Notify(_ *world.World, _ interface{}, _ float64) error {
@@ -56,6 +58,10 @@ func (es *eventSystem) sendScreenSizeChange() error {
 
 func (es eventSystem) sendGameClose() error {
 	return es.wld.Notify(es.sse)
+}
+
+func (es eventSystem) sendMouseMove() error {
+	return es.wld.Notify(es.mme)
 }
 
 func (es *eventSystem) initialize(world *world.World) error {
@@ -94,11 +100,27 @@ func (es *eventSystem) Update(world *world.World, delta float64) error {
 		}
 	}
 
+	x, y := render.GetMousePosition()
+	if es.mme.X != x || es.mme.Y != y {
+		es.mme.X = x
+		es.mme.Y = y
+		if err := es.sendMouseMove(); err != nil {
+			return err
+		}
+	}
+
 	es.tt += delta
 	return nil
 }
 
 // EventSystem returns a world.System that will handle events
 func EventSystem() world.System {
-	return &eventSystem{}
+	return &eventSystem{
+		mme: events.MouseMoveEvent{
+			Position: position.Position{
+				X: -1,
+				Y: -1,
+			},
+		},
+	}
 }

@@ -23,6 +23,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
@@ -118,18 +119,23 @@ func positionElements(width int, height int, scale float64) {
 	setPosAndScale(bottomText, textPos, scale)
 }
 
-type layoutSystem struct{}
+type layoutSystem struct {
+	lastSize events.ScreenSizeChangeEvent
+}
 
 func (ls layoutSystem) Update(_ *world.World, _ float64) error {
 	return nil
 }
 
-func (ls layoutSystem) Notify(_ *world.World, event interface{}, _ float64) error {
+func (ls *layoutSystem) Notify(_ *world.World, event interface{}, _ float64) error {
 	switch ev := event.(type) {
 	// if the screen has change size
 	case events.ScreenSizeChangeEvent:
 		// change layout
 		positionElements(ev.Current.Width, ev.Current.Height, ev.Scale.Max)
+		ls.lastSize = ev
+	case events.MouseMoveEvent:
+		fmt.Printf("mouse move :%f, %f\n", ev.X/ls.lastSize.Scale.Y, ev.Y/ls.lastSize.Scale.Y)
 	}
 
 	return nil
@@ -162,7 +168,7 @@ func loadGame(eng engine.Engine) error {
 	))
 
 	// add our layout system
-	gw.AddSystem(layoutSystem{})
+	gw.AddSystem(&layoutSystem{})
 
 	return nil
 }
