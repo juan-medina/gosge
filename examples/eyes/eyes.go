@@ -200,18 +200,18 @@ func (ls layoutSystem) positionElements(event events.ScreenSizeChangeEvent) {
 	// the nose is in the middle and a bit down
 	nosePos := position.Position{
 		X: float64(event.Current.Width / 2),
-		Y: float64(event.Current.Height/2) + (noseVerticalGap * event.Scale.Max),
+		Y: float64(event.Current.Height/2) + (noseVerticalGap * scale),
 	}
 
 	// left eye is a bit up left of the nose
 	leftEyePos := position.Position{
-		X: nosePos.X - (eyesGap * event.Scale.Max),
-		Y: nosePos.Y - (eyesGap * event.Scale.Max),
+		X: nosePos.X - (eyesGap * scale),
+		Y: nosePos.Y - (eyesGap * scale),
 	}
 
 	// right eye is a bit up right of the nose
 	rightEyePos := position.Position{
-		X: nosePos.X + (eyesGap * event.Scale.Max),
+		X: nosePos.X + (eyesGap * scale),
 		Y: leftEyePos.Y,
 	}
 
