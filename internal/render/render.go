@@ -29,6 +29,7 @@ import (
 	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/options"
@@ -172,4 +173,32 @@ func DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Pos
 func GetMousePosition() (x, y float32) {
 	pos := rl.GetMousePosition()
 	return pos.X, pos.Y
+}
+
+// DrawSolidBox draws a solid box with an color.Solid and a scale
+func DrawSolidBox(pos geometry.Position, box shapes.Box, solid color.Solid) {
+	rec := rl.Rectangle{
+		X:      pos.X,
+		Y:      pos.Y,
+		Width:  box.Size.Width * box.Scale,
+		Height: box.Size.Height * box.Scale,
+	}
+
+	rl.DrawRectangleRec(rec, color2RayColor(solid))
+}
+
+// DrawGradientBox draws a solid box with an color.Solid and a scale
+func DrawGradientBox(pos geometry.Position, box shapes.Box, gradient color.Gradient) {
+	x := int32(pos.X)
+	y := int32(pos.Y)
+	w := int32(box.Size.Width * box.Scale)
+	h := int32(box.Size.Height * box.Scale)
+	c1 := color2RayColor(gradient.From)
+	c2 := color2RayColor(gradient.To)
+
+	if gradient.Direction == color.GradientHorizontal {
+		rl.DrawRectangleGradientH(x, y, w, h, c1, c2)
+	} else {
+		rl.DrawRectangleGradientV(x, y, w, h, c1, c2)
+	}
 }

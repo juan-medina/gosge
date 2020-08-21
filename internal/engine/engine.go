@@ -111,6 +111,7 @@ func (ei *engineImpl) initialize() error {
 		ei.gWorld.AddSystem(systems.EventSystem())
 		ei.gWorld.AddSystem(systems.AlternateColorSystem())
 		ei.gWorld.AddSystemToGroup(ei.spriteRS, renderingGroup)
+		ei.gWorld.AddSystemToGroup(systems.ShapesRenderingSystem(), renderingGroup)
 		ei.gWorld.AddSystemToGroup(systems.UIRenderingSystem(), uiGroup)
 
 		ei.status = statusRunning

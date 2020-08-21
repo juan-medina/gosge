@@ -26,7 +26,9 @@ import (
 	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
@@ -56,13 +58,23 @@ var (
 	rightInterior *entity.Entity
 	rightExterior *entity.Entity
 	bottomText    *entity.Entity
+	dizzyBar      *entity.Entity
+	dizzyBarEmpty *entity.Entity
+	dizzyText     *entity.Entity
 )
 
 // game constants
 const (
 	noseVerticalGap = 300
 	eyesGap         = 400
-	textSize        = 40
+	textSmallSize   = 40
+	textBigSize     = 70
+	dizzyBarWith    = 1500
+	dizzyBarHeight  = 100
+	dizzyBarGap     = 50
+	maxDizzy        = 2.5
+	dizzyGainRate   = 6
+	dizzyReduceRate = 1
 )
 
 func loadGame(eng engine.Engine) error {
@@ -107,10 +119,38 @@ func loadGame(eng engine.Engine) error {
 		color.Black,
 	))
 
+	// Add the dizzy bar
+	dizzyBar = gw.Add(entity.New(
+		shapes.Box{},
+		color.Gradient{From: color.Green, To: color.Red},
+	))
+
+	dizzyBarEmpty = gw.Add(entity.New(
+		shapes.Box{},
+		color.Black,
+	))
+
+	// add the dizzy text
+	dizzyText = gw.Add(entity.New(
+		text.Text{
+			String:     "Dizzy! Level",
+			HAlignment: text.CenterHAlignment,
+			VAlignment: text.MiddleVAlignment,
+		},
+		effects.AlternateColor{
+			Time:  0.25,
+			Delay: 0.25,
+			From:  color.Red,
+			To:    color.Yellow,
+		},
+	))
+
 	// add our layout system
 	gw.AddSystem(&layoutSystem{})
 	// add our look at mouse system
 	gw.AddSystem(&lookAtMouseSystem{})
+	// add our dizzy bar system
+	gw.AddSystem(&dizzyBarSystem{})
 
 	return nil
 }
@@ -194,7 +234,6 @@ func (ls *layoutSystem) Notify(_ *world.World, event interface{}, _ float32) err
 		// change layout
 		ls.positionElements(ev)
 	}
-
 	return nil
 }
 
@@ -220,11 +259,11 @@ func (ls layoutSystem) positionElements(event events.ScreenSizeChangeEvent) {
 	}
 
 	// update sprites pos and scale
-	ls.setPosAndScale(nose, nosePos, scale)
-	ls.setPosAndScale(leftExterior, leftEyePos, scale)
-	ls.setPosAndScale(leftInterior, leftEyePos, scale)
-	ls.setPosAndScale(rightExterior, rightEyePos, scale)
-	ls.setPosAndScale(rightInterior, rightEyePos, scale)
+	ls.setPosAndScaleSprite(nose, nosePos, scale)
+	ls.setPosAndScaleSprite(leftExterior, leftEyePos, scale)
+	ls.setPosAndScaleSprite(leftInterior, leftEyePos, scale)
+	ls.setPosAndScaleSprite(rightExterior, rightEyePos, scale)
+	ls.setPosAndScaleSprite(rightInterior, rightEyePos, scale)
 
 	// the text is bottom center
 	textPos := geometry.Position{
@@ -232,26 +271,90 @@ func (ls layoutSystem) positionElements(event events.ScreenSizeChangeEvent) {
 		Y: event.Current.Height,
 	}
 	// update text pos and scale
-	ls.setPosAndScale(bottomText, textPos, scale)
+	ls.setPosAndScaleText(bottomText, textPos, scale, textSmallSize)
+
+	box := shapes.Get.Box(dizzyBar)
+	box.Size.Width = dizzyBarWith
+	box.Size.Height = dizzyBarHeight
+	box.Scale = scale
+
+	dizzyBarPosition := geometry.Position{
+		X: (event.Current.Width - (box.Size.Width * scale)) / 2,
+		Y: dizzyBarGap * scale,
+	}
+	dizzyBar.Set(dizzyBarPosition)
+	dizzyBar.Set(box)
+
+	dizzyTextPosition := geometry.Position{
+		X: event.Current.Width / 2,
+		Y: dizzyBarPosition.Y + (box.Size.Height / 2 * scale),
+	}
+
+	ls.setPosAndScaleText(dizzyText, dizzyTextPosition, scale, textBigSize)
 }
 
 // set the position and scale of the objects
-func (ls layoutSystem) setPosAndScale(ent *entity.Entity, pos geometry.Position, scale float32) {
+func (ls layoutSystem) setPosAndScaleSprite(ent *entity.Entity, pos geometry.Position, scale float32) {
 	// set pos
 	ent.Set(pos)
 
-	if ent.Contains(sprite.TYPE) {
-		// update sprite scale
-		sp := sprite.Get(ent)
-		sp.Scale = scale
-		ent.Set(sp)
+	// update sprite scale
+	sp := sprite.Get(ent)
+	sp.Scale = scale
+	ent.Set(sp)
+
+}
+
+// set the position and scale of the objects
+func (ls layoutSystem) setPosAndScaleText(ent *entity.Entity, pos geometry.Position, size float32, scale float32) {
+	// set pos
+	ent.Set(pos)
+
+	// update text scale
+	tx := text.Get(ent)
+	tx.Size = size * scale
+	tx.Spacing = size / 4 * scale
+	ent.Set(tx)
+
+}
+
+type dizzyBarSystem struct {
+	dizzy    float32
+	lasMouse geometry.Position
+}
+
+func (dbs *dizzyBarSystem) Update(_ *world.World, delta float32) error {
+	dbs.dizzy = float32(math.Max(float64(dbs.dizzy-(delta/dizzyReduceRate)), 0))
+	percent := 1 - (dbs.dizzy / maxDizzy)
+
+	if dizzyBar.Contains(geometry.TYPE.Position) {
+		dizzyBarPosition := geometry.Get.Position(dizzyBar)
+		box := shapes.Get.Box(dizzyBar)
+		cut := box.Size.Width * percent
+		dizzyBarPosition.X += box.Size.Width - cut
+		box.Size.Width = cut
+
+		dizzyBarEmpty.Set(dizzyBarPosition)
+		dizzyBarEmpty.Set(box)
+
+		ac := effects.Get.AlternateColor(dizzyText)
+		ac.Delay = 0.25 * percent
+		ac.Time = 0.25 * percent
+
+		dizzyText.Set(ac)
+
+		clr := color.White.Blend(color.Red, (1-percent)/2)
+		leftExterior.Set(clr)
+		rightExterior.Set(clr)
 	}
 
-	if ent.Contains(text.TYPE) {
-		// update text scale
-		tx := text.Get(ent)
-		tx.Size = textSize * scale
-		tx.Spacing = textSize / 4 * scale
-		ent.Set(tx)
+	return nil
+}
+
+func (dbs *dizzyBarSystem) Notify(_ *world.World, event interface{}, delta float32) error {
+	switch event.(type) {
+	case events.MouseMoveEvent:
+		dbs.dizzy = float32(math.Min(float64(dbs.dizzy+(delta*dizzyGainRate)), 2.5))
 	}
+	return nil
 }
