@@ -42,8 +42,9 @@ const (
 )
 
 const (
-	uiGroup        = "UI_GROUP"
-	renderingGroup = "RENDERING_GROUP"
+	lastPriority = int32(-1000)
+	lowPriority  = int32(-500)
+	highPriority = int32(500)
 )
 
 // Impl a engine internal implementation
@@ -110,44 +111,40 @@ func (ei *engineImpl) initialize() error {
 	ei.rdr.EndFrame()
 
 	if err == nil {
-		ei.gWorld.AddSystem(ei)
-		ei.gWorld.AddSystem(systems.EventSystem(ei.rdr))
-		ei.gWorld.AddSystem(systems.AlternateColorSystem())
-		ei.gWorld.AddSystemToGroup(ei.spriteRS, renderingGroup)
-		ei.gWorld.AddSystemToGroup(systems.ShapesRenderingSystem(ei.rdr), renderingGroup)
-		ei.gWorld.AddSystemToGroup(systems.UIRenderingSystem(ei.rdr), uiGroup)
+		// main systems will update before the game systems
+		ei.gWorld.AddSystemWithPriority(ei, highPriority)
+		ei.gWorld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
+
+		// effect system will run after game system but before the rendering systems
+		ei.gWorld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
+
+		// rendering system will run last
+		ei.gWorld.AddSystemWithPriority(ei.spriteRS, lastPriority)
+		ei.gWorld.AddSystemWithPriority(systems.ShapesRenderingSystem(ei.rdr), lastPriority)
+		ei.gWorld.AddSystemWithPriority(systems.UIRenderingSystem(ei.rdr), lastPriority)
 
 		ei.status = statusRunning
 	}
 	return err
 }
 
-func (ei *engineImpl) render() error {
-	err := ei.gWorld.UpdateGroup(renderingGroup, ei.frameTime)
-	return err
-}
-
-func (ei *engineImpl) renderUI() error {
-	return ei.gWorld.UpdateGroup(uiGroup, ei.frameTime)
-}
-
 func (ei *engineImpl) running() error {
+	// begin frame
 	ei.rdr.BeginFrame()
 
-	var err error
-	if err = ei.gWorld.Update(ei.frameTime); err == nil {
-		if err = ei.render(); err == nil {
-			err = ei.renderUI()
-		}
-	}
+	// update the systems
+	err := ei.gWorld.Update(ei.frameTime)
 
+	// we end the frame regardless of if we have an error
 	ei.rdr.EndFrame()
 
+	// if we do not have an error check if we should close
 	if err == nil {
 		if ei.rdr.ShouldClose() {
 			ei.status = statusEnding
 		}
 	}
+
 	return err
 }
 
