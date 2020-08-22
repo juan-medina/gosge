@@ -67,8 +67,8 @@ func ShouldClose() bool {
 }
 
 // GetScreenSize get the current screen size
-func GetScreenSize() (width int, height int) {
-	return rl.GetScreenWidth(), rl.GetScreenHeight()
+func GetScreenSize() geometry.Size {
+	return geometry.Size{Width: float32(rl.GetScreenWidth()), Height: float32(rl.GetScreenHeight())}
 }
 
 // DrawText will draw a text.Text in the given geometry.Position with the correspondent color.Color
@@ -170,9 +170,9 @@ func DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Pos
 }
 
 // GetMousePosition returns the current position of the mouse
-func GetMousePosition() (x, y float32) {
+func GetMousePosition() geometry.Position {
 	pos := rl.GetMousePosition()
-	return pos.X, pos.Y
+	return geometry.Position{pos.X, pos.Y}
 }
 
 // DrawSolidBox draws a solid box with an color.Solid and a scale

@@ -42,9 +42,9 @@ func (es eventSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
 }
 
 func (es *eventSystem) sendScreenSizeChange() error {
-	w, h := render.GetScreenSize()
-	es.sse.Current.Width = float32(w)
-	es.sse.Current.Height = float32(h)
+	size := render.GetScreenSize()
+	es.sse.Current.Width = size.Width
+	es.sse.Current.Height = size.Height
 
 	sx := es.sse.Current.Width / es.sse.Original.Width
 	sy := es.sse.Current.Height / es.sse.Original.Height
@@ -67,12 +67,10 @@ func (es eventSystem) sendMouseMove() error {
 func (es *eventSystem) initialize(world *world.World) error {
 	es.wld = world
 
-	w, h := render.GetScreenSize()
+	size := render.GetScreenSize()
 
-	es.sse.Original.Width = float32(w)
-	es.sse.Original.Height = float32(h)
-	es.sse.Current.Width = float32(w)
-	es.sse.Current.Height = float32(h)
+	es.sse.Original = size
+	es.sse.Current = size
 	es.sse.Scale.Min = 1
 	es.sse.Scale.Max = 1
 	es.sse.Scale.Point.X = 1
@@ -100,10 +98,9 @@ func (es *eventSystem) Update(world *world.World, delta float32) error {
 		}
 	}
 
-	x, y := render.GetMousePosition()
-	if es.mme.X != x || es.mme.Y != y {
-		es.mme.X = x
-		es.mme.Y = y
+	mp := render.GetMousePosition()
+	if es.mme.Position != mp {
+		es.mme.Position = mp
 		if err := es.sendMouseMove(); err != nil {
 			return err
 		}
