@@ -26,6 +26,7 @@ package engine
 import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/render"
+	"github.com/juan-medina/gosge/internal/store"
 	"github.com/juan-medina/gosge/internal/systems"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/engine"
@@ -59,16 +60,16 @@ type engineImpl struct {
 	status    engineStatus
 	init      engine.InitFunc
 	frameTime float32
-	spriteRS  systems.SpriteRendering
+	ss        store.SpriteStorage
 	rdr       render.Render
 }
 
 func (ei *engineImpl) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
-	return ei.spriteRS.GetSpriteSize(sheet, name)
+	return ei.ss.GetSpriteSize(sheet, name)
 }
 
 func (ei *engineImpl) LoadSpriteSheet(fileName string) error {
-	return ei.spriteRS.LoadSpriteSheet(fileName)
+	return ei.ss.LoadSpriteSheet(fileName)
 }
 
 func (ei *engineImpl) LoadTexture(fileName string) error {
@@ -95,12 +96,12 @@ func (ei *engineImpl) Notify(_ *world.World, event interface{}, _ float32) error
 func New(opt options.Options, init engine.InitFunc) Impl {
 	rdr := render.New()
 	return &engineImpl{
-		opt:      opt,
-		gWorld:   world.New(),
-		status:   statusInitializing,
-		init:     init,
-		spriteRS: systems.SpriteRenderingSystem(rdr),
-		rdr:      rdr,
+		opt:    opt,
+		gWorld: world.New(),
+		status: statusInitializing,
+		init:   init,
+		ss:     store.NewSpriteStorage(rdr),
+		rdr:    rdr,
 	}
 }
 
@@ -119,9 +120,7 @@ func (ei *engineImpl) initialize() error {
 		ei.gWorld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
 
 		// rendering system will run last
-		ei.gWorld.AddSystemWithPriority(ei.spriteRS, lastPriority)
-		ei.gWorld.AddSystemWithPriority(systems.ShapesRenderingSystem(ei.rdr), lastPriority)
-		ei.gWorld.AddSystemWithPriority(systems.UIRenderingSystem(ei.rdr), lastPriority)
+		ei.gWorld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ss), lastPriority)
 
 		ei.status = statusRunning
 	}

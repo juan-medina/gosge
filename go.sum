@@ -2,3 +2,5 @@ github.com/gen2brain/raylib-go v0.0.0-20200504161950-7ab77a47307b h1:9ohp/Bw+lbu
 github.com/gen2brain/raylib-go v0.0.0-20200504161950-7ab77a47307b/go.mod h1:LUVRDQbnxUaOgzLzW5lMS+IcbqlXHIqIA9wq8wxzmcA=
 github.com/juan-medina/goecs v0.1.6 h1:+jzKYo27SOOjhQ8ub0YPu7rY+sAYtcaOWKKcm7xkBq8=
 github.com/juan-medina/goecs v0.1.6/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
+github.com/juan-medina/goecs v0.1.7 h1:vCZImMb+AsuvuJnhifovSSP51EKep4oez3/xAT4cu0c=
+github.com/juan-medina/goecs v0.1.7/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=

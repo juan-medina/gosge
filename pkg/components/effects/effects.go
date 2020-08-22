@@ -49,19 +49,29 @@ type AlternateColor struct {
 	State   EffectState // State is the current EffectState
 }
 
+// Layer effect is use to render thins in a logical layer
+type Layer struct {
+	Depth int32 // Depth is the screen depth for this effects.Layer
+}
+
 type types struct {
 	// AlternateColor is the reflect.Type for effects.AlternateColor
 	AlternateColor reflect.Type
+	// Layer is the reflect.Type for effects.Layer
+	Layer reflect.Type
 }
 
 // TYPE hold the reflect.Type for our effects components
 var TYPE = types{
 	AlternateColor: reflect.TypeOf(AlternateColor{}),
+	Layer:          reflect.TypeOf(Layer{}),
 }
 
 type gets struct {
 	// AlternateColor gets a AlternateColor from a entity.Entity
 	AlternateColor func(e *entity.Entity) AlternateColor
+	// Layer gets a Layer from a entity.Entity
+	Layer func(e *entity.Entity) Layer
 }
 
 // Get effect component
@@ -69,5 +79,9 @@ var Get = gets{
 	// AlternateColor gets a AlternateColor from a entity.Entity
 	AlternateColor: func(e *entity.Entity) AlternateColor {
 		return e.Get(TYPE.AlternateColor).(AlternateColor)
+	},
+	// Layer gets a Layer from a entity.Entity
+	Layer: func(e *entity.Entity) Layer {
+		return e.Get(TYPE.Layer).(Layer)
 	},
 }

@@ -20,17 +20,14 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package store
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"io/ioutil"
 	"os"
 	"path"
@@ -58,59 +55,27 @@ type spriteSheetData struct {
 
 type spriteSheet map[string]components.SpriteDef
 
-type spriteRenderingSystem struct {
+type spriteStorage struct {
 	sheets map[string]spriteSheet
 	rdr    render.Render
 }
 
-var noTint = color.White
-
-// SpriteRendering is a world.System for rendering sprite.Sprite
-type SpriteRendering interface {
-	//Update the world.World
-	Update(world *world.World, delta float32) error
-	//Notify is trigger when new events are received
-	Notify(world *world.World, event interface{}, delta float32) error
+// SpriteStorage is a storage for sprite.Sprite
+type SpriteStorage interface {
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(fileName string) error
 	//GetSpriteSize returns the geometry.Size of a given sprite
 	GetSpriteSize(sheet string, name string) (geometry.Size, error)
+	//GetSpriteDef returns the components.SpriteDef for an sprite
+	GetSpriteDef(sheet string, name string) (components.SpriteDef, error)
 }
 
-func (srs spriteRenderingSystem) Update(world *world.World, _ float32) error {
-	for _, v := range world.Entities(sprite.TYPE, geometry.TYPE.Position) {
-		spr := sprite.Get(v)
-		pos := geometry.Get.Position(v)
-
-		var tint color.Solid
-		if v.Contains(color.TYPE.Solid) {
-			tint = color.Get.Solid(v)
-		} else {
-			tint = noTint
-		}
-
-		if def, err := srs.getSpriteDef(spr.Sheet, spr.Name); err == nil {
-			if err := srs.rdr.DrawSprite(def, spr, pos, tint); err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
-
-	}
-	return nil
-}
-
-func (srs spriteRenderingSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
-	return nil
-}
-
-func (srs *spriteRenderingSystem) handleSheet(data spriteSheetData, name string) (err error) {
+func (ss *spriteStorage) handleSheet(data spriteSheetData, name string) (err error) {
 	st := make(spriteSheet, 0)
-	srs.sheets[name] = st
+	ss.sheets[name] = st
 	dir := filepath.Dir(name)
 	texturePath := path.Join(dir, data.Meta.Image)
-	if err = srs.rdr.LoadTexture(texturePath); err == nil {
+	if err = ss.rdr.LoadTexture(texturePath); err == nil {
 		for _, spr := range data.Frames {
 			st[spr.Filename] = components.SpriteDef{
 				Texture: texturePath,
@@ -135,7 +100,7 @@ func (srs *spriteRenderingSystem) handleSheet(data spriteSheetData, name string)
 	return
 }
 
-func (srs *spriteRenderingSystem) LoadSpriteSheet(fileName string) (err error) {
+func (ss *spriteStorage) LoadSpriteSheet(fileName string) (err error) {
 	data := spriteSheetData{}
 	var jsonFile *os.File
 	if jsonFile, err = os.Open(fileName); err == nil {
@@ -144,15 +109,15 @@ func (srs *spriteRenderingSystem) LoadSpriteSheet(fileName string) (err error) {
 		var bytes []byte
 		if bytes, err = ioutil.ReadAll(jsonFile); err == nil {
 			if err = json.Unmarshal(bytes, &data); err == nil {
-				return srs.handleSheet(data, fileName)
+				return ss.handleSheet(data, fileName)
 			}
 		}
 	}
 	return
 }
 
-func (srs spriteRenderingSystem) getSpriteDef(sheet string, name string) (components.SpriteDef, error) {
-	if sh, ok := srs.sheets[sheet]; ok {
+func (ss spriteStorage) GetSpriteDef(sheet string, name string) (components.SpriteDef, error) {
+	if sh, ok := ss.sheets[sheet]; ok {
 		if def, ok := sh[name]; ok {
 			return def, nil
 		}
@@ -161,15 +126,15 @@ func (srs spriteRenderingSystem) getSpriteDef(sheet string, name string) (compon
 	return components.SpriteDef{}, fmt.Errorf("can not find sprite sheet %q", sheet)
 }
 
-func (srs spriteRenderingSystem) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
-	def, err := srs.getSpriteDef(sheet, name)
+func (ss spriteStorage) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
+	def, err := ss.GetSpriteDef(sheet, name)
 	//goland:noinspection GoNilness
 	return def.Origin.Size, err
 }
 
-// SpriteRenderingSystem returns a world.System that will handle sprite.Sprite rendering
-func SpriteRenderingSystem(rdr render.Render) SpriteRendering {
-	return &spriteRenderingSystem{
+// NewSpriteStorage returns a new storage for sprite.Sprite
+func NewSpriteStorage(rdr render.Render) SpriteStorage {
+	return &spriteStorage{
 		sheets: make(map[string]spriteSheet, 0),
 		rdr:    rdr,
 	}
