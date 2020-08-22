@@ -8,6 +8,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
+	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
@@ -44,8 +45,8 @@ var (
 	// groups is an slice of groups
 	groups = []group{
 		{
-			clr:   color.Green,
-			name:  "Green",
+			clr:   color.White,
+			name:  "White",
 			layer: backLayer,
 		},
 		{
@@ -54,8 +55,8 @@ var (
 			layer: topLayer,
 		},
 		{
-			clr:   color.Yellow,
-			name:  "Yellow",
+			clr:   color.Green,
+			name:  "Green",
 			layer: middleLayer,
 		},
 	}
@@ -70,6 +71,16 @@ const (
 	timeToChange = float32(10) // timeToChange is how many seconds to change layers
 )
 
+// item type
+type itemType int
+
+// define item types
+const (
+	itemTypeText = itemType(iota)
+	itemTypeSprite
+	totalItemsTypes
+)
+
 // addItem add a set of random items to the world
 func addItems(toAdd int, wld *world.World) {
 	// for as many items we like to add
@@ -82,26 +93,39 @@ func addItems(toAdd int, wld *world.World) {
 		x := rand.Float32() * opt.Size.Width
 		y := rand.Float32() * opt.Size.Height
 
-		// text position
-		txp := geometry.Position{X: x, Y: y}
-		// text shadow position
-		stp := geometry.Position{X: x + 5, Y: y + 5}
+		it := itemType(rand.Float32() * float32(totalItemsTypes))
 
-		// add the texts shadow
-		wld.Add(entity.New(
-			text.Text{String: gr.name, VAlignment: text.MiddleVAlignment, HAlignment: text.CenterHAlignment},
-			relativePosition{original: stp, size: 100},
-			color.DarkGray.Alpha(127),
-			gr.layer,
-		))
+		// item position
+		pos := geometry.Position{X: x, Y: y}
 
-		// add the text
-		wld.Add(entity.New(
-			text.Text{String: gr.name, VAlignment: text.MiddleVAlignment, HAlignment: text.CenterHAlignment},
-			relativePosition{original: txp, size: 100},
-			gr.clr,
-			gr.layer,
-		))
+		switch it {
+		case itemTypeText:
+			// text shadow position
+			stp := geometry.Position{X: x + 5, Y: y + 5}
+
+			// add the texts shadow
+			wld.Add(entity.New(
+				text.Text{String: gr.name, VAlignment: text.MiddleVAlignment, HAlignment: text.CenterHAlignment},
+				relativePosition{original: stp, size: 100},
+				color.DarkGray.Alpha(127),
+				gr.layer,
+			))
+
+			// add the text
+			wld.Add(entity.New(
+				text.Text{String: gr.name, VAlignment: text.MiddleVAlignment, HAlignment: text.CenterHAlignment},
+				relativePosition{original: pos, size: 100},
+				gr.clr,
+				gr.layer,
+			))
+		case itemTypeSprite:
+			wld.Add(entity.New(
+				sprite.Sprite{Sheet: "resources/gamer.json", Name: "gamer.png"},
+				relativePosition{original: pos, size: 0.25},
+				gr.clr,
+				gr.layer,
+			))
+		}
 	}
 }
 
@@ -109,6 +133,11 @@ func addItems(toAdd int, wld *world.World) {
 func load(eng engine.Engine) error {
 	// get the world
 	wld := eng.World()
+
+	// preload sprite sheet
+	if err := eng.LoadSpriteSheet("resources/gamer.json"); err != nil {
+		return err
+	}
 
 	// calculate the UI positions
 	boxSize := geometry.Size{Width: opt.Size.Width / 1.15, Height: opt.Size.Height / 12}
@@ -245,11 +274,18 @@ func (ls layoutSystem) layout(w *world.World, ssc events.ScreenSizeChangeEvent) 
 			ent.Set(tx)
 		}
 
-		// if a Box shape update its scale
+		// if is a Box shape update its scale
 		if ent.Contains(shapes.TYPE.Box) {
 			box := shapes.Get.Box(ent)
 			box.Scale = ssc.Scale.Min
 			ent.Set(box)
+		}
+
+		// if is a Sprite update its scale
+		if ent.Contains(sprite.TYPE) {
+			spr := sprite.Get(ent)
+			spr.Scale = rl.size * ssc.Scale.Min
+			ent.Set(spr)
 		}
 	}
 	return nil
