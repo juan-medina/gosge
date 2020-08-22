@@ -37,23 +37,23 @@ import (
 	"path/filepath"
 )
 
-type spriteSheetJSON struct {
-	Atlas struct {
-		ImagePath string `json:"imagePath"`
-	} `json:"atlas"`
-	Sprites []struct {
-		NameID   string `json:"nameId"`
-		Position struct {
+type spriteSheetData struct {
+	Frames []struct {
+		Filename string `json:"filename"`
+		Frame    struct {
 			X float32 `json:"x"`
 			Y float32 `json:"y"`
-		} `json:"position"`
-		TrimRec struct {
-			X      float32 `json:"x"`
-			Y      float32 `json:"y"`
-			Width  float32 `json:"width"`
-			Height float32 `json:"height"`
-		} `json:"trimRec"`
-	} `json:"sprites"`
+			W float32 `json:"w"`
+			H float32 `json:"h"`
+		} `json:"frame"`
+		Pivot struct {
+			X float32 `json:"x"`
+			Y float32 `json:"y"`
+		} `json:"pivot"`
+	} `json:"frames"`
+	Meta struct {
+		Image string `json:"image"`
+	} `json:"meta"`
 }
 
 type spriteSheet map[string]components.SpriteDef
@@ -105,44 +105,48 @@ func (srs spriteRenderingSystem) Notify(_ *world.World, _ interface{}, _ float32
 	return nil
 }
 
-func (srs *spriteRenderingSystem) loadSpriteSheetFile(fileName string, sheet *spriteSheetJSON) (err error) {
-	var jsonFile *os.File
-	if jsonFile, err = os.Open(fileName); err == nil {
-		dir := filepath.Dir(fileName)
-		//goland:noinspection GoUnhandledErrorResult
-		defer jsonFile.Close()
-		var bytes []byte
-		if bytes, err = ioutil.ReadAll(jsonFile); err == nil {
-			if err = json.Unmarshal(bytes, &sheet); err == nil {
-				st := make(spriteSheet, 0)
-				srs.sheets[fileName] = st
-				texturePath := path.Join(dir, sheet.Atlas.ImagePath)
-				if err = srs.rdr.LoadTexture(texturePath); err == nil {
-					for _, spr := range sheet.Sprites {
-						st[spr.NameID] = components.SpriteDef{
-							Texture: texturePath,
-							Origin: geometry.Rect{
-								From: geometry.Point{
-									X: spr.TrimRec.X + spr.Position.X,
-									Y: spr.TrimRec.Y + spr.Position.Y,
-								},
-								Size: geometry.Size{
-									Width:  spr.TrimRec.Width,
-									Height: spr.TrimRec.Height,
-								},
-							},
-						}
-					}
-				}
+func (srs *spriteRenderingSystem) handleSheet(data spriteSheetData, name string) (err error) {
+	st := make(spriteSheet, 0)
+	srs.sheets[name] = st
+	dir := filepath.Dir(name)
+	texturePath := path.Join(dir, data.Meta.Image)
+	if err = srs.rdr.LoadTexture(texturePath); err == nil {
+		for _, spr := range data.Frames {
+			st[spr.Filename] = components.SpriteDef{
+				Texture: texturePath,
+				Origin: geometry.Rect{
+					From: geometry.Point{
+						X: spr.Frame.X,
+						Y: spr.Frame.Y,
+					},
+					Size: geometry.Size{
+						Width:  spr.Frame.W,
+						Height: spr.Frame.H,
+					},
+				},
+				Pivot: geometry.Point{
+					X: spr.Pivot.X,
+					Y: spr.Pivot.Y,
+				},
 			}
 		}
 	}
+
 	return
 }
 
 func (srs *spriteRenderingSystem) LoadSpriteSheet(fileName string) (err error) {
-	var ss spriteSheetJSON
-	if err = srs.loadSpriteSheetFile(fileName, &ss); err == nil {
+	data := spriteSheetData{}
+	var jsonFile *os.File
+	if jsonFile, err = os.Open(fileName); err == nil {
+		//goland:noinspection GoUnhandledErrorResult
+		defer jsonFile.Close()
+		var bytes []byte
+		if bytes, err = ioutil.ReadAll(jsonFile); err == nil {
+			if err = json.Unmarshal(bytes, &data); err == nil {
+				return srs.handleSheet(data, fileName)
+			}
+		}
 	}
 	return
 }

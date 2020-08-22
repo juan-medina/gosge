@@ -26,6 +26,7 @@ import "github.com/juan-medina/gosge/pkg/components/geometry"
 
 // SpriteDef defines an sprite.Sprite
 type SpriteDef struct {
-	Texture string        // Texture is the texture file name
-	Origin  geometry.Rect // Origin is where the sprite is on the texture
+	Texture string         // Texture is the texture file name
+	Origin  geometry.Rect  // Origin is where the sprite is on the texture
+	Pivot   geometry.Point // Pivot is the relative pivot 0..1 in each axis
 }

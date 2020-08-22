@@ -90,22 +90,22 @@ func loadGame(eng engine.Engine) error {
 	// Get the eyes size
 	var eyeSize geometry.Size
 	var eyeRadius geometry.Position
-	if eyeSize, err = eng.GetSpriteSize("resources/gopher.json", "eye_exterior"); err == nil {
+	if eyeSize, err = eng.GetSpriteSize("resources/gopher.json", "eye_exterior.png"); err == nil {
 		eyeRadius = geometry.Position{X: eyeSize.Width / 4, Y: eyeSize.Height / 4}
 	} else {
 		return err
 	}
 
 	// add the sprites
-	nose = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "nose"}))
-	leftExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior"}))
+	nose = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "nose.png"}))
+	leftExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior.png"}))
 	leftInterior = gw.Add(entity.New(
-		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior"},
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior.png"},
 		lookAtMouse{pivot: leftExterior, radius: eyeRadius},
 	))
-	rightExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior"}))
+	rightExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior.png"}))
 	rightInterior = gw.Add(entity.New(
-		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior"},
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior.png"},
 		lookAtMouse{pivot: rightExterior, radius: eyeRadius},
 	))
 

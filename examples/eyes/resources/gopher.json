@@ -1,43 +1,90 @@
 {
-    "software": {
-        "name": "rTexPacker v1.0",
-        "url": "https://www.raylibtech.com/rtexpacker"
+  "frames": [
+    {
+      "filename": "eye_exterior.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 428,
+        "h": 397
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 428,
+        "h": 397
+      },
+      "sourceSize": {
+        "w": 428,
+        "h": 397
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
     },
-    "atlas": {
-        "imagePath": "gopher.png",
-        "width": 1024,
-        "height": 1024,
-        "spriteCount": 3,
-        "isFont": false,
-        "fontSize": 32
+    {
+      "filename": "nose.png",
+      "frame": {
+        "x": 0,
+        "y": 397,
+        "w": 342,
+        "h": 345
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 342,
+        "h": 345
+      },
+      "sourceSize": {
+        "w": 342,
+        "h": 345
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
     },
-    "sprites": [
-        {
-            "nameId": "eye_exterior",
-            "origin": { "x": 0, "y": 0 },
-            "position": { "x": 0, "y": 0 },
-            "sourceSize": { "width": 428, "height": 397 },
-            "padding": 0,
-            "trimmed": true,
-            "trimRec": { "x": 0, "y": 0, "width": 428, "height": 397 }
-        },
-        {
-            "nameId": "eye_interior",
-            "origin": { "x": 0, "y": 0 },
-            "position": { "x": 428, "y": 345 },
-            "sourceSize": { "width": 122, "height": 134 },
-            "padding": 0,
-            "trimmed": true,
-            "trimRec": { "x": 0, "y": 0, "width": 122, "height": 134 }
-        },
-        {
-            "nameId": "nose",
-            "origin": { "x": 0, "y": 0 },
-            "position": { "x": 428, "y": 0 },
-            "sourceSize": { "width": 342, "height": 345 },
-            "padding": 0,
-            "trimmed": true,
-            "trimRec": { "x": 0, "y": 0, "width": 342, "height": 345 }
-        }
-    ]
+    {
+      "filename": "eye_interior.png",
+      "frame": {
+        "x": 342,
+        "y": 397,
+        "w": 122,
+        "h": 134
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 122,
+        "h": 134
+      },
+      "sourceSize": {
+        "w": 122,
+        "h": 134
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.6",
+    "image": "gopher.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 464,
+      "h": 742
+    },
+    "scale": 1
+  }
 }

@@ -95,8 +95,8 @@ func (rr RenderImpl) DrawText(txt text.Text, pos geometry.Position, color color.
 func (rr RenderImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Position, tint color.Solid) error {
 	if val, ok := rr.textureHold[def.Texture]; ok {
 		scale := sprite.Scale
-		px := def.Origin.Size.Width / 2
-		py := def.Origin.Size.Height / 2
+		px := def.Origin.Size.Width * def.Pivot.X
+		py := def.Origin.Size.Height * def.Pivot.Y
 		rc := rr.color2RayColor(tint)
 		rotation := sprite.Rotation
 		sourceRec := rl.Rectangle{
