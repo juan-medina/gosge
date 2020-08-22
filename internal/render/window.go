@@ -20,5 +20,25 @@
  *  THE SOFTWARE.
  */
 
-// Package render device rendering implementation
 package render
+
+import (
+	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/juan-medina/gosge/pkg/components/geometry"
+)
+
+// GetScreenSize get the current screen size
+func GetScreenSize() geometry.Size {
+	return geometry.Size{Width: float32(rl.GetScreenWidth()), Height: float32(rl.GetScreenHeight())}
+}
+
+// GetMousePosition returns the current position of the mouse
+func GetMousePosition() geometry.Position {
+	pos := rl.GetMousePosition()
+	return geometry.Position{X: pos.X, Y: pos.Y}
+}
+
+// IsScreenScaleChange returns if the current screen scale has changed
+func IsScreenScaleChange() bool {
+	return rl.IsWindowResized()
+}

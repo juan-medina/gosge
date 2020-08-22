@@ -20,5 +20,11 @@
  *  THE SOFTWARE.
  */
 
-// Package render device rendering implementation
 package render
+
+import rl "github.com/gen2brain/raylib-go/raylib"
+
+// GetFrameTime returns the time from the delta time for current frame
+func GetFrameTime() float32 {
+	return rl.GetFrameTime()
+}

@@ -20,5 +20,40 @@
  *  THE SOFTWARE.
  */
 
-// Package render device rendering implementation
 package render
+
+import (
+	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/juan-medina/gosge/pkg/options"
+)
+
+var saveOpts = options.Options{}
+
+// Init the rendering device
+func Init(opt options.Options) {
+	saveOpts = opt
+	rl.SetConfigFlags(rl.FlagWindowResizable)
+	rl.InitWindow(int32(opt.Size.Width), int32(opt.Size.Height), opt.Title)
+}
+
+// End the rendering device
+func End() {
+	UnloadAllTextures()
+	rl.CloseWindow()
+}
+
+// BeginFrame for rendering
+func BeginFrame() {
+	rl.BeginDrawing()
+	rl.ClearBackground(color2RayColor(saveOpts.ClearColor))
+}
+
+// EndFrame for rendering
+func EndFrame() {
+	rl.EndDrawing()
+}
+
+// ShouldClose returns if th engine should close
+func ShouldClose() bool {
+	return rl.WindowShouldClose()
+}
