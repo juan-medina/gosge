@@ -20,40 +20,38 @@
  *  THE SOFTWARE.
  */
 
-package render
+package ray
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/options"
 )
 
-var saveOpts = options.Options{}
-
 // Init the rendering device
-func Init(opt options.Options) {
-	saveOpts = opt
+func (rr *RenderImpl) Init(opt options.Options) {
+	rr.saveOpts = opt
 	rl.SetConfigFlags(rl.FlagWindowResizable)
 	rl.InitWindow(int32(opt.Size.Width), int32(opt.Size.Height), opt.Title)
 }
 
 // End the rendering device
-func End() {
-	UnloadAllTextures()
+func (rr RenderImpl) End() {
+	rr.UnloadAllTextures()
 	rl.CloseWindow()
 }
 
 // BeginFrame for rendering
-func BeginFrame() {
+func (rr RenderImpl) BeginFrame() {
 	rl.BeginDrawing()
-	rl.ClearBackground(color2RayColor(saveOpts.ClearColor))
+	rl.ClearBackground(rr.color2RayColor(rr.saveOpts.ClearColor))
 }
 
 // EndFrame for rendering
-func EndFrame() {
+func (rr RenderImpl) EndFrame() {
 	rl.EndDrawing()
 }
 
 // ShouldClose returns if th engine should close
-func ShouldClose() bool {
+func (rr RenderImpl) ShouldClose() bool {
 	return rl.WindowShouldClose()
 }

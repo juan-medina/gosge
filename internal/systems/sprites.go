@@ -60,6 +60,7 @@ type spriteSheet map[string]components.SpriteDef
 
 type spriteRenderingSystem struct {
 	sheets map[string]spriteSheet
+	rdr    render.Render
 }
 
 var noTint = color.White
@@ -76,7 +77,7 @@ type SpriteRendering interface {
 	GetSpriteSize(sheet string, name string) (geometry.Size, error)
 }
 
-func (s spriteRenderingSystem) Update(world *world.World, _ float32) error {
+func (srs spriteRenderingSystem) Update(world *world.World, _ float32) error {
 	for _, v := range world.Entities(sprite.TYPE, geometry.TYPE.Position) {
 		spr := sprite.Get(v)
 		pos := geometry.Get.Position(v)
@@ -88,8 +89,8 @@ func (s spriteRenderingSystem) Update(world *world.World, _ float32) error {
 			tint = noTint
 		}
 
-		if def, err := s.getSpriteDef(spr.Sheet, spr.Name); err == nil {
-			if err := render.DrawSprite(def, spr, pos, tint); err != nil {
+		if def, err := srs.getSpriteDef(spr.Sheet, spr.Name); err == nil {
+			if err := srs.rdr.DrawSprite(def, spr, pos, tint); err != nil {
 				return err
 			}
 		} else {
@@ -100,11 +101,11 @@ func (s spriteRenderingSystem) Update(world *world.World, _ float32) error {
 	return nil
 }
 
-func (s spriteRenderingSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
+func (srs spriteRenderingSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
 	return nil
 }
 
-func (s *spriteRenderingSystem) loadSpriteSheetFile(fileName string, sheet *spriteSheetJSON) (err error) {
+func (srs *spriteRenderingSystem) loadSpriteSheetFile(fileName string, sheet *spriteSheetJSON) (err error) {
 	var jsonFile *os.File
 	if jsonFile, err = os.Open(fileName); err == nil {
 		dir := filepath.Dir(fileName)
@@ -114,9 +115,9 @@ func (s *spriteRenderingSystem) loadSpriteSheetFile(fileName string, sheet *spri
 		if bytes, err = ioutil.ReadAll(jsonFile); err == nil {
 			if err = json.Unmarshal(bytes, &sheet); err == nil {
 				st := make(spriteSheet, 0)
-				s.sheets[fileName] = st
+				srs.sheets[fileName] = st
 				texturePath := path.Join(dir, sheet.Atlas.ImagePath)
-				if err = render.LoadTexture(texturePath); err == nil {
+				if err = srs.rdr.LoadTexture(texturePath); err == nil {
 					for _, spr := range sheet.Sprites {
 						st[spr.NameID] = components.SpriteDef{
 							Texture: texturePath,
@@ -139,15 +140,15 @@ func (s *spriteRenderingSystem) loadSpriteSheetFile(fileName string, sheet *spri
 	return
 }
 
-func (s *spriteRenderingSystem) LoadSpriteSheet(fileName string) (err error) {
+func (srs *spriteRenderingSystem) LoadSpriteSheet(fileName string) (err error) {
 	var ss spriteSheetJSON
-	if err = s.loadSpriteSheetFile(fileName, &ss); err == nil {
+	if err = srs.loadSpriteSheetFile(fileName, &ss); err == nil {
 	}
 	return
 }
 
-func (s spriteRenderingSystem) getSpriteDef(sheet string, name string) (components.SpriteDef, error) {
-	if sh, ok := s.sheets[sheet]; ok {
+func (srs spriteRenderingSystem) getSpriteDef(sheet string, name string) (components.SpriteDef, error) {
+	if sh, ok := srs.sheets[sheet]; ok {
 		if def, ok := sh[name]; ok {
 			return def, nil
 		}
@@ -156,15 +157,16 @@ func (s spriteRenderingSystem) getSpriteDef(sheet string, name string) (componen
 	return components.SpriteDef{}, fmt.Errorf("can not find sprite sheet %q", sheet)
 }
 
-func (s spriteRenderingSystem) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
-	def, err := s.getSpriteDef(sheet, name)
+func (srs spriteRenderingSystem) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
+	def, err := srs.getSpriteDef(sheet, name)
 	//goland:noinspection GoNilness
 	return def.Origin.Size, err
 }
 
 // SpriteRenderingSystem returns a world.System that will handle sprite.Sprite rendering
-func SpriteRenderingSystem() SpriteRendering {
+func SpriteRenderingSystem(rdr render.Render) SpriteRendering {
 	return &spriteRenderingSystem{
 		sheets: make(map[string]spriteSheet, 0),
+		rdr:    rdr,
 	}
 }

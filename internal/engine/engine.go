@@ -59,6 +59,7 @@ type engineImpl struct {
 	init      engine.InitFunc
 	frameTime float32
 	spriteRS  systems.SpriteRendering
+	rdr       render.Render
 }
 
 func (ei *engineImpl) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
@@ -70,7 +71,7 @@ func (ei *engineImpl) LoadSpriteSheet(fileName string) error {
 }
 
 func (ei *engineImpl) LoadTexture(fileName string) error {
-	return render.LoadTexture(fileName)
+	return ei.rdr.LoadTexture(fileName)
 }
 
 func (ei *engineImpl) World() *world.World {
@@ -91,28 +92,30 @@ func (ei *engineImpl) Notify(_ *world.World, event interface{}, _ float32) error
 
 // New return a engine internal implementation
 func New(opt options.Options, init engine.InitFunc) Impl {
+	rdr := render.New()
 	return &engineImpl{
 		opt:      opt,
 		gWorld:   world.New(),
 		status:   statusInitializing,
 		init:     init,
-		spriteRS: systems.SpriteRenderingSystem(),
+		spriteRS: systems.SpriteRenderingSystem(rdr),
+		rdr:      rdr,
 	}
 }
 
 func (ei *engineImpl) initialize() error {
-	render.Init(ei.opt)
-	render.BeginFrame()
+	ei.rdr.Init(ei.opt)
+	ei.rdr.BeginFrame()
 	err := ei.init(ei)
-	render.EndFrame()
+	ei.rdr.EndFrame()
 
 	if err == nil {
 		ei.gWorld.AddSystem(ei)
-		ei.gWorld.AddSystem(systems.EventSystem())
+		ei.gWorld.AddSystem(systems.EventSystem(ei.rdr))
 		ei.gWorld.AddSystem(systems.AlternateColorSystem())
 		ei.gWorld.AddSystemToGroup(ei.spriteRS, renderingGroup)
-		ei.gWorld.AddSystemToGroup(systems.ShapesRenderingSystem(), renderingGroup)
-		ei.gWorld.AddSystemToGroup(systems.UIRenderingSystem(), uiGroup)
+		ei.gWorld.AddSystemToGroup(systems.ShapesRenderingSystem(ei.rdr), renderingGroup)
+		ei.gWorld.AddSystemToGroup(systems.UIRenderingSystem(ei.rdr), uiGroup)
 
 		ei.status = statusRunning
 	}
@@ -129,7 +132,7 @@ func (ei *engineImpl) renderUI() error {
 }
 
 func (ei *engineImpl) running() error {
-	render.BeginFrame()
+	ei.rdr.BeginFrame()
 
 	var err error
 	if err = ei.gWorld.Update(ei.frameTime); err == nil {
@@ -138,10 +141,10 @@ func (ei *engineImpl) running() error {
 		}
 	}
 
-	render.EndFrame()
+	ei.rdr.EndFrame()
 
 	if err == nil {
-		if render.ShouldClose() {
+		if ei.rdr.ShouldClose() {
 			ei.status = statusEnding
 		}
 	}
@@ -149,14 +152,14 @@ func (ei *engineImpl) running() error {
 }
 
 func (ei *engineImpl) end() error {
-	render.End()
+	ei.rdr.End()
 	return nil
 }
 
 func (ei *engineImpl) Run() error {
 	var err error = nil
 	for ei.status != statusEnding && err == nil {
-		ei.frameTime = render.GetFrameTime()
+		ei.frameTime = ei.rdr.GetFrameTime()
 		switch ei.status {
 		case statusInitializing:
 			err = ei.initialize()

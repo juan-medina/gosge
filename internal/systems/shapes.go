@@ -30,7 +30,9 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 )
 
-type shapesRenderingSystem struct{}
+type shapesRenderingSystem struct {
+	rdr render.Render
+}
 
 func (srs shapesRenderingSystem) Update(world *world.World, _ float32) error {
 	for _, s := range world.Entities(shapes.TYPE.Box, geometry.TYPE.Position) {
@@ -38,10 +40,10 @@ func (srs shapesRenderingSystem) Update(world *world.World, _ float32) error {
 		box := shapes.Get.Box(s)
 		if s.Contains(color.TYPE.Solid) {
 			clr := color.Get.Solid(s)
-			render.DrawSolidBox(pos, box, clr)
+			srs.rdr.DrawSolidBox(pos, box, clr)
 		} else if s.Contains(color.TYPE.Gradient) {
 			gra := color.Get.Gradient(s)
-			render.DrawGradientBox(pos, box, gra)
+			srs.rdr.DrawGradientBox(pos, box, gra)
 		}
 	}
 	return nil
@@ -52,6 +54,8 @@ func (srs shapesRenderingSystem) Notify(_ *world.World, _ interface{}, _ float32
 }
 
 // ShapesRenderingSystem returns a world.System that will handle shapes rendering
-func ShapesRenderingSystem() world.System {
-	return &shapesRenderingSystem{}
+func ShapesRenderingSystem(rdr render.Render) world.System {
+	return &shapesRenderingSystem{
+		rdr: rdr,
+	}
 }

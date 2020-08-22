@@ -20,25 +20,24 @@
  *  THE SOFTWARE.
  */
 
-package render
+//Package ray the implementation of render.Render for raylib
+package ray
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/gen2brain/raylib-go/raylib"
+	"github.com/juan-medina/gosge/pkg/options"
 )
 
-// GetScreenSize get the current screen size
-func GetScreenSize() geometry.Size {
-	return geometry.Size{Width: float32(rl.GetScreenWidth()), Height: float32(rl.GetScreenHeight())}
+//RenderImpl is our render.Render based on raylib
+type RenderImpl struct {
+	saveOpts    options.Options
+	textureHold map[string]rl.Texture2D
 }
 
-// GetMousePosition returns the current position of the mouse
-func GetMousePosition() geometry.Position {
-	pos := rl.GetMousePosition()
-	return geometry.Position{X: pos.X, Y: pos.Y}
-}
-
-// IsScreenScaleChange returns if the current screen scale has changed
-func IsScreenScaleChange() bool {
-	return rl.IsWindowResized()
+// New create a new render.Render base on raylib
+func New() *RenderImpl {
+	return &RenderImpl{
+		saveOpts:    options.Options{},
+		textureHold: make(map[string]rl.Texture2D, 0),
+	}
 }

@@ -20,11 +20,11 @@
  *  THE SOFTWARE.
  */
 
-package render
+package ray
 
 import (
 	"fmt"
-	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
@@ -33,12 +33,29 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/text"
 )
 
-func color2RayColor(color color.Solid) rl.Color {
+func (rr *RenderImpl) color2RayColor(color color.Solid) rl.Color {
 	return rl.NewColor(color.R, color.G, color.B, color.A)
 }
 
+// LoadTexture giving it file name into VRAM
+func (rr RenderImpl) LoadTexture(fileName string) error {
+	if t := rl.LoadTexture(fileName); t.ID != 0 {
+		rr.textureHold[fileName] = t
+		return nil
+	}
+	return fmt.Errorf("error loading texture: %q", fileName)
+}
+
+// UnloadAllTextures from VRAM
+func (rr RenderImpl) UnloadAllTextures() {
+	for k, v := range rr.textureHold {
+		delete(rr.textureHold, k)
+		rl.UnloadTexture(v)
+	}
+}
+
 // DrawText will draw a text.Text in the given geometry.Position with the correspondent color.Color
-func DrawText(txt text.Text, pos geometry.Position, color color.Solid) {
+func (rr RenderImpl) DrawText(txt text.Text, pos geometry.Position, color color.Solid) {
 	font := rl.GetFontDefault()
 
 	vec := rl.Vector2{
@@ -71,35 +88,16 @@ func DrawText(txt text.Text, pos geometry.Position, color color.Solid) {
 		vec.Y += av.Y
 	}
 
-	rl.DrawTextEx(font, txt.String, vec, txt.Size, txt.Spacing, color2RayColor(color))
-}
-
-var textureHold = make(map[string]rl.Texture2D, 0)
-
-// LoadTexture giving it file name into VRAM
-func LoadTexture(fileName string) error {
-	if t := rl.LoadTexture(fileName); t.ID != 0 {
-		textureHold[fileName] = t
-		return nil
-	}
-	return fmt.Errorf("error loading texture: %q", fileName)
-}
-
-// UnloadAllTextures from VRAM
-func UnloadAllTextures() {
-	for k, v := range textureHold {
-		delete(textureHold, k)
-		rl.UnloadTexture(v)
-	}
+	rl.DrawTextEx(font, txt.String, vec, txt.Size, txt.Spacing, rr.color2RayColor(color))
 }
 
 // DrawSprite draws a sprite.Sprite in the given geometry.Position with the tint color.Color
-func DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Position, tint color.Solid) error {
-	if val, ok := textureHold[def.Texture]; ok {
+func (rr RenderImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Position, tint color.Solid) error {
+	if val, ok := rr.textureHold[def.Texture]; ok {
 		scale := sprite.Scale
 		px := def.Origin.Size.Width / 2
 		py := def.Origin.Size.Height / 2
-		rc := color2RayColor(tint)
+		rc := rr.color2RayColor(tint)
 		rotation := sprite.Rotation
 		sourceRec := rl.Rectangle{
 			X:      def.Origin.From.X,
@@ -122,7 +120,7 @@ func DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Pos
 }
 
 // DrawSolidBox draws a solid box with an color.Solid and a scale
-func DrawSolidBox(pos geometry.Position, box shapes.Box, solid color.Solid) {
+func (rr RenderImpl) DrawSolidBox(pos geometry.Position, box shapes.Box, solid color.Solid) {
 	rec := rl.Rectangle{
 		X:      pos.X,
 		Y:      pos.Y,
@@ -130,17 +128,17 @@ func DrawSolidBox(pos geometry.Position, box shapes.Box, solid color.Solid) {
 		Height: box.Size.Height * box.Scale,
 	}
 
-	rl.DrawRectangleRec(rec, color2RayColor(solid))
+	rl.DrawRectangleRec(rec, rr.color2RayColor(solid))
 }
 
 // DrawGradientBox draws a solid box with an color.Solid and a scale
-func DrawGradientBox(pos geometry.Position, box shapes.Box, gradient color.Gradient) {
+func (rr RenderImpl) DrawGradientBox(pos geometry.Position, box shapes.Box, gradient color.Gradient) {
 	x := int32(pos.X)
 	y := int32(pos.Y)
 	w := int32(box.Size.Width * box.Scale)
 	h := int32(box.Size.Height * box.Scale)
-	c1 := color2RayColor(gradient.From)
-	c2 := color2RayColor(gradient.To)
+	c1 := rr.color2RayColor(gradient.From)
+	c2 := rr.color2RayColor(gradient.To)
 
 	if gradient.Direction == color.GradientHorizontal {
 		rl.DrawRectangleGradientH(x, y, w, h, c1, c2)

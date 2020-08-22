@@ -20,38 +20,25 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package ray
 
 import (
-	"github.com/juan-medina/goecs/pkg/world"
-	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/text"
 )
 
-type uiRenderingSystem struct {
-	rdr render.Render
+// GetScreenSize get the current screen size
+func (rr RenderImpl) GetScreenSize() geometry.Size {
+	return geometry.Size{Width: float32(rl.GetScreenWidth()), Height: float32(rl.GetScreenHeight())}
 }
 
-func (ui uiRenderingSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
-	return nil
+// GetMousePosition returns the current position of the mouse
+func (rr RenderImpl) GetMousePosition() geometry.Position {
+	pos := rl.GetMousePosition()
+	return geometry.Position{X: pos.X, Y: pos.Y}
 }
 
-func (ui uiRenderingSystem) Update(world *world.World, _ float32) error {
-	for _, v := range world.Entities(text.TYPE, geometry.TYPE.Position, color.TYPE.Solid) {
-		textCmp := text.Get(v)
-		posCmp := geometry.Get.Position(v)
-		colorCmp := color.Get.Solid(v)
-
-		ui.rdr.DrawText(textCmp, posCmp, colorCmp)
-	}
-	return nil
-}
-
-// UIRenderingSystem returns a world.System that handle UI rendering
-func UIRenderingSystem(rdr render.Render) world.System {
-	return uiRenderingSystem{
-		rdr: rdr,
-	}
+// IsScreenScaleChange returns if the current screen scale has changed
+func (rr RenderImpl) IsScreenScaleChange() bool {
+	return rl.IsWindowResized()
 }

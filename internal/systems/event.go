@@ -35,6 +35,7 @@ type eventSystem struct {
 	wld *world.World
 	sse events.ScreenSizeChangeEvent
 	mme events.MouseMoveEvent
+	rdr render.Render
 }
 
 func (es eventSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
@@ -42,7 +43,7 @@ func (es eventSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
 }
 
 func (es *eventSystem) sendScreenSizeChange() error {
-	size := render.GetScreenSize()
+	size := es.rdr.GetScreenSize()
 	es.sse.Current.Width = size.Width
 	es.sse.Current.Height = size.Height
 
@@ -67,7 +68,7 @@ func (es eventSystem) sendMouseMove() error {
 func (es *eventSystem) initialize(world *world.World) error {
 	es.wld = world
 
-	size := render.GetScreenSize()
+	size := es.rdr.GetScreenSize()
 
 	es.sse.Original = size
 	es.sse.Current = size
@@ -86,19 +87,19 @@ func (es *eventSystem) Update(world *world.World, delta float32) error {
 		}
 	}
 
-	if render.ShouldClose() {
+	if es.rdr.ShouldClose() {
 		if err := es.sendGameClose(); err != nil {
 			return err
 		}
 	}
 
-	if render.IsScreenScaleChange() {
+	if es.rdr.IsScreenScaleChange() {
 		if err := es.sendScreenSizeChange(); err != nil {
 			return err
 		}
 	}
 
-	mp := render.GetMousePosition()
+	mp := es.rdr.GetMousePosition()
 	if es.mme.Position != mp {
 		es.mme.Position = mp
 		if err := es.sendMouseMove(); err != nil {
@@ -111,8 +112,9 @@ func (es *eventSystem) Update(world *world.World, delta float32) error {
 }
 
 // EventSystem returns a world.System that will handle events
-func EventSystem() world.System {
+func EventSystem(rdr render.Render) world.System {
 	return &eventSystem{
+		rdr: rdr,
 		mme: events.MouseMoveEvent{
 			Position: geometry.Position{
 				X: -1,
