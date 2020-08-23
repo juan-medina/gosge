@@ -45,7 +45,7 @@ func main() {
 }
 
 func loadGame(eng engine.Engine) error {
-    // get the ECS world
+	// get the ECS world
 	wld := eng.World()
 
 	// gameScale from the real screen size to our design resolution
