@@ -37,6 +37,7 @@ import (
 var opt = options.Options{
 	Title:      "Hello Game",
 	BackGround: color.Black,
+	Icon:       "resources/icon.png",
 }
 
 var (

@@ -1,3 +1,5 @@
+github.com/akavel/rsrc v0.9.0 h1:HwUDC0+tMFWqN4D5G+o5siGD4oVsC3jn6zM8ocjc3nY=
+github.com/akavel/rsrc v0.9.0/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=
 github.com/gen2brain/raylib-go v0.0.0-20200504161950-7ab77a47307b h1:9ohp/Bw+lbuv/oo756g4Niv0rfUL21JEBfzW2rK6whg=
 github.com/gen2brain/raylib-go v0.0.0-20200504161950-7ab77a47307b/go.mod h1:LUVRDQbnxUaOgzLzW5lMS+IcbqlXHIqIA9wq8wxzmcA=
 github.com/juan-medina/goecs v0.1.6 h1:+jzKYo27SOOjhQ8ub0YPu7rY+sAYtcaOWKKcm7xkBq8=

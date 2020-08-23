@@ -21,6 +21,7 @@ import (
 var opt = options.Options{
 	Title:      "Layers Game",
 	BackGround: color.Black,
+	Icon:       "resources/icon.png",
 }
 
 func main() {

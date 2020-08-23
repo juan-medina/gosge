@@ -25,6 +25,7 @@ package ray
 import (
 	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/options"
+	"os"
 )
 
 // Init the rendering device
@@ -34,6 +35,16 @@ func (rr *RenderImpl) Init(opt options.Options) {
 	w := rl.GetMonitorWidth(opt.Monitor)
 	h := rl.GetMonitorHeight(opt.Monitor)
 	rl.InitWindow(int32(w), int32(h), opt.Title)
+
+	if opt.Icon != "" {
+		if file, err := os.Open(opt.Icon); err == nil {
+			_ = file.Close()
+			img := rl.LoadImage(opt.Icon)
+			rl.SetWindowIcon(*img)
+			rl.UnloadImage(img)
+		}
+	}
+
 	rl.ToggleFullscreen()
 }
 

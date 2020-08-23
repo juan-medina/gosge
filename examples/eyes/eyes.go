@@ -43,6 +43,7 @@ import (
 var opt = options.Options{
 	Title:      "Eyes Game",
 	BackGround: color.Gopher,
+	Icon:       "resources/icon.png",
 }
 
 // entities that we are going to create
