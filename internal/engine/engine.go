@@ -64,6 +64,10 @@ type engineImpl struct {
 	rdr       render.Render
 }
 
+func (ei *engineImpl) GetScreenSize() geometry.Size {
+	return ei.rdr.GetScreenSize()
+}
+
 func (ei *engineImpl) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
 	return ei.ss.GetSpriteSize(sheet, name)
 }

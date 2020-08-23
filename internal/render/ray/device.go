@@ -30,8 +30,11 @@ import (
 // Init the rendering device
 func (rr *RenderImpl) Init(opt options.Options) {
 	rr.saveOpts = opt
-	rl.SetConfigFlags(rl.FlagWindowResizable)
-	rl.InitWindow(int32(opt.Size.Width), int32(opt.Size.Height), opt.Title)
+
+	w := rl.GetMonitorWidth(opt.Monitor)
+	h := rl.GetMonitorHeight(opt.Monitor)
+	rl.InitWindow(int32(w), int32(h), opt.Title)
+	rl.ToggleFullscreen()
 }
 
 // End the rendering device
@@ -43,7 +46,7 @@ func (rr RenderImpl) End() {
 // BeginFrame for rendering
 func (rr RenderImpl) BeginFrame() {
 	rl.BeginDrawing()
-	rl.ClearBackground(rr.color2RayColor(rr.saveOpts.ClearColor))
+	rl.ClearBackground(rr.color2RayColor(rr.saveOpts.BackGround))
 }
 
 // EndFrame for rendering

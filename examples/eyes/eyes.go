@@ -26,7 +26,6 @@ import (
 	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
@@ -42,25 +41,20 @@ import (
 
 // our game options
 var opt = options.Options{
-	Title: "Eyes Game",
-	Size: geometry.Size{
-		Width:  1920,
-		Height: 1080,
-	},
-	ClearColor: color.Gopher,
+	Title:      "Eyes Game",
+	BackGround: color.Gopher,
 }
 
 // entities that we are going to create
 var (
-	nose          *entity.Entity
 	leftExterior  *entity.Entity
-	leftInterior  *entity.Entity
-	rightInterior *entity.Entity
 	rightExterior *entity.Entity
-	bottomText    *entity.Entity
 	dizzyBar      *entity.Entity
 	dizzyBarEmpty *entity.Entity
 	dizzyText     *entity.Entity
+
+	// designResolution is how our game is designed
+	designResolution = geometry.Size{Width: 1920, Height: 1080}
 )
 
 // game constants
@@ -73,9 +67,15 @@ const (
 	dizzyBarHeight  = 100
 	dizzyBarGap     = 50
 	maxDizzy        = 2.5
-	dizzyGainRate   = 6
-	dizzyReduceRate = 1
+	dizzyGainRate   = 5
+	dizzyReduceRate = 0.5
 )
+
+func main() {
+	if err := game.Run(opt, loadGame); err != nil {
+		log.Fatalf("error running the game: %v", err)
+	}
+}
 
 func loadGame(eng engine.Engine) error {
 	var err error
@@ -87,47 +87,119 @@ func loadGame(eng engine.Engine) error {
 	// get the world
 	gw := eng.World()
 
+	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
+
 	// Get the eyes size
 	var eyeSize geometry.Size
 	var eyeRadius geometry.Position
 	if eyeSize, err = eng.GetSpriteSize("resources/gopher.json", "eye_exterior.png"); err == nil {
-		eyeRadius = geometry.Position{X: eyeSize.Width / 4, Y: eyeSize.Height / 4}
+		eyeRadius = geometry.Position{X: eyeSize.Width / 4 * gameScale.Point.X, Y: eyeSize.Height / 4 * gameScale.Point.X}
 	} else {
 		return err
 	}
 
-	// add the sprites
-	nose = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "nose.png"}))
-	leftExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior.png"}))
-	leftInterior = gw.Add(entity.New(
-		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior.png"},
+	// the nose is in the middle and a bit down
+	nosePos := geometry.Position{
+		X: (designResolution.Width / 2) * gameScale.Point.X,
+		Y: ((designResolution.Height / 2) + noseVerticalGap) * gameScale.Point.Y,
+	}
+
+	// left eye is a bit up left of the nose
+	leftEyePos := geometry.Position{
+		X: nosePos.X - (eyesGap * gameScale.Point.X),
+		Y: nosePos.Y - (eyesGap * gameScale.Point.Y),
+	}
+
+	// right eye is a bit up right of the nose
+	rightEyePos := geometry.Position{
+		X: nosePos.X + (eyesGap * gameScale.Point.Y),
+		Y: leftEyePos.Y,
+	}
+
+	// add the nose sprite
+	gw.Add(entity.New(
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "nose.png", Scale: gameScale.Min},
+		nosePos,
+	))
+
+	// add the left exterior eye
+	leftExterior = gw.Add(entity.New(
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior.png", Scale: gameScale.Min},
+		leftEyePos,
+	))
+
+	// add the lef exterior eye
+	gw.Add(entity.New(
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior.png", Scale: gameScale.Min},
+		leftEyePos,
 		lookAtMouse{pivot: leftExterior, radius: eyeRadius},
 	))
-	rightExterior = gw.Add(entity.New(sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior.png"}))
-	rightInterior = gw.Add(entity.New(
-		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior.png"},
+
+	// add the right exterior eye
+	rightExterior = gw.Add(entity.New(
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior.png", Scale: gameScale.Min},
+		rightEyePos,
+	))
+
+	// add the right interior eye
+	gw.Add(entity.New(
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior.png", Scale: gameScale.Min},
+		rightEyePos,
 		lookAtMouse{pivot: rightExterior, radius: eyeRadius},
 	))
 
+	// the text is bottom center
+	textPos := geometry.Position{
+		X: (designResolution.Width / 2) * gameScale.Point.X,
+		Y: designResolution.Height * gameScale.Point.Y,
+	}
+
 	// add our text
-	bottomText = gw.Add(entity.New(
+	gw.Add(entity.New(
 		text.Text{
 			String:     "press <ESC> to close",
 			HAlignment: text.CenterHAlignment,
 			VAlignment: text.BottomVAlignment,
+			Size:       textSmallSize * gameScale.Min,
+			Spacing:    (textSmallSize / 4) * gameScale.Min,
 		},
+		textPos,
 		color.Black,
 	))
+
+	// our bar shape
+	box := shapes.Box{
+		Size: geometry.Size{
+			Width:  dizzyBarWith,
+			Height: dizzyBarHeight,
+		},
+		Scale: gameScale.Min,
+	}
+
+	// position of the bar
+	dizzyBarPosition := geometry.Position{
+		X: (designResolution.Width - dizzyBarWith) / 2 * gameScale.Min,
+		Y: dizzyBarGap * gameScale.Min,
+	}
+
+	// position the dizzy text
+	dizzyTextPosition := geometry.Position{
+		X: designResolution.Width / 2 * gameScale.Min,
+		Y: (dizzyBarGap + (dizzyBarHeight / 2)) * gameScale.Min,
+	}
 
 	// Add the dizzy bar
 	dizzyBar = gw.Add(entity.New(
-		shapes.Box{},
 		color.Gradient{From: color.Green, To: color.Red},
+		box,
+		dizzyBarPosition,
 	))
 
+	// Add the empty dizzy bar
 	dizzyBarEmpty = gw.Add(entity.New(
-		shapes.Box{},
 		color.Black,
+		box,
+		dizzyBarPosition,
 	))
 
 	// add the dizzy text
@@ -136,29 +208,19 @@ func loadGame(eng engine.Engine) error {
 			String:     "Dizzy! Level",
 			HAlignment: text.CenterHAlignment,
 			VAlignment: text.MiddleVAlignment,
+			Size:       textBigSize * gameScale.Min,
+			Spacing:    (textBigSize / 4) * gameScale.Min,
 		},
-		effects.AlternateColor{
-			Time:  0.25,
-			Delay: 0.25,
-			From:  color.Red,
-			To:    color.Yellow,
-		},
+		color.Green,
+		dizzyTextPosition,
 	))
 
-	// add our layout system
-	gw.AddSystem(&layoutSystem{})
 	// add our look at mouse system
 	gw.AddSystem(&lookAtMouseSystem{})
 	// add our dizzy bar system
 	gw.AddSystem(&dizzyBarSystem{})
 
 	return nil
-}
-
-func main() {
-	if err := game.Run(opt, loadGame); err != nil {
-		log.Fatalf("error running the game: %v", err)
-	}
 }
 
 // component to make an entity to look at mouse with a pivot
@@ -174,10 +236,7 @@ func getLookAtMouse(e *entity.Entity) lookAtMouse {
 }
 
 // system that make entities to look at the mouse
-type lookAtMouseSystem struct {
-	scaleX float32
-	scaleY float32
-}
+type lookAtMouseSystem struct{}
 
 func (lam lookAtMouseSystem) Update(_ *world.World, _ float32) error {
 	return nil
@@ -185,11 +244,6 @@ func (lam lookAtMouseSystem) Update(_ *world.World, _ float32) error {
 
 func (lam *lookAtMouseSystem) Notify(gw *world.World, event interface{}, _ float32) error {
 	switch ev := event.(type) {
-	// if the screen has change size
-	case events.ScreenSizeChangeEvent:
-		// save the scale
-		lam.scaleX = ev.Scale.Point.X
-		lam.scaleY = ev.Scale.Point.Y
 	// if we move the mouse
 	case events.MouseMoveEvent:
 		// get the entities that look at the mouse
@@ -207,10 +261,11 @@ func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse ge
 
 	dx := mouse.X - pos.X
 	dy := mouse.Y - pos.Y
+
 	angle := float32(math.Atan2(float64(dy), float64(dx)))
 
-	ax := la.radius.X * lam.scaleX * float32(math.Cos(float64(angle)))
-	ay := la.radius.Y * lam.scaleY * float32(math.Sin(float64(angle)))
+	ax := la.radius.X * float32(math.Cos(float64(angle)))
+	ay := la.radius.Y * float32(math.Sin(float64(angle)))
 
 	np := geometry.Position{
 		X: pos.X + ax,
@@ -218,104 +273,6 @@ func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse ge
 	}
 
 	ent.Set(np)
-}
-
-// system that layout/scale our entities when the screen size change
-type layoutSystem struct{}
-
-func (ls layoutSystem) Update(_ *world.World, _ float32) error {
-	return nil
-}
-
-func (ls *layoutSystem) Notify(_ *world.World, event interface{}, _ float32) error {
-	switch ev := event.(type) {
-	// if the screen has change size
-	case events.ScreenSizeChangeEvent:
-		// change layout
-		ls.positionElements(ev)
-	}
-	return nil
-}
-
-// layout our entities
-func (ls layoutSystem) positionElements(event events.ScreenSizeChangeEvent) {
-	scale := event.Scale.Max
-	// the nose is in the middle and a bit down
-	nosePos := geometry.Position{
-		X: event.Current.Width / 2,
-		Y: event.Current.Height/2 + (noseVerticalGap * scale),
-	}
-
-	// left eye is a bit up left of the nose
-	leftEyePos := geometry.Position{
-		X: nosePos.X - (eyesGap * scale),
-		Y: nosePos.Y - (eyesGap * scale),
-	}
-
-	// right eye is a bit up right of the nose
-	rightEyePos := geometry.Position{
-		X: nosePos.X + (eyesGap * scale),
-		Y: leftEyePos.Y,
-	}
-
-	// update sprites pos and scale
-	ls.setPosAndScaleSprite(nose, nosePos, scale)
-	ls.setPosAndScaleSprite(leftExterior, leftEyePos, scale)
-	ls.setPosAndScaleSprite(leftInterior, leftEyePos, scale)
-	ls.setPosAndScaleSprite(rightExterior, rightEyePos, scale)
-	ls.setPosAndScaleSprite(rightInterior, rightEyePos, scale)
-
-	// the text is bottom center
-	textPos := geometry.Position{
-		X: event.Current.Width / 2,
-		Y: event.Current.Height,
-	}
-	// update text pos and scale
-	ls.setPosAndScaleText(bottomText, textPos, scale, textSmallSize)
-
-	box := shapes.Get.Box(dizzyBar)
-	box.Size.Width = dizzyBarWith
-	box.Size.Height = dizzyBarHeight
-	box.Scale = scale
-
-	dizzyBarPosition := geometry.Position{
-		X: (event.Current.Width - (box.Size.Width * scale)) / 2,
-		Y: dizzyBarGap * scale,
-	}
-	dizzyBar.Set(dizzyBarPosition)
-	dizzyBar.Set(box)
-
-	dizzyTextPosition := geometry.Position{
-		X: event.Current.Width / 2,
-		Y: dizzyBarPosition.Y + (box.Size.Height / 2 * scale),
-	}
-
-	ls.setPosAndScaleText(dizzyText, dizzyTextPosition, scale, textBigSize)
-}
-
-// set the position and scale of the objects
-func (ls layoutSystem) setPosAndScaleSprite(ent *entity.Entity, pos geometry.Position, scale float32) {
-	// set pos
-	ent.Set(pos)
-
-	// update sprite scale
-	sp := sprite.Get(ent)
-	sp.Scale = scale
-	ent.Set(sp)
-
-}
-
-// set the position and scale of the objects
-func (ls layoutSystem) setPosAndScaleText(ent *entity.Entity, pos geometry.Position, size float32, scale float32) {
-	// set pos
-	ent.Set(pos)
-
-	// update text scale
-	tx := text.Get(ent)
-	tx.Size = size * scale
-	tx.Spacing = size / 4 * scale
-	ent.Set(tx)
-
 }
 
 type dizzyBarSystem struct {
@@ -330,32 +287,27 @@ func (dbs *dizzyBarSystem) Update(_ *world.World, delta float32) error {
 	// calculate how dizzy we are in 0..1
 	percent := 1 - (dbs.dizzy / maxDizzy)
 
-	// if we have position
-	if dizzyBar.Contains(geometry.TYPE.Position) {
-		// get the position of the regular dizzy bar
-		dizzyBarPosition := geometry.Get.Position(dizzyBar)
-		// get the position
-		box := shapes.Get.Box(dizzyBar)
+	// get the position of the regular dizzy bar
+	dizzyBarPosition := geometry.Get.Position(dizzyBar)
+	// get the position
+	box := shapes.Get.Box(dizzyBar)
 
-		// calculate position and width
-		box.Size.Width = box.Size.Width * percent
-		dizzyBarPosition.X = dizzyBarPosition.X - (dizzyBarWith * box.Scale * (percent - 1))
+	// calculate position and width
+	box.Size.Width = box.Size.Width * percent
+	dizzyBarPosition.X = dizzyBarPosition.X - (dizzyBarWith * box.Scale * (percent - 1))
 
-		// set components
-		dizzyBarEmpty.Set(dizzyBarPosition)
-		dizzyBarEmpty.Set(box)
+	// set components
+	dizzyBarEmpty.Set(dizzyBarPosition)
+	dizzyBarEmpty.Set(box)
 
-		// make the dizzy text to blink faster
-		ac := effects.Get.AlternateColor(dizzyText)
-		ac.Delay = 0.25 * percent
-		ac.Time = 0.25 * (percent * 8)
-		dizzyText.Set(ac)
+	// make the dizzy text color change from green to blend depending on how dizzy we are
+	cl := color.Green.Blend(color.Red, 1-percent)
+	dizzyText.Set(cl)
 
-		// color the eyes red
-		clr := color.White.Blend(color.Red, (1-percent)/2)
-		leftExterior.Set(clr)
-		rightExterior.Set(clr)
-	}
+	// color the eyes red
+	clr := color.White.Blend(color.Red, (1-percent)/2)
+	leftExterior.Set(clr)
+	rightExterior.Set(clr)
 
 	return nil
 }

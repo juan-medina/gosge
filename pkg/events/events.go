@@ -28,20 +28,6 @@ import "github.com/juan-medina/gosge/pkg/components/geometry"
 // GameCloseEvent is an event that indicates that game need to close
 type GameCloseEvent struct{}
 
-// ScreenSizeChangeEvent is an event that indicates that the screen size has change
-type ScreenSizeChangeEvent struct {
-	// Current is the current screen size
-	Current geometry.Size
-	// Original is the original, from options.Options, screen size
-	Original geometry.Size
-	// Scale is the current scale between Current and Original
-	Scale struct {
-		Point geometry.Point //Point is the scale per point
-		Min   float32        // Min is the minimum scale between X and Y
-		Max   float32        // Max is the maximum scale between X and Y
-	}
-}
-
 // MouseMoveEvent is an event that indicates that the mouse is moving
 type MouseMoveEvent struct {
 	geometry.Position

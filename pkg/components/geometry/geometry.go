@@ -25,6 +25,7 @@ package geometry
 
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
+	"math"
 	"reflect"
 )
 
@@ -38,6 +39,27 @@ type Point struct {
 type Size struct {
 	Width  float32 // Width is vertical length of the size
 	Height float32 // Height is the horizontal length of the size
+}
+
+// Scale is the current scale between two Size
+type Scale struct {
+	Point Point   // Point is the scale per point
+	Min   float32 // Min is the minimum scale between X and Y
+	Max   float32 // Max is the maximum scale between X and Y
+}
+
+// CalculateScale calculates the Scale between to Size
+func (s Size) CalculateScale(other Size) Scale {
+	sx := s.Width / other.Width
+	sy := s.Height / other.Height
+	return Scale{
+		Min: float32(math.Min(float64(sx), float64(sy))),
+		Max: float32(math.Max(float64(sx), float64(sy))),
+		Point: Point{
+			X: sx,
+			Y: sy,
+		},
+	}
 }
 
 // Rect is a rectangular area

@@ -25,12 +25,11 @@ package options
 
 import (
 	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
 )
 
 // Options are our game options
 type Options struct {
-	Title      string        // Title is the game title
-	Size       geometry.Size // Size is the screen size
-	ClearColor color.Solid   // ClearColor is the background color.Color
+	Title      string      // Title is the game title
+	BackGround color.Solid // BackGround is the background color.Color
+	Monitor    int         // Monitor is the monitor that we will use
 }

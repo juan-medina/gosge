@@ -38,6 +38,8 @@ type Engine interface {
 	LoadSpriteSheet(fileName string) error
 	//GetSpriteSize returns the geometry.Size of a given sprite
 	GetSpriteSize(sheet string, name string) (geometry.Size, error)
+	//GetScreenSize returns the current screen size
+	GetScreenSize() geometry.Size
 }
 
 // InitFunc is a function that will get call for our game to load

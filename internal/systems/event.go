@@ -5,7 +5,6 @@ import (
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/events"
-	"math"
 )
 
 /*
@@ -31,9 +30,6 @@ import (
  */
 
 type eventSystem struct {
-	tt  float32
-	wld *world.World
-	sse events.ScreenSizeChangeEvent
 	mme events.MouseMoveEvent
 	rdr render.Render
 }
@@ -42,59 +38,17 @@ func (es eventSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
 	return nil
 }
 
-func (es *eventSystem) sendScreenSizeChange() error {
-	size := es.rdr.GetScreenSize()
-	es.sse.Current.Width = size.Width
-	es.sse.Current.Height = size.Height
-
-	sx := es.sse.Current.Width / es.sse.Original.Width
-	sy := es.sse.Current.Height / es.sse.Original.Height
-	es.sse.Scale.Min = float32(math.Min(float64(sx), float64(sy)))
-	es.sse.Scale.Max = float32(math.Max(float64(sx), float64(sy)))
-	es.sse.Scale.Point.X = sx
-	es.sse.Scale.Point.Y = sy
-
-	return es.wld.Notify(es.sse)
+func (es eventSystem) sendGameClose(wld *world.World) error {
+	return wld.Notify(events.GameCloseEvent{})
 }
 
-func (es eventSystem) sendGameClose() error {
-	return es.wld.Notify(es.sse)
+func (es eventSystem) sendMouseMove(wld *world.World) error {
+	return wld.Notify(es.mme)
 }
 
-func (es eventSystem) sendMouseMove() error {
-	return es.wld.Notify(es.mme)
-}
-
-func (es *eventSystem) initialize(world *world.World) error {
-	es.wld = world
-
-	size := es.rdr.GetScreenSize()
-
-	es.sse.Original = size
-	es.sse.Current = size
-	es.sse.Scale.Min = 1
-	es.sse.Scale.Max = 1
-	es.sse.Scale.Point.X = 1
-	es.sse.Scale.Point.Y = 1
-
-	return es.sendScreenSizeChange()
-}
-
-func (es *eventSystem) Update(world *world.World, delta float32) error {
-	if es.tt == 0 {
-		if err := es.initialize(world); err != nil {
-			return err
-		}
-	}
-
+func (es *eventSystem) Update(world *world.World, _ float32) error {
 	if es.rdr.ShouldClose() {
-		if err := es.sendGameClose(); err != nil {
-			return err
-		}
-	}
-
-	if es.rdr.IsScreenScaleChange() {
-		if err := es.sendScreenSizeChange(); err != nil {
+		if err := es.sendGameClose(world); err != nil {
 			return err
 		}
 	}
@@ -102,12 +56,11 @@ func (es *eventSystem) Update(world *world.World, delta float32) error {
 	mp := es.rdr.GetMousePosition()
 	if es.mme.Position != mp {
 		es.mme.Position = mp
-		if err := es.sendMouseMove(); err != nil {
+		if err := es.sendMouseMove(world); err != nil {
 			return err
 		}
 	}
 
-	es.tt += delta
 	return nil
 }
 

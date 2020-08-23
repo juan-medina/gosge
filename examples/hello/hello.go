@@ -24,60 +24,25 @@ package main
 
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
-	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
-	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
 	"log"
-	"reflect"
 )
 
 var opt = options.Options{
-	Title: "Hello Game",
-	Size: geometry.Size{
-		Width:  1920,
-		Height: 1080,
-	},
-	ClearColor: color.Black,
+	Title:      "Hello Game",
+	BackGround: color.Black,
 }
 
-func loadGame(eng engine.Engine) error {
-	gWorld := eng.World()
-	gWorld.Add(entity.New(
-		text.Text{
-			String:     "Hello World",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.MiddleVAlignment,
-		},
-		effects.AlternateColor{
-			Time:  2,
-			Delay: 1,
-			From:  color.Red,
-			To:    color.Yellow,
-		},
-		stickyText{size: 300, spacing: 10, stick: stickToCenter},
-	))
-	gWorld.Add(entity.New(
-		text.Text{
-			String:     "press <ESC> to close",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.BottomVAlignment,
-		},
-		effects.AlternateColor{
-			Time: .25,
-			From: color.White,
-			To:   color.White.Alpha(0),
-		},
-		stickyText{size: 60, spacing: 10, stick: stickToBottom},
-	))
-	gWorld.AddSystem(stickyTextSystem{})
-	return nil
-}
+var (
+	// designResolution is how our game is designed
+	designResolution = geometry.Size{Width: 1920, Height: 1080}
+)
 
 func main() {
 	if err := game.Run(opt, loadGame); err != nil {
@@ -85,58 +50,51 @@ func main() {
 	}
 }
 
-type stickPosition int
+func loadGame(eng engine.Engine) error {
+	gWorld := eng.World()
 
-const (
-	stickToCenter = iota
-	stickToBottom
-)
+	// gameScale has a geometry.Scale from the real screen size to our designResolution
+	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
-type stickyText struct {
-	size    float32
-	spacing float32
-	stick   stickPosition
-}
+	// add the centered text
+	gWorld.Add(entity.New(
+		text.Text{
+			String:     "Hello World",
+			HAlignment: text.CenterHAlignment,
+			VAlignment: text.MiddleVAlignment,
+			Size:       300 * gameScale.Min,
+			Spacing:    10,
+		},
+		geometry.Position{
+			X: designResolution.Width / 2 * gameScale.Point.X,
+			Y: designResolution.Height / 2 * gameScale.Point.Y,
+		},
+		effects.AlternateColor{
+			Time:  1,
+			Delay: 0.5,
+			From:  color.Red,
+			To:    color.Yellow,
+		},
+	))
 
-var types = struct{ stickyText reflect.Type }{stickyText: reflect.TypeOf(stickyText{})}
-
-func getStickyText(e *entity.Entity) stickyText {
-	return e.Get(types.stickyText).(stickyText)
-}
-
-type stickyTextSystem struct{}
-
-func (sts stickyTextSystem) Update(_ *world.World, _ float32) error {
-	return nil
-}
-
-func (sts stickyTextSystem) Notify(wld *world.World, event interface{}, _ float32) error {
-	switch e := event.(type) {
-	case events.ScreenSizeChangeEvent:
-		// get all our texts
-		for _, v := range wld.Entities(text.TYPE, types.stickyText) {
-			// get the text components
-			txt := text.Get(v)
-			st := getStickyText(v)
-
-			// change text size & spacing from current scale
-			txt.Size = st.size * e.Scale.Min
-			txt.Spacing = st.spacing * e.Scale.Min
-			v.Set(txt)
-
-			// calculate position based on current screen size and sticky
-			pos := geometry.Position{}
-			switch st.stick {
-			case stickToCenter:
-				pos.X = e.Current.Width / 2
-				pos.Y = e.Current.Height / 2
-			case stickToBottom:
-				pos.X = e.Current.Width / 2
-				pos.Y = e.Current.Height
-			}
-			v.Set(pos)
-		}
-	}
-
+	// add the bottom text
+	gWorld.Add(entity.New(
+		text.Text{
+			String:     "press <ESC> to close",
+			HAlignment: text.CenterHAlignment,
+			VAlignment: text.BottomVAlignment,
+			Size:       60 * gameScale.Min,
+			Spacing:    10,
+		},
+		geometry.Position{
+			X: designResolution.Width / 2 * gameScale.Point.X,
+			Y: designResolution.Height * gameScale.Point.Y,
+		},
+		effects.AlternateColor{
+			Time: .25,
+			From: color.White,
+			To:   color.White.Alpha(0),
+		},
+	))
 	return nil
 }

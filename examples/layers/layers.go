@@ -11,22 +11,23 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
-	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
 	"log"
 	"math/rand"
-	"reflect"
 )
 
 // game options
 var opt = options.Options{
-	Title: "Layers Game",
-	Size: geometry.Size{
-		Width:  1920,
-		Height: 1080,
-	},
-	ClearColor: color.Black,
+	Title:      "Layers Game",
+	BackGround: color.Black,
+}
+
+func main() {
+	// create and load the game
+	if err := game.Run(opt, load); err != nil {
+		log.Fatalf("error running the game: %v", err)
+	}
 }
 
 // group will contain a set of items
@@ -45,8 +46,8 @@ var (
 	// groups is an slice of groups
 	groups = []group{
 		{
-			clr:   color.White,
-			name:  "White",
+			clr:   color.SkyBlue,
+			name:  "SkyBlue",
 			layer: backLayer,
 		},
 		{
@@ -63,13 +64,90 @@ var (
 
 	// uiText contains the text on top of the screen
 	uiText *entity.Entity
+
+	// designResolution is how our game is designed
+	designResolution = geometry.Size{Width: 1920, Height: 1080}
 )
 
 // game constants
 const (
-	itemsToAdd   = 100         // itemsToAdd is how many items we are going to add
+	itemsToAdd   = 200         // itemsToAdd is how many items we are going to add
 	timeToChange = float32(10) // timeToChange is how many seconds to change layers
+	uiFontSize   = 75          // uiFontSize is the size for UI font
+	itemFontSize = 50          // itemFontSize is the size for Items font
 )
+
+// load the game
+func load(eng engine.Engine) error {
+	// get the world
+	wld := eng.World()
+
+	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
+
+	// preload sprite sheet
+	if err := eng.LoadSpriteSheet("resources/gamer.json"); err != nil {
+		return err
+	}
+
+	// calculate the UI positions
+	boxWidth := designResolution.Width * 0.70
+	boxStartX := (designResolution.Width / 2) - (boxWidth / 2)
+
+	// set the position with scale
+	boxSize := geometry.Size{Width: boxWidth * gameScale.Point.X, Height: uiFontSize * gameScale.Point.Y}
+	uiPos := geometry.Position{X: boxStartX * gameScale.Point.X, Y: 0}
+	uiTextPos := geometry.Position{X: uiPos.X, Y: boxSize.Height / 2}
+
+	// add the top box
+	wld.Add(entity.New(
+		shapes.Box{Size: boxSize, Scale: 1},
+		uiPos,
+		color.DarkBlue.Alpha(200),
+		uiLayer,
+	))
+
+	// add the text
+	uiText = wld.Add(entity.New(
+		text.Text{
+			String:     "xx is Front",
+			VAlignment: text.MiddleVAlignment,
+			HAlignment: text.LeftHAlignment,
+			Size:       uiFontSize * gameScale.Min,
+			Spacing:    (uiFontSize / 10) * gameScale.Min,
+		},
+		uiTextPos,
+		color.SkyBlue,
+		uiLayer,
+	))
+
+	// add the bottom text
+	wld.Add(entity.New(
+		text.Text{
+			String:     "press <ESC> to close",
+			HAlignment: text.CenterHAlignment,
+			VAlignment: text.BottomVAlignment,
+			Size:       uiFontSize * gameScale.Min,
+			Spacing:    (uiFontSize / 10) * gameScale.Min,
+		},
+		geometry.Position{
+			X: designResolution.Width / 2 * gameScale.Point.X,
+			Y: designResolution.Height * gameScale.Point.Y,
+		},
+		effects.AlternateColor{
+			Time: .25,
+			From: color.DarkBlue,
+			To:   color.DarkBlue.Alpha(150),
+		},
+		uiLayer,
+	))
+
+	// add the items
+	addItems(itemsToAdd, wld, gameScale)
+
+	// at the layout system
+	wld.AddSystem(&swapLayersOnTimeSystem{})
+	return nil
+}
 
 // item type
 type itemType int
@@ -82,7 +160,7 @@ const (
 )
 
 // addItem add a set of random items to the world
-func addItems(toAdd int, wld *world.World) {
+func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 	// for as many items we like to add
 	for i := 0; i < toAdd; i++ {
 		// pick a random group
@@ -90,8 +168,8 @@ func addItems(toAdd int, wld *world.World) {
 		gr := groups[gn]
 
 		// position is random in within the screen
-		x := rand.Float32() * opt.Size.Width
-		y := rand.Float32() * opt.Size.Height
+		x := rand.Float32() * designResolution.Width * scl.Point.X
+		y := rand.Float32() * designResolution.Height * scl.Point.Y
 
 		it := itemType(rand.Float32() * float32(totalItemsTypes))
 
@@ -105,23 +183,39 @@ func addItems(toAdd int, wld *world.World) {
 
 			// add the texts shadow
 			wld.Add(entity.New(
-				text.Text{String: gr.name, VAlignment: text.MiddleVAlignment, HAlignment: text.CenterHAlignment},
-				relativePosition{original: stp, size: 100},
+				text.Text{
+					String:     gr.name,
+					VAlignment: text.MiddleVAlignment,
+					HAlignment: text.CenterHAlignment,
+					Size:       itemFontSize * scl.Min,
+					Spacing:    itemFontSize / 10 * scl.Min,
+				},
+				stp,
 				color.DarkGray.Alpha(127),
 				gr.layer,
 			))
 
 			// add the text
 			wld.Add(entity.New(
-				text.Text{String: gr.name, VAlignment: text.MiddleVAlignment, HAlignment: text.CenterHAlignment},
-				relativePosition{original: pos, size: 100},
+				text.Text{
+					String:     gr.name,
+					VAlignment: text.MiddleVAlignment,
+					HAlignment: text.CenterHAlignment,
+					Size:       itemFontSize * scl.Min,
+					Spacing:    itemFontSize / 10 * scl.Min,
+				},
+				pos,
 				gr.clr,
 				gr.layer,
 			))
 		case itemTypeSprite:
 			wld.Add(entity.New(
-				sprite.Sprite{Sheet: "resources/gamer.json", Name: "gamer.png"},
-				relativePosition{original: pos, size: 0.25},
+				sprite.Sprite{
+					Sheet: "resources/gamer.json",
+					Name:  "gamer.png",
+					Scale: 0.25 * scl.Min,
+				},
+				pos,
 				gr.clr,
 				gr.layer,
 			))
@@ -129,73 +223,43 @@ func addItems(toAdd int, wld *world.World) {
 	}
 }
 
-// load the game
-func load(eng engine.Engine) error {
-	// get the world
-	wld := eng.World()
-
-	// preload sprite sheet
-	if err := eng.LoadSpriteSheet("resources/gamer.json"); err != nil {
-		return err
-	}
-
-	// calculate the UI positions
-	boxSize := geometry.Size{Width: opt.Size.Width / 1.15, Height: opt.Size.Height / 12}
-	uiPos := geometry.Position{X: (opt.Size.Width / 2) - (boxSize.Width / 2), Y: 0}
-	uiTextPos := geometry.Position{X: uiPos.X, Y: boxSize.Height / 2}
-
-	// add the top box
-	wld.Add(entity.New(
-		shapes.Box{
-			Size:  boxSize,
-			Scale: 1,
-		},
-		relativePosition{original: uiPos},
-		color.DarkBlue.Alpha(200),
-		uiLayer,
-	))
-
-	// add the text
-	uiText = wld.Add(entity.New(
-		text.Text{String: "xx is Front", VAlignment: text.MiddleVAlignment, HAlignment: text.LeftHAlignment},
-		relativePosition{original: uiTextPos, size: 80},
-		color.SkyBlue,
-		uiLayer,
-	))
-
-	// add the items
-	addItems(itemsToAdd, wld)
-
-	// at the layout system
-	wld.AddSystem(&layoutSystem{})
-	return nil
-}
-
-func main() {
-	// create and load the game
-	if err := game.Run(opt, load); err != nil {
-		log.Fatalf("error running the game: %v", err)
-	}
-}
-
-// relativePosition contains the original position and size for changing layout on screen size change
-type relativePosition struct {
-	original geometry.Position
-	size     float32
-}
-
-// relativeType is the reflect.Type of your relativePosition
-var relativeType = reflect.TypeOf(relativePosition{})
-
-// layoutSystem will resize and re-position the game on screen size change
-type layoutSystem struct {
+// swapLayersOnTimeSystem will change the groups layers base on time
+type swapLayersOnTimeSystem struct {
 	time float32
 }
 
+// Update the system checking when need to swap layers
+func (sls *swapLayersOnTimeSystem) Update(w *world.World, delta float32) error {
+	// increase time
+	sls.time += delta
+
+	// if we need to change
+	if sls.time > timeToChange {
+		// reset time
+		sls.time = 0
+		// swap layers
+		if err := sls.swapLayers(w, 1, 2); err != nil {
+			return err
+		}
+	}
+
+	// update the ui
+	if err := sls.updateUI(w); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Notify is trigger on events
+func (sls *swapLayersOnTimeSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
+	return nil
+}
+
 // swapLayers swap the layers of two groups
-func (ls *layoutSystem) swapLayers(w *world.World, old, new int) error {
+func (sls *swapLayersOnTimeSystem) swapLayers(w *world.World, old, new int) error {
 	for _, ent := range w.Entities() {
-		if ent.Contains(relativeType, effects.TYPE.Layer) {
+		if ent.Contains(effects.TYPE.Layer) {
 			ly := effects.Get.Layer(ent)
 			if ly.Depth == groups[old].layer.Depth {
 				ent.Set(groups[new].layer)
@@ -214,7 +278,7 @@ func (ls *layoutSystem) swapLayers(w *world.World, old, new int) error {
 }
 
 // updateUI update the ui telling what group is top and when is going to change
-func (ls *layoutSystem) updateUI(_ *world.World) error {
+func (sls *swapLayersOnTimeSystem) updateUI(_ *world.World) error {
 	var top = 0
 	for i := 0; i < 3; i++ {
 		if groups[i].layer.Depth == topLayer.Depth {
@@ -224,81 +288,8 @@ func (ls *layoutSystem) updateUI(_ *world.World) error {
 	}
 
 	txt := text.Get(uiText)
-	txt.String = fmt.Sprintf("top layer %s, change in %02.02f", groups[top].name, timeToChange-ls.time)
+	txt.String = fmt.Sprintf("top layer %s, change in %02.02f", groups[top].name, timeToChange-sls.time)
 	uiText.Set(txt)
 
-	return nil
-}
-
-// Update the system checking when need to swap layers
-func (ls *layoutSystem) Update(w *world.World, delta float32) error {
-	// increase time
-	ls.time += delta
-
-	// if we need to change
-	if ls.time > timeToChange {
-		// reset time
-		ls.time = 0
-		// swap layers
-		if err := ls.swapLayers(w, 1, 2); err != nil {
-			return err
-		}
-	}
-
-	// update the ui
-	if err := ls.updateUI(w); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// layout game elements
-func (ls layoutSystem) layout(w *world.World, ssc events.ScreenSizeChangeEvent) error {
-	// get the entities that has a relativePosition
-	for _, ent := range w.Entities(relativeType) {
-		// get the original position
-		rl := ent.Get(relativeType).(relativePosition)
-
-		// calculate the new position
-		pos := geometry.Position{}
-		pos.X = rl.original.X * ssc.Scale.Point.X
-		pos.Y = rl.original.Y * ssc.Scale.Point.Y
-		ent.Set(pos)
-
-		// if is a text scale text size and spacing
-		if ent.Contains(text.TYPE) {
-			tx := text.Get(ent)
-			tx.Size = rl.size * ssc.Scale.Min
-			tx.Spacing = tx.Size / 4
-			ent.Set(tx)
-		}
-
-		// if is a Box shape update its scale
-		if ent.Contains(shapes.TYPE.Box) {
-			box := shapes.Get.Box(ent)
-			box.Scale = ssc.Scale.Min
-			ent.Set(box)
-		}
-
-		// if is a Sprite update its scale
-		if ent.Contains(sprite.TYPE) {
-			spr := sprite.Get(ent)
-			spr.Scale = rl.size * ssc.Scale.Min
-			ent.Set(spr)
-		}
-	}
-	return nil
-}
-
-// Notify is trigger on events
-func (ls *layoutSystem) Notify(w *world.World, event interface{}, _ float32) error {
-	// switch event type
-	switch e := event.(type) {
-	//if the screen size change
-	case events.ScreenSizeChangeEvent:
-		// re-layout the game
-		return ls.layout(w, e)
-	}
 	return nil
 }
