@@ -28,6 +28,13 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 )
 
+// GameStage is our game different stages
+type GameStage interface {
+	Load(eng Engine) error
+	Run(eng Engine) error
+	Unload(eng Engine) error
+}
+
 // Engine is the interface for the game engine
 type Engine interface {
 	// World returns the game world.World
@@ -36,10 +43,15 @@ type Engine interface {
 	LoadTexture(fileName string) error
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(fileName string) error
-	//GetSpriteSize returns the geometry.Size of a given sprite
+	// GetSpriteSize returns the geometry.Size of a given sprite
 	GetSpriteSize(sheet string, name string) (geometry.Size, error)
-	//GetScreenSize returns the current screen size
+	// GetScreenSize returns the current screen size
 	GetScreenSize() geometry.Size
+	// AddGameStage adds a new engine.GameStage to our game with the given name
+	AddGameStage(name string, stage GameStage)
+	// ChangeStage ask the engine to change the engine.GameStage giving its name, it will trigger GameStage.Unload on
+	//the running engine.GameStage and GameStage.Load in the new engine.GameStage
+	ChangeStage(name string) error
 }
 
 // InitFunc is a function that will get call for our game to load

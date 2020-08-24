@@ -24,6 +24,7 @@
 package engine
 
 import (
+	"fmt"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/internal/store"
@@ -40,6 +41,9 @@ const (
 	statusInitializing = engineStatus(iota)
 	statusRunning
 	statusEnding
+	statusUnloadCurrentStage
+	statusLoadNextStage
+	statusRunStage
 )
 
 const (
@@ -62,6 +66,9 @@ type engineImpl struct {
 	frameTime float32
 	ss        store.SpriteStorage
 	rdr       render.Render
+	stages    map[string]engine.GameStage
+	cStage    engine.GameStage
+	nStage    engine.GameStage
 }
 
 func (ei *engineImpl) GetScreenSize() geometry.Size {
@@ -106,6 +113,9 @@ func New(opt options.Options, init engine.InitFunc) Impl {
 		init:   init,
 		ss:     store.NewSpriteStorage(rdr),
 		rdr:    rdr,
+		stages: make(map[string]engine.GameStage),
+		cStage: nil,
+		nStage: nil,
 	}
 }
 
@@ -126,7 +136,12 @@ func (ei *engineImpl) initialize() error {
 		// rendering system will run last
 		ei.gWorld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ss), lastPriority)
 
-		ei.status = statusRunning
+		if ei.nStage == nil {
+			ei.status = statusRunning
+		} else {
+			ei.status = statusLoadNextStage
+		}
+
 	}
 	return err
 }
@@ -167,10 +182,95 @@ func (ei *engineImpl) Run() error {
 			err = ei.running()
 		case statusEnding:
 			err = ei.end()
+		case statusUnloadCurrentStage:
+			err = ei.unloadCurrentStage()
+		case statusLoadNextStage:
+			err = ei.loadNextStage()
+		case statusRunStage:
+			err = ei.runStage()
 		}
 	}
 	if err != nil && ei.status == statusRunning {
 		_ = ei.end()
 	}
+	return err
+}
+
+func (ei *engineImpl) AddGameStage(name string, stage engine.GameStage) {
+	ei.stages[name] = stage
+}
+
+func (ei *engineImpl) ChangeStage(name string) error {
+	if _, ok := ei.stages[name]; ok {
+		ei.nStage = ei.stages[name]
+
+		// if we have a current stage unload if not load the new
+		if ei.cStage != nil {
+			ei.status = statusUnloadCurrentStage
+		} else {
+			ei.status = statusLoadNextStage
+		}
+
+		return nil
+	}
+	return fmt.Errorf("stage %q not found", name)
+}
+
+func (ei *engineImpl) unloadCurrentStage() error {
+	var err error
+
+	// begin frame
+	ei.rdr.BeginFrame()
+
+	err = ei.cStage.Unload(ei)
+
+	if err == nil {
+		ei.cStage = nil
+		ei.status = statusLoadNextStage
+	} else {
+		ei.status = statusRunning
+	}
+
+	// we end the frame regardless of if we have an error
+	ei.rdr.EndFrame()
+
+	return err
+}
+
+func (ei *engineImpl) loadNextStage() error {
+	var err error
+
+	// begin frame
+	ei.rdr.BeginFrame()
+
+	err = ei.nStage.Load(ei)
+	if err == nil {
+		ei.cStage = ei.nStage
+		ei.status = statusRunStage
+	} else {
+		ei.status = statusRunning
+	}
+
+	// we end the frame regardless of if we have an error
+	ei.rdr.EndFrame()
+
+	return err
+}
+
+func (ei *engineImpl) runStage() error {
+	var err error
+
+	// begin frame
+	ei.rdr.BeginFrame()
+
+	if ei.cStage != nil {
+		err = ei.cStage.Run(ei)
+	}
+
+	ei.status = statusRunning
+
+	// we end the frame regardless of if we have an error
+	ei.rdr.EndFrame()
+
 	return err
 }
