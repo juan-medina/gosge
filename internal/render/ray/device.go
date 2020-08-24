@@ -26,6 +26,8 @@ import (
 	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/options"
 	"os"
+	"runtime"
+	"strings"
 )
 
 // Init the rendering device
@@ -44,8 +46,10 @@ func (rr *RenderImpl) Init(opt options.Options) {
 			rl.UnloadImage(img)
 		}
 	}
-
-	rl.ToggleFullscreen()
+	// rl.ToggleFullscreen does not work ok on linux
+	if !strings.Contains(runtime.GOOS, "linux") {
+		rl.ToggleFullscreen()
+	}
 }
 
 // End the rendering device
