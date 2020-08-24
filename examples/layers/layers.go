@@ -259,14 +259,13 @@ func (sls *swapLayersOnTimeSystem) Notify(_ *world.World, _ interface{}, _ float
 
 // swapLayers swap the layers of two groups
 func (sls *swapLayersOnTimeSystem) swapLayers(w *world.World, old, new int) error {
-	for _, ent := range w.Entities() {
-		if ent.Contains(effects.TYPE.Layer) {
-			ly := effects.Get.Layer(ent)
-			if ly.Depth == groups[old].layer.Depth {
-				ent.Set(groups[new].layer)
-			} else if ly.Depth == groups[new].layer.Depth {
-				ent.Set(groups[old].layer)
-			}
+	for it := w.Iterator(effects.TYPE.Layer); it.HasNext(); {
+		ent := it.Value()
+		ly := effects.Get.Layer(ent)
+		if ly.Depth == groups[old].layer.Depth {
+			ent.Set(groups[new].layer)
+		} else if ly.Depth == groups[new].layer.Depth {
+			ent.Set(groups[old].layer)
 		}
 	}
 

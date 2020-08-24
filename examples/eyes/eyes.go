@@ -248,7 +248,8 @@ func (lam *lookAtMouseSystem) Notify(gw *world.World, event interface{}, _ float
 	// if we move the mouse
 	case events.MouseMoveEvent:
 		// get the entities that look at the mouse
-		for _, v := range gw.Entities(types.lookAtMouse) {
+		for it := gw.Iterator(types.lookAtMouse); it.HasNext(); {
+			v := it.Value()
 			la := getLookAtMouse(v)
 			// make this entity to look at the mouse
 			lam.lookAt(v, la, ev.Position)

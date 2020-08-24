@@ -31,7 +31,8 @@ import (
 type alternateColorSystem struct{}
 
 func (rcs alternateColorSystem) Update(world *world.World, delta float32) error {
-	for _, v := range world.Entities(effects.TYPE.AlternateColor) {
+	for it := world.Iterator(effects.TYPE.AlternateColor); it.HasNext(); {
+		v := it.Value()
 		ac := effects.Get.AlternateColor(v)
 
 		var clr color.Solid

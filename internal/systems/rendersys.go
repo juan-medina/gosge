@@ -90,11 +90,22 @@ func (rs renderingSystem) renderText(v *entity.Entity) error {
 	return nil
 }
 
+func (rs renderingSystem) isRenderable(ent *entity.Entity) bool {
+	return ent.Contains(geometry.TYPE.Position) &&
+		(ent.Contains(sprite.TYPE) || ent.Contains(text.TYPE) || ent.Contains(shapes.TYPE.Box))
+}
+
 func (rs renderingSystem) getSortedByLayers(world *world.World) []*entity.Entity {
-	entities := world.Filter(func(e *entity.Entity) bool {
-		return e.Contains(geometry.TYPE.Position) &&
-			(e.Contains(sprite.TYPE) || e.Contains(text.TYPE) || e.Contains(shapes.TYPE.Box))
-	})
+	entities := make([]*entity.Entity, world.Size())
+	i := 0
+	for it := world.Iterator(); it.HasNext(); {
+		e := it.Value()
+		if rs.isRenderable(e) {
+			entities[i] = e
+			i++
+		}
+	}
+	entities = entities[:i]
 
 	sort.Slice(entities, func(i, j int) bool {
 		first := entities[i]
