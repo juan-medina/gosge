@@ -146,3 +146,8 @@ func (rr RenderImpl) DrawGradientBox(pos geometry.Position, box shapes.Box, grad
 		rl.DrawRectangleGradientV(x, y, w, h, c1, c2)
 	}
 }
+
+// SetBackgroundColor changes the current background color.Solid
+func (rr *RenderImpl) SetBackgroundColor(color color.Solid) {
+	rr.saveOpts.BackGround = color
+}

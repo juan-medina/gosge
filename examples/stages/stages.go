@@ -28,6 +28,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
@@ -60,23 +61,30 @@ func loadGame(eng engine.Engine) error {
 }
 
 func mainStage(eng engine.Engine) error {
+	// pre load sprites
+	if err := eng.LoadSpriteSheet("resources/stages.json"); err != nil {
+		return err
+	}
+
 	gWorld := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
+
+	eng.SetBackgroundColor(color.SkyBlue)
 
 	// add the centered text
 	gWorld.Add(entity.New(
 		text.Text{
 			String:     "Main Stage",
 			HAlignment: text.CenterHAlignment,
-			VAlignment: text.MiddleVAlignment,
+			VAlignment: text.TopVAlignment,
 			Size:       300 * gameScale.Min,
 			Spacing:    10,
 		},
 		geometry.Position{
 			X: designResolution.Width / 2 * gameScale.Point.X,
-			Y: designResolution.Height / 2 * gameScale.Point.Y,
+			Y: 0,
 		},
 		effects.AlternateColor{
 			Time:  1,
@@ -84,6 +92,20 @@ func mainStage(eng engine.Engine) error {
 			From:  color.Red,
 			To:    color.Yellow,
 		},
+		effects.Layer{Depth: 0},
+	))
+
+	gWorld.Add(entity.New(
+		sprite.Sprite{
+			Sheet: "resources/stages.json",
+			Name:  "go-fuzz.png",
+			Scale: 1 * gameScale.Min,
+		},
+		geometry.Position{
+			X: designResolution.Width / 2 * gameScale.Point.X,
+			Y: designResolution.Height / 2 * gameScale.Point.Y,
+		},
+		effects.Layer{Depth: 1},
 	))
 
 	eng.World().AddSystem(&stageChangeSystem{stage: "menu", time: 5})
@@ -92,23 +114,30 @@ func mainStage(eng engine.Engine) error {
 }
 
 func menuStage(eng engine.Engine) error {
+	// pre load sprites
+	if err := eng.LoadSpriteSheet("resources/stages.json"); err != nil {
+		return err
+	}
+
 	gWorld := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
+
+	eng.SetBackgroundColor(color.Gopher)
 
 	// add the centered text
 	gWorld.Add(entity.New(
 		text.Text{
 			String:     "Menu",
 			HAlignment: text.CenterHAlignment,
-			VAlignment: text.MiddleVAlignment,
+			VAlignment: text.TopVAlignment,
 			Size:       300 * gameScale.Min,
 			Spacing:    10,
 		},
 		geometry.Position{
 			X: designResolution.Width / 2 * gameScale.Point.X,
-			Y: designResolution.Height / 2 * gameScale.Point.Y,
+			Y: 0,
 		},
 		effects.AlternateColor{
 			Time:  1,
@@ -116,6 +145,20 @@ func menuStage(eng engine.Engine) error {
 			From:  color.Red,
 			To:    color.Yellow,
 		},
+		effects.Layer{Depth: 0},
+	))
+
+	gWorld.Add(entity.New(
+		sprite.Sprite{
+			Sheet: "resources/stages.json",
+			Name:  "gamer.png",
+			Scale: 1 * gameScale.Min,
+		},
+		geometry.Position{
+			X: designResolution.Width / 2 * gameScale.Point.X,
+			Y: designResolution.Height / 2 * gameScale.Point.Y,
+		},
+		effects.Layer{Depth: 1},
 	))
 
 	eng.World().AddSystem(&stageChangeSystem{stage: "main", time: 5})

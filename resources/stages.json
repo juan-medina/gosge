@@ -1,0 +1,65 @@
+{
+  "frames": [
+    {
+      "filename": "go-fuzz.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 567,
+        "h": 611
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 567,
+        "h": 611
+      },
+      "sourceSize": {
+        "w": 567,
+        "h": 611
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "gamer.png",
+      "frame": {
+        "x": 0,
+        "y": 611,
+        "w": 456,
+        "h": 480
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 18,
+        "w": 456,
+        "h": 480
+      },
+      "sourceSize": {
+        "w": 490,
+        "h": 516
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.6",
+    "image": "stages.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 567,
+      "h": 1091
+    },
+    "scale": 1
+  }
+}

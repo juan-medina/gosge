@@ -61,6 +61,10 @@ type Render interface {
 	LoadTexture(fileName string) error
 	// UnloadAllTextures from VRAM
 	UnloadAllTextures()
+
+	// SetBackgroundColor changes the current background color.Solid
+	SetBackgroundColor(color color.Solid)
+
 	// DrawText will draw a text.Text in the given geometry.Position with the correspondent color.Color
 	DrawText(txt text.Text, pos geometry.Position, color color.Solid)
 	// DrawSprite draws a sprite.Sprite in the given geometry.Position with the tint color.Color

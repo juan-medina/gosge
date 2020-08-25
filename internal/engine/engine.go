@@ -29,6 +29,7 @@ import (
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/internal/store"
 	"github.com/juan-medina/gosge/internal/systems"
+	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
@@ -66,6 +67,10 @@ type engineImpl struct {
 	ss        store.SpriteStorage
 	rdr       render.Render
 	stages    map[string]engine.InitFunc
+}
+
+func (ei *engineImpl) SetBackgroundColor(color color.Solid) {
+	ei.rdr.SetBackgroundColor(color)
 }
 
 func (ei *engineImpl) GetScreenSize() geometry.Size {

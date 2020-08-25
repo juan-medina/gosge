@@ -25,6 +25,7 @@ package engine
 
 import (
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 )
 
@@ -43,6 +44,8 @@ type Engine interface {
 	// AddGameStage adds a new game stage to our game with the given name, for changing
 	//to that stage send events.ChangeStage
 	AddGameStage(name string, init InitFunc)
+	// SetBackgroundColor changes the current background color.Solid
+	SetBackgroundColor(color color.Solid)
 }
 
 // InitFunc is a function that will get call for our game to load
