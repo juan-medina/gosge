@@ -92,27 +92,27 @@ func loadGame(eng engine.Engine) error {
 
 	// Get the eyes size
 	var eyeSize geometry.Size
-	var eyeRadius geometry.Position
+	var eyeRadius geometry.Point
 	if eyeSize, err = eng.GetSpriteSize("resources/gopher.json", "eye_exterior.png"); err == nil {
-		eyeRadius = geometry.Position{X: eyeSize.Width / 4 * gameScale.Point.X, Y: eyeSize.Height / 4 * gameScale.Point.X}
+		eyeRadius = geometry.Point{X: eyeSize.Width / 4 * gameScale.Point.X, Y: eyeSize.Height / 4 * gameScale.Point.X}
 	} else {
 		return err
 	}
 
 	// the nose is in the middle and a bit down
-	nosePos := geometry.Position{
+	nosePos := geometry.Point{
 		X: (designResolution.Width / 2) * gameScale.Point.X,
 		Y: ((designResolution.Height / 2) + noseVerticalGap) * gameScale.Point.Y,
 	}
 
 	// left eye is a bit up left of the nose
-	leftEyePos := geometry.Position{
+	leftEyePos := geometry.Point{
 		X: nosePos.X - (eyesGap * gameScale.Point.X),
 		Y: nosePos.Y - (eyesGap * gameScale.Point.Y),
 	}
 
 	// right eye is a bit up right of the nose
-	rightEyePos := geometry.Position{
+	rightEyePos := geometry.Point{
 		X: nosePos.X + (eyesGap * gameScale.Point.Y),
 		Y: leftEyePos.Y,
 	}
@@ -150,7 +150,7 @@ func loadGame(eng engine.Engine) error {
 	))
 
 	// the text is bottom center
-	textPos := geometry.Position{
+	textPos := geometry.Point{
 		X: (designResolution.Width / 2) * gameScale.Point.X,
 		Y: designResolution.Height * gameScale.Point.Y,
 	}
@@ -177,14 +177,14 @@ func loadGame(eng engine.Engine) error {
 		Scale: gameScale.Min,
 	}
 
-	// position of the bar
-	dizzyBarPosition := geometry.Position{
+	// Point of the bar
+	dizzyBarPoint := geometry.Point{
 		X: (designResolution.Width - dizzyBarWith) / 2 * gameScale.Min,
 		Y: dizzyBarGap * gameScale.Min,
 	}
 
-	// position the dizzy text
-	dizzyTextPosition := geometry.Position{
+	// Point the dizzy text
+	dizzyTextPoint := geometry.Point{
 		X: designResolution.Width / 2 * gameScale.Min,
 		Y: (dizzyBarGap + (dizzyBarHeight / 2)) * gameScale.Min,
 	}
@@ -193,14 +193,14 @@ func loadGame(eng engine.Engine) error {
 	dizzyBar = gw.Add(entity.New(
 		color.Gradient{From: color.Green, To: color.Red},
 		box,
-		dizzyBarPosition,
+		dizzyBarPoint,
 	))
 
 	// Add the empty dizzy bar
 	dizzyBarEmpty = gw.Add(entity.New(
 		color.Black,
 		box,
-		dizzyBarPosition,
+		dizzyBarPoint,
 	))
 
 	// add the dizzy text
@@ -213,7 +213,7 @@ func loadGame(eng engine.Engine) error {
 			Spacing:    (textBigSize / 4) * gameScale.Min,
 		},
 		color.Green,
-		dizzyTextPosition,
+		dizzyTextPoint,
 	))
 
 	// add our look at mouse system
@@ -227,7 +227,7 @@ func loadGame(eng engine.Engine) error {
 // component to make an entity to look at mouse with a pivot
 type lookAtMouse struct {
 	pivot  *entity.Entity
-	radius geometry.Position
+	radius geometry.Point
 }
 
 var types = struct{ lookAtMouse reflect.Type }{lookAtMouse: reflect.TypeOf(lookAtMouse{})}
@@ -252,14 +252,14 @@ func (lam *lookAtMouseSystem) Notify(gw *world.World, event interface{}, _ float
 			v := it.Value()
 			la := getLookAtMouse(v)
 			// make this entity to look at the mouse
-			lam.lookAt(v, la, ev.Position)
+			lam.lookAt(v, la, ev.Point)
 		}
 	}
 	return nil
 }
 
-func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse geometry.Position) {
-	pos := geometry.Get.Position(la.pivot)
+func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse geometry.Point) {
+	pos := geometry.Get.Point(la.pivot)
 
 	dx := mouse.X - pos.X
 	dy := mouse.Y - pos.Y
@@ -269,7 +269,7 @@ func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse ge
 	ax := la.radius.X * float32(math.Cos(float64(angle)))
 	ay := la.radius.Y * float32(math.Sin(float64(angle)))
 
-	np := geometry.Position{
+	np := geometry.Point{
 		X: pos.X + ax,
 		Y: pos.Y + ay,
 	}
@@ -279,7 +279,7 @@ func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse ge
 
 type dizzyBarSystem struct {
 	dizzy    float32
-	lasMouse geometry.Position
+	lasMouse geometry.Point
 }
 
 func (dbs *dizzyBarSystem) Update(_ *world.World, delta float32) error {
@@ -289,17 +289,17 @@ func (dbs *dizzyBarSystem) Update(_ *world.World, delta float32) error {
 	// calculate how dizzy we are in 0..1
 	percent := 1 - (dbs.dizzy / maxDizzy)
 
-	// get the position of the regular dizzy bar
-	dizzyBarPosition := geometry.Get.Position(dizzyBar)
-	// get the position
+	// get the Point of the regular dizzy bar
+	dizzyBarPoint := geometry.Get.Point(dizzyBar)
+	// get the Point
 	box := shapes.Get.Box(dizzyBar)
 
-	// calculate position and width
+	// calculate Point and width
 	box.Size.Width = box.Size.Width * percent
-	dizzyBarPosition.X = dizzyBarPosition.X - (dizzyBarWith * box.Scale * (percent - 1))
+	dizzyBarPoint.X = dizzyBarPoint.X - (dizzyBarWith * box.Scale * (percent - 1))
 
 	// set components
-	dizzyBarEmpty.Set(dizzyBarPosition)
+	dizzyBarEmpty.Set(dizzyBarPoint)
 	dizzyBarEmpty.Set(box)
 
 	// make the dizzy text color change from green to blend depending on how dizzy we are

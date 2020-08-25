@@ -54,8 +54,8 @@ func (rr RenderImpl) UnloadAllTextures() {
 	}
 }
 
-// DrawText will draw a text.Text in the given geometry.Position with the correspondent color.Color
-func (rr RenderImpl) DrawText(txt text.Text, pos geometry.Position, color color.Solid) {
+// DrawText will draw a text.Text in the given geometry.Point with the correspondent color.Color
+func (rr RenderImpl) DrawText(txt text.Text, pos geometry.Point, color color.Solid) {
 	font := rl.GetFontDefault()
 
 	vec := rl.Vector2{
@@ -91,8 +91,8 @@ func (rr RenderImpl) DrawText(txt text.Text, pos geometry.Position, color color.
 	rl.DrawTextEx(font, txt.String, vec, txt.Size, txt.Spacing, rr.color2RayColor(color))
 }
 
-// DrawSprite draws a sprite.Sprite in the given geometry.Position with the tint color.Color
-func (rr RenderImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Position, tint color.Solid) error {
+// DrawSprite draws a sprite.Sprite in the given geometry.Point with the tint color.Color
+func (rr RenderImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Point, tint color.Solid) error {
 	if val, ok := rr.textureHold[def.Texture]; ok {
 		scale := sprite.Scale
 		px := def.Origin.Size.Width * def.Pivot.X
@@ -120,7 +120,7 @@ func (rr RenderImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, 
 }
 
 // DrawSolidBox draws a solid box with an color.Solid and a scale
-func (rr RenderImpl) DrawSolidBox(pos geometry.Position, box shapes.Box, solid color.Solid) {
+func (rr RenderImpl) DrawSolidBox(pos geometry.Point, box shapes.Box, solid color.Solid) {
 	rec := rl.Rectangle{
 		X:      pos.X,
 		Y:      pos.Y,
@@ -132,7 +132,7 @@ func (rr RenderImpl) DrawSolidBox(pos geometry.Position, box shapes.Box, solid c
 }
 
 // DrawGradientBox draws a solid box with an color.Solid and a scale
-func (rr RenderImpl) DrawGradientBox(pos geometry.Position, box shapes.Box, gradient color.Gradient) {
+func (rr RenderImpl) DrawGradientBox(pos geometry.Point, box shapes.Box, gradient color.Gradient) {
 	x := int32(pos.X)
 	y := int32(pos.Y)
 	w := int32(box.Size.Width * box.Scale)

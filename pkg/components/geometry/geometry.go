@@ -68,36 +68,33 @@ type Rect struct {
 	Size Size  // Size is the size of the area
 }
 
-// PointInRect return if a given geometry.Position is inside the geometry.Rect
-func (r Rect) PointInRect(point Position) bool {
+// PointInRect return if a given geometry.Point is inside the geometry.Rect
+func (r Rect) PointInRect(point Point) bool {
 	return r.From.X <= point.X &&
 		r.From.Y <= point.Y &&
 		r.From.X+r.Size.Width >= point.X &&
 		r.From.Y+r.Size.Height >= point.Y
 }
 
-// Position represent an X and Y screen position
-type Position Point
-
 type types struct {
-	// Position is the reflect.Type for geometry.Position
-	Position reflect.Type
+	// Point is the reflect.Type for geometry.Point
+	Point reflect.Type
 }
 
 // TYPE hold the reflect.Type for our geometry components
 var TYPE = types{
-	Position: reflect.TypeOf(Position{}),
+	Point: reflect.TypeOf(Point{}),
 }
 
 type gets struct {
-	// Position gets a geometry.Position from a entity.Entity
-	Position func(e *entity.Entity) Position
+	// Point gets a geometry.Point from a entity.Entity
+	Point func(e *entity.Entity) Point
 }
 
 // Get a geometry component
 var Get = gets{
-	// Position gets a geometry.Position from a entity.Entity
-	Position: func(e *entity.Entity) Position {
-		return e.Get(TYPE.Position).(Position)
+	// Point gets a geometry.Point from a entity.Entity
+	Point: func(e *entity.Entity) Point {
+		return e.Get(TYPE.Point).(Point)
 	},
 }

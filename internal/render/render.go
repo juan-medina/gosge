@@ -49,8 +49,8 @@ type Render interface {
 
 	// GetScreenSize get the current screen size
 	GetScreenSize() geometry.Size
-	// GetMousePosition returns the current position of the mouse
-	GetMousePosition() geometry.Position
+	// GetMousePoint returns the current Point of the mouse
+	GetMousePoint() geometry.Point
 	// IsScreenScaleChange returns if the current screen scale has changed
 	IsScreenScaleChange() bool
 
@@ -65,14 +65,14 @@ type Render interface {
 	// SetBackgroundColor changes the current background color.Solid
 	SetBackgroundColor(color color.Solid)
 
-	// DrawText will draw a text.Text in the given geometry.Position with the correspondent color.Color
-	DrawText(txt text.Text, pos geometry.Position, color color.Solid)
-	// DrawSprite draws a sprite.Sprite in the given geometry.Position with the tint color.Color
-	DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Position, tint color.Solid) error
+	// DrawText will draw a text.Text in the given geometry.Point with the correspondent color.Color
+	DrawText(txt text.Text, pos geometry.Point, color color.Solid)
+	// DrawSprite draws a sprite.Sprite in the given geometry.Point with the tint color.Color
+	DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Point, tint color.Solid) error
 	// DrawSolidBox draws a solid box with an color.Solid and a scale
-	DrawSolidBox(pos geometry.Position, box shapes.Box, solid color.Solid)
+	DrawSolidBox(pos geometry.Point, box shapes.Box, solid color.Solid)
 	// DrawGradientBox draws a solid box with an color.Solid and a scale
-	DrawGradientBox(pos geometry.Position, box shapes.Box, gradient color.Gradient)
+	DrawGradientBox(pos geometry.Point, box shapes.Box, gradient color.Gradient)
 }
 
 // New return the Render system

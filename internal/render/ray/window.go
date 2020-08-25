@@ -32,10 +32,10 @@ func (rr RenderImpl) GetScreenSize() geometry.Size {
 	return geometry.Size{Width: float32(rl.GetScreenWidth()), Height: float32(rl.GetScreenHeight())}
 }
 
-// GetMousePosition returns the current position of the mouse
-func (rr RenderImpl) GetMousePosition() geometry.Position {
+// GetMousePoint returns the current Point of the mouse
+func (rr RenderImpl) GetMousePoint() geometry.Point {
 	pos := rl.GetMousePosition()
-	return geometry.Position{X: pos.X, Y: pos.Y}
+	return geometry.Point{X: pos.X, Y: pos.Y}
 }
 
 // IsScreenScaleChange returns if the current screen scale has changed

@@ -90,14 +90,14 @@ func load(eng engine.Engine) error {
 		return err
 	}
 
-	// calculate the UI positions
+	// calculate the UI Points
 	boxWidth := designResolution.Width * 0.70
 	boxStartX := (designResolution.Width / 2) - (boxWidth / 2)
 
-	// set the position with scale
+	// set the Point with scale
 	boxSize := geometry.Size{Width: boxWidth * gameScale.Point.X, Height: uiFontSize * gameScale.Point.Y}
-	uiPos := geometry.Position{X: boxStartX * gameScale.Point.X, Y: 0}
-	uiTextPos := geometry.Position{X: uiPos.X, Y: boxSize.Height / 2}
+	uiPos := geometry.Point{X: boxStartX * gameScale.Point.X, Y: 0}
+	uiTextPos := geometry.Point{X: uiPos.X, Y: boxSize.Height / 2}
 
 	// add the top box
 	wld.Add(entity.New(
@@ -130,7 +130,7 @@ func load(eng engine.Engine) error {
 			Size:       uiFontSize * gameScale.Min,
 			Spacing:    (uiFontSize / 10) * gameScale.Min,
 		},
-		geometry.Position{
+		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
 			Y: designResolution.Height * gameScale.Point.Y,
 		},
@@ -168,19 +168,19 @@ func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 		gn := int32(rand.Float32() * float32(len(groups)))
 		gr := groups[gn]
 
-		// position is random in within the screen
+		// Point is random in within the screen
 		x := rand.Float32() * designResolution.Width * scl.Point.X
 		y := rand.Float32() * designResolution.Height * scl.Point.Y
 
 		it := itemType(rand.Float32() * float32(totalItemsTypes))
 
-		// item position
-		pos := geometry.Position{X: x, Y: y}
+		// item Point
+		pos := geometry.Point{X: x, Y: y}
 
 		switch it {
 		case itemTypeText:
-			// text shadow position
-			stp := geometry.Position{X: x + 5, Y: y + 5}
+			// text shadow Point
+			stp := geometry.Point{X: x + 5, Y: y + 5}
 
 			// add the texts shadow
 			wld.Add(entity.New(

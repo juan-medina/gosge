@@ -30,7 +30,7 @@ type GameCloseEvent struct{}
 
 // MouseMoveEvent is an event that indicates that the mouse is moving
 type MouseMoveEvent struct {
-	geometry.Position
+	geometry.Point
 }
 
 // ChangeGameStage is an event that indicates that change game stage, all entities,

@@ -53,9 +53,9 @@ func (es *eventSystem) Update(world *world.World, _ float32) error {
 		}
 	}
 
-	mp := es.rdr.GetMousePosition()
-	if es.mme.Position != mp {
-		es.mme.Position = mp
+	mp := es.rdr.GetMousePoint()
+	if es.mme.Point != mp {
+		es.mme.Point = mp
 		if err := es.sendMouseMove(world); err != nil {
 			return err
 		}
@@ -69,7 +69,7 @@ func EventSystem(rdr render.Render) world.System {
 	return &eventSystem{
 		rdr: rdr,
 		mme: events.MouseMoveEvent{
-			Position: geometry.Position{
+			Point: geometry.Point{
 				X: -1,
 				Y: -1,
 			},

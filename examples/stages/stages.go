@@ -85,7 +85,7 @@ func mainStage(eng engine.Engine) error {
 			Size:       300 * gameScale.Min,
 			Spacing:    10,
 		},
-		geometry.Position{
+		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
 			Y: 0,
 		},
@@ -104,7 +104,7 @@ func mainStage(eng engine.Engine) error {
 			Name:  "go-fuzz.png",
 			Scale: 1 * gameScale.Min,
 		},
-		geometry.Position{
+		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
 			Y: designResolution.Height / 2 * gameScale.Point.Y,
 		},
@@ -139,7 +139,7 @@ func menuStage(eng engine.Engine) error {
 			Size:       300 * gameScale.Min,
 			Spacing:    10,
 		},
-		geometry.Position{
+		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
 			Y: 0,
 		},
@@ -158,7 +158,7 @@ func menuStage(eng engine.Engine) error {
 			Name:  "gamer.png",
 			Scale: 1 * gameScale.Min,
 		},
-		geometry.Position{
+		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
 			Y: designResolution.Height / 2 * gameScale.Point.Y,
 		},
@@ -198,12 +198,12 @@ var (
 )
 
 func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale, bc, tc color.Solid, str string) {
-	boxPos := geometry.Position{
+	boxPos := geometry.Point{
 		X: (x - (w / 2)) * scale.Point.X,
 		Y: (y - (h / 2)) * scale.Point.Y,
 	}
 
-	textPos := geometry.Position{
+	textPos := geometry.Point{
 		X: boxPos.X + ((w / 2) * scale.Point.X),
 		Y: boxPos.Y + ((h / 2) * scale.Point.Y),
 	}
@@ -293,13 +293,13 @@ func (bos *buttonOverSystem) Notify(wld *world.World, e interface{}, _ float32) 
 			ent := it.Value()
 			btn := ent.Get(tagType).(button)
 
-			pos := geometry.Get.Position(ent)
+			pos := geometry.Get.Point(ent)
 			box := shapes.Get.Box(ent)
 
 			clr := btn.color.normal
 			tcl := btn.txt.normal
 
-			if box.Contains(pos, v.Position) {
+			if box.Contains(pos, v.Point) {
 				clr = btn.color.hover
 				tcl = btn.txt.hover
 			}

@@ -29,19 +29,16 @@ import (
 	"reflect"
 )
 
-//Box is a rectangular shape that we could draw in a geometry.Position with a color.Solid or color.Gradient
+//Box is a rectangular shape that we could draw in a geometry.Point with a color.Solid or color.Gradient
 type Box struct {
 	Size  geometry.Size // The box size
 	Scale float32       // The box scale
 }
 
-// Contains return if a box at a geometry.Position contains a point
-func (b Box) Contains(at geometry.Position, point geometry.Position) bool {
+// Contains return if a box at a geometry.Point contains a point
+func (b Box) Contains(at geometry.Point, point geometry.Point) bool {
 	return geometry.Rect{
-		From: geometry.Point{
-			X: at.X,
-			Y: at.Y,
-		},
+		From: at,
 		Size: geometry.Size{
 			Width:  b.Size.Width * b.Scale,
 			Height: b.Size.Height * b.Scale,

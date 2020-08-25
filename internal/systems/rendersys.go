@@ -49,7 +49,7 @@ const (
 
 func (rs renderingSystem) renderSprite(ent *entity.Entity) error {
 	spr := sprite.Get(ent)
-	pos := geometry.Get.Position(ent)
+	pos := geometry.Get.Point(ent)
 
 	var tint color.Solid
 	if ent.Contains(color.TYPE.Solid) {
@@ -69,7 +69,7 @@ func (rs renderingSystem) renderSprite(ent *entity.Entity) error {
 }
 
 func (rs renderingSystem) renderShape(ent *entity.Entity) error {
-	pos := geometry.Get.Position(ent)
+	pos := geometry.Get.Point(ent)
 	box := shapes.Get.Box(ent)
 	if ent.Contains(color.TYPE.Solid) {
 		clr := color.Get.Solid(ent)
@@ -83,7 +83,7 @@ func (rs renderingSystem) renderShape(ent *entity.Entity) error {
 
 func (rs renderingSystem) renderText(v *entity.Entity) error {
 	textCmp := text.Get(v)
-	posCmp := geometry.Get.Position(v)
+	posCmp := geometry.Get.Point(v)
 	colorCmp := color.Get.Solid(v)
 
 	rs.rdr.DrawText(textCmp, posCmp, colorCmp)
@@ -91,7 +91,7 @@ func (rs renderingSystem) renderText(v *entity.Entity) error {
 }
 
 func (rs renderingSystem) isRenderable(ent *entity.Entity) bool {
-	return ent.Contains(geometry.TYPE.Position) &&
+	return ent.Contains(geometry.TYPE.Point) &&
 		(ent.Contains(sprite.TYPE) || ent.Contains(text.TYPE) || ent.Contains(shapes.TYPE.Box))
 }
 

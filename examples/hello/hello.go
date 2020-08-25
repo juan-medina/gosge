@@ -66,7 +66,7 @@ func loadGame(eng engine.Engine) error {
 			Size:       300 * gameScale.Min,
 			Spacing:    10,
 		},
-		geometry.Position{
+		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
 			Y: designResolution.Height / 2 * gameScale.Point.Y,
 		},
@@ -87,7 +87,7 @@ func loadGame(eng engine.Engine) error {
 			Size:       60 * gameScale.Min,
 			Spacing:    10,
 		},
-		geometry.Position{
+		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
 			Y: designResolution.Height * gameScale.Point.Y,
 		},
