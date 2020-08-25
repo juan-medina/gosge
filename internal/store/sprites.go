@@ -68,6 +68,8 @@ type SpriteStorage interface {
 	GetSpriteSize(sheet string, name string) (geometry.Size, error)
 	//GetSpriteDef returns the components.SpriteDef for an sprite
 	GetSpriteDef(sheet string, name string) (components.SpriteDef, error)
+	//Clear all loaded sprite sheets
+	Clear()
 }
 
 func (ss *spriteStorage) handleSheet(data spriteSheetData, name string) (err error) {
@@ -130,6 +132,10 @@ func (ss spriteStorage) GetSpriteSize(sheet string, name string) (geometry.Size,
 	def, err := ss.GetSpriteDef(sheet, name)
 	//goland:noinspection GoNilness
 	return def.Origin.Size, err
+}
+
+func (ss *spriteStorage) Clear() {
+	ss.sheets = make(map[string]spriteSheet, 0)
 }
 
 // NewSpriteStorage returns a new storage for sprite.Sprite

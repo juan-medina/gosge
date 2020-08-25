@@ -32,3 +32,11 @@ type GameCloseEvent struct{}
 type MouseMoveEvent struct {
 	geometry.Position
 }
+
+// ChangeGameStage is an event that indicates that change game stage, all entities,
+//systems, sprites sheets and textures will be removed. If the Stage does not exist
+//the game.Run method will return an error. Stages must be created with engine.AddGameStage
+type ChangeGameStage struct {
+	// Stage is the name of the stage to change to, it must be created with engine.AddGameStage
+	Stage string
+}

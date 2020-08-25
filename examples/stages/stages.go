@@ -30,6 +30,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
+	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
 	"log"
@@ -53,22 +54,12 @@ func main() {
 }
 
 func loadGame(eng engine.Engine) error {
-	eng.AddGameStage("main", mainStage{})
-	eng.AddGameStage("menu", menuStage{})
-
-	scs := &stageChangeSystem{eng: eng, stages: []string{"main", "menu"}}
-	eng.World().AddSystem(scs)
-
-	return eng.ChangeStage("menu")
+	eng.AddGameStage("menu", menuStage)
+	eng.AddGameStage("main", mainStage)
+	return eng.World().Notify(events.ChangeGameStage{Stage: "menu"})
 }
 
-type mainStage struct{}
-
-func (m mainStage) Load(_ engine.Engine) error {
-	return nil
-}
-
-func (m mainStage) Run(eng engine.Engine) error {
+func mainStage(eng engine.Engine) error {
 	gWorld := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
@@ -95,24 +86,12 @@ func (m mainStage) Run(eng engine.Engine) error {
 		},
 	))
 
+	eng.World().AddSystem(&stageChangeSystem{stage: "menu", time: 5})
+
 	return nil
 }
 
-func (m mainStage) Unload(eng engine.Engine) error {
-	w := eng.World()
-	for it := w.Iterator(geometry.TYPE.Position); it.HasNext(); {
-		_ = w.Remove(it.Value())
-	}
-	return nil
-}
-
-type menuStage struct{}
-
-func (m menuStage) Load(_ engine.Engine) error {
-	return nil
-}
-
-func (m menuStage) Run(eng engine.Engine) error {
+func menuStage(eng engine.Engine) error {
 	gWorld := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
@@ -139,34 +118,21 @@ func (m menuStage) Run(eng engine.Engine) error {
 		},
 	))
 
-	return eng.ChangeStage("main")
-}
+	eng.World().AddSystem(&stageChangeSystem{stage: "main", time: 5})
 
-func (m menuStage) Unload(eng engine.Engine) error {
-	w := eng.World()
-	for it := w.Iterator(geometry.TYPE.Position); it.HasNext(); {
-		_ = w.Remove(it.Value())
-	}
 	return nil
 }
 
+// stageChangeSystem is a world.System that will automatically change to game stage in a giving time
 type stageChangeSystem struct {
-	eng     engine.Engine
-	time    float32
-	stages  []string
-	current int
+	time  float32 // time to change to the given stage
+	stage string  // stage name, must be create with engine.AddGameStage
 }
 
-func (s *stageChangeSystem) Update(_ *world.World, delta float32) error {
-	s.time += delta
-
-	if s.time > 5 {
-		s.time = 0
-		s.current++
-		if s.current >= len(s.stages) {
-			s.current = 0
-		}
-		return s.eng.ChangeStage(s.stages[s.current])
+func (s *stageChangeSystem) Update(world *world.World, delta float32) error {
+	// we discount time until zero, them we will notify to change the stage
+	if s.time -= delta; s.time <= 0 {
+		return world.Notify(events.ChangeGameStage{Stage: s.stage})
 	}
 	return nil
 }

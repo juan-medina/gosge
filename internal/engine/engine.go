@@ -39,11 +39,10 @@ type engineStatus int
 
 const (
 	statusInitializing = engineStatus(iota)
+	statusPrepare
+	statusChangeStage
 	statusRunning
 	statusEnding
-	statusUnloadCurrentStage
-	statusLoadNextStage
-	statusRunStage
 )
 
 const (
@@ -66,9 +65,7 @@ type engineImpl struct {
 	frameTime float32
 	ss        store.SpriteStorage
 	rdr       render.Render
-	stages    map[string]engine.GameStage
-	cStage    engine.GameStage
-	nStage    engine.GameStage
+	stages    map[string]engine.InitFunc
 }
 
 func (ei *engineImpl) GetScreenSize() geometry.Size {
@@ -96,9 +93,11 @@ func (ei *engineImpl) Update(_ *world.World, _ float32) error {
 }
 
 func (ei *engineImpl) Notify(_ *world.World, event interface{}, _ float32) error {
-	switch event.(type) {
+	switch v := event.(type) {
 	case events.GameCloseEvent:
 		ei.status = statusEnding
+	case events.ChangeGameStage:
+		return ei.changeStage(v.Stage)
 	}
 	return nil
 }
@@ -113,35 +112,40 @@ func New(opt options.Options, init engine.InitFunc) Impl {
 		init:   init,
 		ss:     store.NewSpriteStorage(rdr),
 		rdr:    rdr,
-		stages: make(map[string]engine.GameStage),
-		cStage: nil,
-		nStage: nil,
+		stages: make(map[string]engine.InitFunc),
 	}
 }
 
 func (ei *engineImpl) initialize() error {
 	ei.rdr.Init(ei.opt)
 	ei.rdr.BeginFrame()
+	ei.rdr.EndFrame()
+
+	ei.status = statusPrepare
+
+	return nil
+}
+
+func (ei *engineImpl) prepare() error {
+	ei.rdr.BeginFrame()
 	err := ei.init(ei)
 	ei.rdr.EndFrame()
 
 	if err == nil {
-		// main systems will update before the game systems
-		ei.gWorld.AddSystemWithPriority(ei, highPriority)
-		ei.gWorld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
+		if ei.status == statusPrepare {
+			// main systems will update before the game systems
+			ei.gWorld.AddSystemWithPriority(ei, highPriority)
+			ei.gWorld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
 
-		// effect system will run after game system but before the rendering systems
-		ei.gWorld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
+			// effect system will run after game system but before the rendering systems
+			ei.gWorld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
 
-		// rendering system will run last
-		ei.gWorld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ss), lastPriority)
-
-		if ei.nStage == nil {
+			// rendering system will run last
+			ei.gWorld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ss), lastPriority)
 			ei.status = statusRunning
 		} else {
-			ei.status = statusLoadNextStage
+			ei.status = statusPrepare
 		}
-
 	}
 	return err
 }
@@ -178,16 +182,14 @@ func (ei *engineImpl) Run() error {
 		switch ei.status {
 		case statusInitializing:
 			err = ei.initialize()
+		case statusPrepare:
+			err = ei.prepare()
+		case statusChangeStage:
+			err = ei.prepare()
 		case statusRunning:
 			err = ei.running()
 		case statusEnding:
 			err = ei.end()
-		case statusUnloadCurrentStage:
-			err = ei.unloadCurrentStage()
-		case statusLoadNextStage:
-			err = ei.loadNextStage()
-		case statusRunStage:
-			err = ei.runStage()
 		}
 	}
 	if err != nil && ei.status == statusRunning {
@@ -196,81 +198,23 @@ func (ei *engineImpl) Run() error {
 	return err
 }
 
-func (ei *engineImpl) AddGameStage(name string, stage engine.GameStage) {
-	ei.stages[name] = stage
+func (ei *engineImpl) AddGameStage(name string, init engine.InitFunc) {
+	ei.stages[name] = init
 }
 
-func (ei *engineImpl) ChangeStage(name string) error {
+func (ei *engineImpl) changeStage(name string) error {
 	if _, ok := ei.stages[name]; ok {
-		ei.nStage = ei.stages[name]
+		// clear all entities and systems
+		ei.gWorld.Clear()
+		// clear all sprites storage
+		ei.ss.Clear()
+		// unload all textures
+		ei.rdr.UnloadAllTextures()
 
-		// if we have a current stage unload if not load the new
-		if ei.cStage != nil {
-			ei.status = statusUnloadCurrentStage
-		} else {
-			ei.status = statusLoadNextStage
-		}
+		ei.init = ei.stages[name]
+		ei.status = statusChangeStage
 
 		return nil
 	}
 	return fmt.Errorf("stage %q not found", name)
-}
-
-func (ei *engineImpl) unloadCurrentStage() error {
-	var err error
-
-	// begin frame
-	ei.rdr.BeginFrame()
-
-	err = ei.cStage.Unload(ei)
-
-	if err == nil {
-		ei.cStage = nil
-		ei.status = statusLoadNextStage
-	} else {
-		ei.status = statusRunning
-	}
-
-	// we end the frame regardless of if we have an error
-	ei.rdr.EndFrame()
-
-	return err
-}
-
-func (ei *engineImpl) loadNextStage() error {
-	var err error
-
-	// begin frame
-	ei.rdr.BeginFrame()
-
-	err = ei.nStage.Load(ei)
-	if err == nil {
-		ei.cStage = ei.nStage
-		ei.status = statusRunStage
-	} else {
-		ei.status = statusRunning
-	}
-
-	// we end the frame regardless of if we have an error
-	ei.rdr.EndFrame()
-
-	return err
-}
-
-func (ei *engineImpl) runStage() error {
-	var err error
-
-	// begin frame
-	ei.rdr.BeginFrame()
-
-	if ei.cStage != nil {
-		err = ei.cStage.Run(ei)
-	}
-
-	ei.status = statusRunning
-
-	// we end the frame regardless of if we have an error
-	ei.rdr.EndFrame()
-
-	return err
 }
