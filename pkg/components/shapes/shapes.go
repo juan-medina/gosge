@@ -35,6 +35,20 @@ type Box struct {
 	Scale float32       // The box scale
 }
 
+// Contains return if a box at a geometry.Position contains a point
+func (b Box) Contains(at geometry.Position, point geometry.Position) bool {
+	return geometry.Rect{
+		From: geometry.Point{
+			X: at.X,
+			Y: at.Y,
+		},
+		Size: geometry.Size{
+			Width:  b.Size.Width * b.Scale,
+			Height: b.Size.Height * b.Scale,
+		},
+	}.PointInRect(point)
+}
+
 type types struct {
 	// Box is the reflect.Type for shapes.Box
 	Box reflect.Type

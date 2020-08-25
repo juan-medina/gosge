@@ -28,6 +28,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/engine"
@@ -35,6 +36,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
 	"log"
+	"reflect"
 )
 
 var opt = options.Options{
@@ -57,6 +59,7 @@ func main() {
 func loadGame(eng engine.Engine) error {
 	eng.AddGameStage("menu", menuStage)
 	eng.AddGameStage("main", mainStage)
+
 	return eng.World().Notify(events.ChangeGameStage{Stage: "menu"})
 }
 
@@ -108,7 +111,8 @@ func mainStage(eng engine.Engine) error {
 		effects.Layer{Depth: 1},
 	))
 
-	eng.World().AddSystem(&stageChangeSystem{stage: "menu", time: 5})
+	wld := eng.World()
+	wld.AddSystem(&stageChangeSystem{stage: "menu", time: 5})
 
 	return nil
 }
@@ -161,9 +165,97 @@ func menuStage(eng engine.Engine) error {
 		effects.Layer{Depth: 1},
 	))
 
-	eng.World().AddSystem(&stageChangeSystem{stage: "main", time: 5})
+	createButton(gWorld, designResolution.Width/2, designResolution.Height-200, 400, 100, gameScale,
+		color.SkyBlue, color.Yellow, "Play!")
+
+	createButton(gWorld, designResolution.Width/2, designResolution.Height-90, 400, 100, gameScale,
+		color.Beige, color.Yellow, "Exit")
+
+	gWorld.AddSystem(newButtonOverSystem())
+
+	//eng.World().AddSystem(&stageChangeSystem{stage: "main", time: 5})
 
 	return nil
+}
+
+type buttonColor struct {
+	normal color.Solid
+	hover  color.Solid
+}
+
+type buttonText struct {
+	normal color.Solid
+	hover  color.Solid
+	ref    *entity.Entity
+}
+type button struct {
+	color buttonColor
+	txt   buttonText
+}
+
+var (
+	tagType = reflect.TypeOf(button{})
+)
+
+func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale, bc, tc color.Solid, str string) {
+	boxPos := geometry.Position{
+		X: (x - (w / 2)) * scale.Point.X,
+		Y: (y - (h / 2)) * scale.Point.Y,
+	}
+
+	textPos := geometry.Position{
+		X: boxPos.X + ((w / 2) * scale.Point.X),
+		Y: boxPos.Y + ((h / 2) * scale.Point.Y),
+	}
+
+	txt := wld.Add(entity.New(
+		text.Text{
+			String:     str,
+			Size:       (h - 20) * scale.Min,
+			Spacing:    10 * scale.Min,
+			VAlignment: text.MiddleVAlignment,
+			HAlignment: text.CenterHAlignment,
+		},
+		color.Yellow,
+		textPos,
+		effects.Layer{Depth: -11},
+	))
+
+	bnc := bc.Blend(color.Black, 0.2)
+	tnc := tc.Blend(color.Black, 0.2)
+
+	wld.Add(entity.New(
+		boxPos,
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  w,
+				Height: h,
+			},
+			Scale: scale.Min,
+		},
+		color.DarkBlue,
+		effects.Layer{Depth: -10},
+		button{
+			color: buttonColor{normal: bnc, hover: bc},
+			txt:   buttonText{normal: tnc, hover: tc, ref: txt},
+		},
+	))
+
+	boxPos.X += 10
+	boxPos.Y += 10
+
+	wld.Add(entity.New(
+		boxPos,
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  w,
+				Height: h,
+			},
+			Scale: scale.Min,
+		},
+		color.DarkGray,
+		effects.Layer{Depth: 0},
+	))
 }
 
 // stageChangeSystem is a world.System that will automatically change to game stage in a giving time
@@ -181,5 +273,40 @@ func (s *stageChangeSystem) Update(world *world.World, delta float32) error {
 }
 
 func (s stageChangeSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
+	return nil
+}
+
+func newButtonOverSystem() world.System {
+	return &buttonOverSystem{}
+}
+
+type buttonOverSystem struct{}
+
+func (bos buttonOverSystem) Update(_ *world.World, _ float32) error {
+	return nil
+}
+
+func (bos *buttonOverSystem) Notify(wld *world.World, e interface{}, _ float32) error {
+	switch v := e.(type) {
+	case events.MouseMoveEvent:
+		for it := wld.Iterator(tagType, color.TYPE.Solid); it.HasNext(); {
+			ent := it.Value()
+			btn := ent.Get(tagType).(button)
+
+			pos := geometry.Get.Position(ent)
+			box := shapes.Get.Box(ent)
+
+			clr := btn.color.normal
+			tcl := btn.txt.normal
+
+			if box.Contains(pos, v.Position) {
+				clr = btn.color.hover
+				tcl = btn.txt.hover
+			}
+
+			ent.Set(clr)
+			btn.txt.ref.Set(tcl)
+		}
+	}
 	return nil
 }

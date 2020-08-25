@@ -68,6 +68,14 @@ type Rect struct {
 	Size Size  // Size is the size of the area
 }
 
+// PointInRect return if a given geometry.Position is inside the geometry.Rect
+func (r Rect) PointInRect(point Position) bool {
+	return r.From.X <= point.X &&
+		r.From.Y <= point.Y &&
+		r.From.X+r.Size.Width >= point.X &&
+		r.From.Y+r.Size.Height >= point.Y
+}
+
 // Position represent an X and Y screen position
 type Position Point
 
