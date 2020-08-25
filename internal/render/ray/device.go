@@ -46,9 +46,13 @@ func (rr *RenderImpl) Init(opt options.Options) {
 			rl.UnloadImage(img)
 		}
 	}
-	// rl.ToggleFullscreen does not work ok on linux
-	if !strings.Contains(runtime.GOOS, "linux") {
-		rl.ToggleFullscreen()
+
+	if !opt.Windowed {
+		// TODO: Open a Issue in raylib repo
+		// rl.ToggleFullscreen does not work ok on linux
+		if !strings.Contains(runtime.GOOS, "linux") {
+			rl.ToggleFullscreen()
+		}
 	}
 }
 
