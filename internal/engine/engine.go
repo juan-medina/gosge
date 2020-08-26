@@ -60,7 +60,7 @@ type Impl interface {
 
 type engineImpl struct {
 	opt       options.Options
-	gWorld    *world.World
+	wld       *world.World
 	status    engineStatus
 	init      engine.InitFunc
 	frameTime float32
@@ -90,7 +90,7 @@ func (ei *engineImpl) LoadTexture(fileName string) error {
 }
 
 func (ei *engineImpl) World() *world.World {
-	return ei.gWorld
+	return ei.wld
 }
 
 func (ei *engineImpl) Update(_ *world.World, _ float32) error {
@@ -112,7 +112,7 @@ func New(opt options.Options, init engine.InitFunc) Impl {
 	rdr := render.New()
 	return &engineImpl{
 		opt:    opt,
-		gWorld: world.New(),
+		wld:    world.New(),
 		status: statusInitializing,
 		init:   init,
 		ss:     store.NewSpriteStorage(rdr),
@@ -137,17 +137,17 @@ func (ei *engineImpl) prepare() error {
 	ei.rdr.EndFrame()
 
 	// main systems will update before the game systems
-	ei.gWorld.AddSystemWithPriority(ei, highPriority)
-	ei.gWorld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
+	ei.wld.AddSystemWithPriority(ei, highPriority)
+	ei.wld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
 
 	// uis system will run after game system but before the effect systems
-	ei.gWorld.AddSystemWithPriority(systems.UISystem(), lowPriority)
+	ei.wld.AddSystemWithPriority(systems.UISystem(), lowPriority)
 
 	// effect system will run after game system but before the rendering systems
-	ei.gWorld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
+	ei.wld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
 
 	// rendering system will run last
-	ei.gWorld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ss), lastPriority)
+	ei.wld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ss), lastPriority)
 	ei.status = statusRunning
 
 	return err
@@ -158,7 +158,7 @@ func (ei *engineImpl) running() error {
 	ei.rdr.BeginFrame()
 
 	// update the systems
-	err := ei.gWorld.Update(ei.frameTime)
+	err := ei.wld.Update(ei.frameTime)
 
 	// we end the frame regardless of if we have an error
 	ei.rdr.EndFrame()
@@ -208,7 +208,7 @@ func (ei *engineImpl) AddGameStage(name string, init engine.InitFunc) {
 func (ei *engineImpl) changeStage(name string) error {
 	if _, ok := ei.stages[name]; ok {
 		// clear all entities and systems
-		ei.gWorld.Clear()
+		ei.wld.Clear()
 		// clear all sprites storage
 		ei.ss.Clear()
 		// unload all textures

@@ -69,7 +69,7 @@ func mainStage(eng engine.Engine) error {
 		return err
 	}
 
-	gWorld := eng.World()
+	wld := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
@@ -77,7 +77,7 @@ func mainStage(eng engine.Engine) error {
 	eng.SetBackgroundColor(color.SkyBlue)
 
 	// add the centered text
-	gWorld.Add(entity.New(
+	wld.Add(entity.New(
 		text.Text{
 			String:     "Main Stage",
 			HAlignment: text.CenterHAlignment,
@@ -98,7 +98,7 @@ func mainStage(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
-	gWorld.Add(entity.New(
+	wld.Add(entity.New(
 		sprite.Sprite{
 			Sheet: "resources/stages.json",
 			Name:  "go-fuzz.png",
@@ -110,8 +110,6 @@ func mainStage(eng engine.Engine) error {
 		},
 		effects.Layer{Depth: 1},
 	))
-
-	wld := eng.World()
 
 	measure := eng.MeasureText("< back", 50, 10)
 
@@ -158,7 +156,7 @@ func menuStage(eng engine.Engine) error {
 		return err
 	}
 
-	gWorld := eng.World()
+	wld := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
@@ -166,7 +164,7 @@ func menuStage(eng engine.Engine) error {
 	eng.SetBackgroundColor(color.Gopher)
 
 	// add the centered text
-	gWorld.Add(entity.New(
+	wld.Add(entity.New(
 		text.Text{
 			String:     "Menu",
 			HAlignment: text.CenterHAlignment,
@@ -187,7 +185,7 @@ func menuStage(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
-	gWorld.Add(entity.New(
+	wld.Add(entity.New(
 		sprite.Sprite{
 			Sheet: "resources/stages.json",
 			Name:  "gamer.png",
@@ -204,7 +202,7 @@ func menuStage(eng engine.Engine) error {
 	measure.Width += measure.Width * 0.20
 	measure.Height += measure.Height * 0.20
 
-	gWorld.Add(entity.New(
+	wld.Add(entity.New(
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: 5, Height: 5},
 			Event:  events.ChangeGameStage{Stage: "main"},
@@ -234,7 +232,7 @@ func menuStage(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
-	gWorld.Add(entity.New(
+	wld.Add(entity.New(
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: 5, Height: 5},
 			Event:  events.GameCloseEvent{},

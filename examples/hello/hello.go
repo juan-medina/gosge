@@ -52,13 +52,13 @@ func main() {
 }
 
 func loadGame(eng engine.Engine) error {
-	gWorld := eng.World()
+	wld := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
 	// add the centered text
-	gWorld.Add(entity.New(
+	wld.Add(entity.New(
 		text.Text{
 			String:     "Hello World",
 			HAlignment: text.CenterHAlignment,
@@ -79,7 +79,7 @@ func loadGame(eng engine.Engine) error {
 	))
 
 	// add the bottom text
-	gWorld.Add(entity.New(
+	wld.Add(entity.New(
 		text.Text{
 			String:     "press <ESC> to close",
 			HAlignment: text.CenterHAlignment,
