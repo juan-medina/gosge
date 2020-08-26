@@ -46,6 +46,8 @@ type Engine interface {
 	AddGameStage(name string, init InitFunc)
 	// SetBackgroundColor changes the current background color.Solid
 	SetBackgroundColor(color color.Solid)
+	// MeasureText return the geometry.Size of a string with a defined size and spacing
+	MeasureText(str string, size, spacing float32) geometry.Size
 }
 
 // InitFunc is a function that will get call for our game to load

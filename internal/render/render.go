@@ -73,6 +73,8 @@ type Render interface {
 	DrawSolidBox(pos geometry.Point, box shapes.Box, solid color.Solid)
 	// DrawGradientBox draws a solid box with an color.Solid and a scale
 	DrawGradientBox(pos geometry.Point, box shapes.Box, gradient color.Gradient)
+	// MeasureText return the geometry.Size of a string with a defined size and spacing
+	MeasureText(str string, size, spacing float32) geometry.Size
 }
 
 // New return the Render system

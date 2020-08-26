@@ -151,3 +151,13 @@ func (rr RenderImpl) DrawGradientBox(pos geometry.Point, box shapes.Box, gradien
 func (rr *RenderImpl) SetBackgroundColor(color color.Solid) {
 	rr.saveOpts.BackGround = color
 }
+
+// MeasureText return the geometry.Size of a string with a defined size and spacing
+func (rr *RenderImpl) MeasureText(str string, size, spacing float32) geometry.Size {
+	font := rl.GetFontDefault()
+	av := rl.MeasureTextEx(font, str, size, spacing)
+	return geometry.Size{
+		Width:  av.X,
+		Height: av.Y,
+	}
+}

@@ -223,3 +223,7 @@ func (ei *engineImpl) changeStage(name string) error {
 	}
 	return fmt.Errorf("stage %q not found", name)
 }
+
+func (ei engineImpl) MeasureText(str string, size, spacing float32) geometry.Size {
+	return ei.rdr.MeasureText(str, size, spacing)
+}
