@@ -165,10 +165,12 @@ func menuStage(eng engine.Engine) error {
 		effects.Layer{Depth: 1},
 	))
 
-	createButton(gWorld, designResolution.Width/2, designResolution.Height-200, 400, 100, gameScale,
+	measure := eng.MeasureText(" Exit ", 100, 10)
+
+	createButton(gWorld, designResolution.Width/2, designResolution.Height-200, measure.Width, measure.Height, gameScale,
 		color.SkyBlue, color.Yellow, "Play!")
 
-	createButton(gWorld, designResolution.Width/2, designResolution.Height-90, 400, 100, gameScale,
+	createButton(gWorld, designResolution.Width/2, designResolution.Height-90, measure.Width, measure.Height, gameScale,
 		color.Beige, color.Yellow, "Exit")
 
 	gWorld.AddSystem(newButtonOverSystem())
