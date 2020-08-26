@@ -61,6 +61,21 @@ func (rc Solid) Blend(other Solid, scale float32) Solid {
 	return Solid{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
+// Inverse the color.Solid
+func (rc Solid) Inverse() Solid {
+	r1 := int32(rc.R)
+	g1 := int32(rc.G)
+	b1 := int32(rc.B)
+	a1 := int32(rc.A)
+
+	r := 255 - r1
+	g := 255 - g1
+	b := 255 - b1
+	a := a1
+
+	return Solid{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+}
+
 // GradientDirection is the direction of color.Gradient
 type GradientDirection int
 
