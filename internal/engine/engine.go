@@ -136,22 +136,17 @@ func (ei *engineImpl) prepare() error {
 	err := ei.init(ei)
 	ei.rdr.EndFrame()
 
-	if err == nil {
-		if ei.status == statusPrepare {
-			// main systems will update before the game systems
-			ei.gWorld.AddSystemWithPriority(ei, highPriority)
-			ei.gWorld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
+	// main systems will update before the game systems
+	ei.gWorld.AddSystemWithPriority(ei, highPriority)
+	ei.gWorld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
 
-			// effect system will run after game system but before the rendering systems
-			ei.gWorld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
+	// effect system will run after game system but before the rendering systems
+	ei.gWorld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
 
-			// rendering system will run last
-			ei.gWorld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ss), lastPriority)
-			ei.status = statusRunning
-		} else {
-			ei.status = statusPrepare
-		}
-	}
+	// rendering system will run last
+	ei.gWorld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ss), lastPriority)
+	ei.status = statusRunning
+
 	return err
 }
 
