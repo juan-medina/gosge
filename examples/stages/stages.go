@@ -113,10 +113,10 @@ func mainStage(eng engine.Engine) error {
 
 	wld := eng.World()
 
-	measure := eng.MeasureText("Menu", 100, 10)
+	measure := eng.MeasureText("< back", 50, 10)
 
-	createButton(gWorld, designResolution.Width/2, designResolution.Height-90, measure.Width, measure.Height, gameScale,
-		color.Beige, color.Yellow, "Menu", events.ChangeGameStage{Stage: "menu"})
+	createButton(gWorld, designResolution.Width-(measure.Width/2)-10, 0+(measure.Height/2)+10, measure.Width, measure.Height, gameScale,
+		color.Red, "< back", events.ChangeGameStage{Stage: "menu"})
 
 	wld.AddSystem(newButtonSystem())
 
@@ -124,6 +124,7 @@ func mainStage(eng engine.Engine) error {
 }
 
 func menuStage(eng engine.Engine) error {
+	log.Printf("load menu stage")
 	// pre load sprites
 	if err := eng.LoadSpriteSheet("resources/stages.json"); err != nil {
 		return err
@@ -174,10 +175,10 @@ func menuStage(eng engine.Engine) error {
 	measure := eng.MeasureText("Play!", 100, 10)
 
 	createButton(gWorld, designResolution.Width/2, designResolution.Height-200, measure.Width, measure.Height, gameScale,
-		color.SkyBlue, color.Yellow, "Play!", events.ChangeGameStage{Stage: "main"})
+		color.Yellow, "Play!", events.ChangeGameStage{Stage: "main"})
 
 	createButton(gWorld, designResolution.Width/2, designResolution.Height-90, measure.Width, measure.Height, gameScale,
-		color.Beige, color.Yellow, "Exit", events.GameCloseEvent{})
+		color.Blue, "Exit", events.GameCloseEvent{})
 
 	gWorld.AddSystem(newButtonSystem())
 
@@ -205,7 +206,11 @@ var (
 )
 
 func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale,
-	bc, tc color.Solid, str string, event interface{}) {
+	bc color.Solid, str string, event interface{}) {
+	bnc := bc.Blend(color.Black, 0.2)
+	tc := bnc.Inverse()
+	tnc := tc.Blend(color.Black, 0.2)
+
 	boxPos := geometry.Point{
 		X: (x - (w / 2)) * scale.Point.X,
 		Y: (y - (h / 2)) * scale.Point.Y,
@@ -224,13 +229,10 @@ func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale,
 			VAlignment: text.MiddleVAlignment,
 			HAlignment: text.CenterHAlignment,
 		},
-		color.Yellow,
+		tnc,
 		textPos,
 		effects.Layer{Depth: -11},
 	))
-
-	bnc := bc.Blend(color.Black, 0.2)
-	tnc := tc.Blend(color.Black, 0.2)
 
 	wld.Add(entity.New(
 		boxPos,
@@ -241,7 +243,7 @@ func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale,
 			},
 			Scale: scale.Min,
 		},
-		color.DarkBlue,
+		bnc,
 		effects.Layer{Depth: -10},
 		button{
 			color: buttonColor{normal: bnc, hover: bc},
