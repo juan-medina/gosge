@@ -63,6 +63,18 @@ func loadGame(eng engine.Engine) error {
 	return eng.World().Notify(events.ChangeGameStage{Stage: "menu"})
 }
 
+// game constants
+const (
+	buttonExtraWidth  = 0.20
+	buttonExtraHeight = 0.20
+	shadowExtraWidth  = 5
+	shadowExtraHeight = 5
+	fontTittle        = 300
+	fontBig           = 100
+	fontSmall         = 50
+	fontSpacing       = 10
+)
+
 func mainStage(eng engine.Engine) error {
 	// pre load sprites
 	if err := eng.LoadSpriteSheet("resources/stages.json"); err != nil {
@@ -82,8 +94,8 @@ func mainStage(eng engine.Engine) error {
 			String:     "Main Stage",
 			HAlignment: text.CenterHAlignment,
 			VAlignment: text.TopVAlignment,
-			Size:       300 * gameScale.Min,
-			Spacing:    10,
+			Size:       fontTittle * gameScale.Min,
+			Spacing:    fontSpacing * gameScale.Min,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -111,19 +123,19 @@ func mainStage(eng engine.Engine) error {
 		effects.Layer{Depth: 1},
 	))
 
-	measure := eng.MeasureText("< back", 50, 10)
+	measure := eng.MeasureText("< back", fontSmall, fontSpacing)
 
-	measure.Width += measure.Width * 0.20
-	measure.Height += measure.Height * 0.20
+	measure.Width += measure.Width * buttonExtraWidth
+	measure.Height += measure.Height * buttonExtraHeight
 
 	wld.Add(entity.New(
 		ui.FlatButton{
-			Shadow: geometry.Size{Width: 5, Height: 5},
+			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
 			Event:  events.ChangeGameStage{Stage: "menu"},
 		},
 		geometry.Point{
-			X: (designResolution.Width - (measure.Width) - 5) * gameScale.Point.X,
-			Y: ((measure.Height / 2) - 5) * gameScale.Point.Y,
+			X: (designResolution.Width - (measure.Width) - shadowExtraWidth) * gameScale.Point.X,
+			Y: ((measure.Height / 2) - shadowExtraHeight) * gameScale.Point.Y,
 		},
 		shapes.Box{
 			Size: geometry.Size{
@@ -134,8 +146,8 @@ func mainStage(eng engine.Engine) error {
 		},
 		text.Text{
 			String:     "< back",
-			Size:       50 * gameScale.Min,
-			Spacing:    10 * gameScale.Min,
+			Size:       fontSmall * gameScale.Min,
+			Spacing:    fontSpacing * gameScale.Min,
 			VAlignment: text.MiddleVAlignment,
 			HAlignment: text.CenterHAlignment,
 		},
@@ -169,8 +181,8 @@ func menuStage(eng engine.Engine) error {
 			String:     "Menu",
 			HAlignment: text.CenterHAlignment,
 			VAlignment: text.TopVAlignment,
-			Size:       300 * gameScale.Min,
-			Spacing:    10,
+			Size:       fontTittle * gameScale.Min,
+			Spacing:    fontSpacing * gameScale.Min,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -198,13 +210,13 @@ func menuStage(eng engine.Engine) error {
 		effects.Layer{Depth: 1},
 	))
 
-	measure := eng.MeasureText("Play!", 100, 10)
-	measure.Width += measure.Width * 0.20
-	measure.Height += measure.Height * 0.20
+	measure := eng.MeasureText("Play!", fontBig, fontSpacing)
+	measure.Width += measure.Width * buttonExtraWidth
+	measure.Height += measure.Height * buttonExtraHeight
 
 	wld.Add(entity.New(
 		ui.FlatButton{
-			Shadow: geometry.Size{Width: 5, Height: 5},
+			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
 			Event:  events.ChangeGameStage{Stage: "main"},
 		},
 		geometry.Point{
@@ -220,8 +232,8 @@ func menuStage(eng engine.Engine) error {
 		},
 		text.Text{
 			String:     "Play!",
-			Size:       100 * gameScale.Min,
-			Spacing:    10 * gameScale.Min,
+			Size:       fontBig * gameScale.Min,
+			Spacing:    fontSpacing * gameScale.Min,
 			VAlignment: text.MiddleVAlignment,
 			HAlignment: text.CenterHAlignment,
 		},
@@ -234,7 +246,7 @@ func menuStage(eng engine.Engine) error {
 
 	wld.Add(entity.New(
 		ui.FlatButton{
-			Shadow: geometry.Size{Width: 5, Height: 5},
+			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
 			Event:  events.GameCloseEvent{},
 		},
 		geometry.Point{
@@ -250,8 +262,8 @@ func menuStage(eng engine.Engine) error {
 		},
 		text.Text{
 			String:     "Exit",
-			Size:       100 * gameScale.Min,
-			Spacing:    10 * gameScale.Min,
+			Size:       fontBig * gameScale.Min,
+			Spacing:    fontSpacing * gameScale.Min,
 			VAlignment: text.MiddleVAlignment,
 			HAlignment: text.CenterHAlignment,
 		},
