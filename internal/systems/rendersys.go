@@ -33,6 +33,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/text"
+	"github.com/juan-medina/gosge/pkg/components/ui"
 	"sort"
 )
 
@@ -81,6 +82,62 @@ func (rs renderingSystem) renderShape(ent *entity.Entity) error {
 	return nil
 }
 
+func (rs renderingSystem) renderFlatButton(ent *entity.Entity) error {
+	pos := geometry.Get.Point(ent)
+	box := shapes.Get.Box(ent)
+	fb := ui.Get.FlatButton(ent)
+
+	if fb.Shadow.Width > 0 || fb.Shadow.Height > 0 {
+		shadowPos := geometry.Point{
+			X: pos.X + fb.Shadow.Width,
+			Y: pos.Y + fb.Shadow.Height,
+		}
+		sc := color.Gray.Alpha(127)
+		rs.rdr.DrawSolidBox(shadowPos, box, sc)
+	}
+
+	// draw the box
+	if ent.Contains(color.TYPE.Solid) {
+		clr := color.Get.Solid(ent)
+		rs.rdr.DrawSolidBox(pos, box, clr)
+	} else if ent.Contains(color.TYPE.Gradient) {
+		gra := color.Get.Gradient(ent)
+		rs.rdr.DrawGradientBox(pos, box, gra)
+	}
+
+	// if contains a text component
+	if ent.Contains(text.TYPE) {
+		// get the text component
+		textCmp := text.Get(ent)
+
+		// calculate position on the center of the button
+		textPos := geometry.Point{
+			X: pos.X + ((box.Size.Width / 2) * box.Scale),
+			Y: pos.Y + ((box.Size.Height / 2) * box.Scale),
+		}
+
+		// default color white
+		colorCmp := color.White
+
+		// if the button has a solid color
+		if ent.Contains(color.TYPE.Solid) {
+			// text color is inverse
+			colorCmp = color.Get.Solid(ent).Inverse()
+			// if is has a gradient color
+		} else if ent.Contains(color.TYPE.Gradient) {
+			// get the gradient
+			gra := color.Get.Gradient(ent)
+			// text color if the inverse of the from
+			colorCmp = gra.From.Inverse()
+		}
+
+		// draw the text
+		rs.rdr.DrawText(textCmp, textPos, colorCmp)
+	}
+
+	return nil
+}
+
 func (rs renderingSystem) renderText(v *entity.Entity) error {
 	textCmp := text.Get(v)
 	posCmp := geometry.Get.Point(v)
@@ -92,7 +149,8 @@ func (rs renderingSystem) renderText(v *entity.Entity) error {
 
 func (rs renderingSystem) isRenderable(ent *entity.Entity) bool {
 	return ent.Contains(geometry.TYPE.Point) &&
-		(ent.Contains(sprite.TYPE) || ent.Contains(text.TYPE) || ent.Contains(shapes.TYPE.Box))
+		(ent.Contains(sprite.TYPE) || ent.Contains(text.TYPE) || ent.Contains(shapes.TYPE.Box) ||
+			ent.Contains(ui.TYPE.FlatButton))
 }
 
 func (rs renderingSystem) getSortedByLayers(world *world.World) []*entity.Entity {
@@ -132,6 +190,10 @@ func (rs renderingSystem) Update(world *world.World, _ float32) error {
 	for _, v := range rs.getSortedByLayers(world) {
 		if v.Contains(sprite.TYPE) {
 			if err := rs.renderSprite(v); err != nil {
+				return err
+			}
+		} else if v.Contains(ui.TYPE.FlatButton) {
+			if err := rs.renderFlatButton(v); err != nil {
 				return err
 			}
 		} else if v.Contains(shapes.TYPE.Box) {

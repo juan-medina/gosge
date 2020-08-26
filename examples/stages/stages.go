@@ -24,25 +24,25 @@ package main
 
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
-	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/text"
+	"github.com/juan-medina/gosge/pkg/components/ui"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
 	"log"
-	"reflect"
 )
 
 var opt = options.Options{
 	Title:      "Stages Game",
 	BackGround: color.Black,
 	Icon:       "resources/icon.png",
+	Windowed:   true,
 }
 
 var (
@@ -115,10 +115,38 @@ func mainStage(eng engine.Engine) error {
 
 	measure := eng.MeasureText("< back", 50, 10)
 
-	createButton(gWorld, designResolution.Width-(measure.Width/2)-10, 0+(measure.Height/2)+10, measure.Width, measure.Height, gameScale,
-		color.Red, "< back", events.ChangeGameStage{Stage: "menu"})
+	measure.Width += measure.Width * 0.20
+	measure.Height += measure.Height * 0.20
 
-	wld.AddSystem(newButtonSystem())
+	wld.Add(entity.New(
+		ui.FlatButton{
+			Shadow: geometry.Size{Width: 5, Height: 5},
+			Event:  events.ChangeGameStage{Stage: "menu"},
+		},
+		geometry.Point{
+			X: (designResolution.Width - (measure.Width) - 5) * gameScale.Point.X,
+			Y: ((measure.Height / 2) - 5) * gameScale.Point.Y,
+		},
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  measure.Width,
+				Height: measure.Height,
+			},
+			Scale: gameScale.Min,
+		},
+		text.Text{
+			String:     "< back",
+			Size:       50 * gameScale.Min,
+			Spacing:    10 * gameScale.Min,
+			VAlignment: text.MiddleVAlignment,
+			HAlignment: text.CenterHAlignment,
+		},
+		color.Gradient{
+			From: color.Red,
+			To:   color.Beige,
+		},
+		effects.Layer{Depth: 0},
+	))
 
 	return nil
 }
@@ -173,144 +201,68 @@ func menuStage(eng engine.Engine) error {
 	))
 
 	measure := eng.MeasureText("Play!", 100, 10)
+	measure.Width += measure.Width * 0.20
+	measure.Height += measure.Height * 0.20
 
-	createButton(gWorld, designResolution.Width/2, designResolution.Height-200, measure.Width, measure.Height, gameScale,
-		color.Yellow, "Play!", events.ChangeGameStage{Stage: "main"})
-
-	createButton(gWorld, designResolution.Width/2, designResolution.Height-90, measure.Width, measure.Height, gameScale,
-		color.Blue, "Exit", events.GameCloseEvent{})
-
-	gWorld.AddSystem(newButtonSystem())
-
-	return nil
-}
-
-type buttonColor struct {
-	normal color.Solid
-	hover  color.Solid
-}
-
-type buttonText struct {
-	normal color.Solid
-	hover  color.Solid
-	ref    *entity.Entity
-}
-type button struct {
-	color buttonColor
-	txt   buttonText
-	event interface{}
-}
-
-var (
-	buttonType = reflect.TypeOf(button{})
-)
-
-func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale,
-	bc color.Solid, str string, event interface{}) {
-	bnc := bc.Blend(color.Black, 0.2)
-	tc := bnc.Inverse()
-	tnc := tc.Blend(color.Black, 0.2)
-
-	boxPos := geometry.Point{
-		X: (x - (w / 2)) * scale.Point.X,
-		Y: (y - (h / 2)) * scale.Point.Y,
-	}
-
-	textPos := geometry.Point{
-		X: boxPos.X + ((w / 2) * scale.Point.X),
-		Y: boxPos.Y + ((h / 2) * scale.Point.Y),
-	}
-
-	txt := wld.Add(entity.New(
+	gWorld.Add(entity.New(
+		ui.FlatButton{
+			Shadow: geometry.Size{Width: 5, Height: 5},
+			Event:  events.ChangeGameStage{Stage: "main"},
+		},
+		geometry.Point{
+			X: ((designResolution.Width / 2) - (measure.Width / 2)) * gameScale.Point.X,
+			Y: ((designResolution.Height - 210) - (measure.Height / 2)) * gameScale.Point.Y,
+		},
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  measure.Width,
+				Height: measure.Height,
+			},
+			Scale: gameScale.Min,
+		},
 		text.Text{
-			String:     str,
-			Size:       h * 0.8 * scale.Min,
-			Spacing:    10 * scale.Min,
+			String:     "Play!",
+			Size:       100 * gameScale.Min,
+			Spacing:    10 * gameScale.Min,
 			VAlignment: text.MiddleVAlignment,
 			HAlignment: text.CenterHAlignment,
 		},
-		tnc,
-		textPos,
-		effects.Layer{Depth: -11},
-	))
-
-	wld.Add(entity.New(
-		boxPos,
-		shapes.Box{
-			Size: geometry.Size{
-				Width:  w,
-				Height: h,
-			},
-			Scale: scale.Min,
+		color.Gradient{
+			From: color.Blue,
+			To:   color.SkyBlue,
 		},
-		bnc,
-		effects.Layer{Depth: -10},
-		button{
-			color: buttonColor{normal: bnc, hover: bc},
-			txt:   buttonText{normal: tnc, hover: tc, ref: txt},
-			event: event,
-		},
-	))
-
-	boxPos.X += 10
-	boxPos.Y += 10
-
-	wld.Add(entity.New(
-		boxPos,
-		shapes.Box{
-			Size: geometry.Size{
-				Width:  w,
-				Height: h,
-			},
-			Scale: scale.Min,
-		},
-		color.DarkGray,
 		effects.Layer{Depth: 0},
 	))
-}
 
-func newButtonSystem() world.System {
-	return &buttonSystem{}
-}
+	gWorld.Add(entity.New(
+		ui.FlatButton{
+			Shadow: geometry.Size{Width: 5, Height: 5},
+			Event:  events.GameCloseEvent{},
+		},
+		geometry.Point{
+			X: ((designResolution.Width / 2) - (measure.Width / 2)) * gameScale.Point.X,
+			Y: ((designResolution.Height - 80) - (measure.Height / 2)) * gameScale.Point.Y,
+		},
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  measure.Width,
+				Height: measure.Height,
+			},
+			Scale: gameScale.Min,
+		},
+		text.Text{
+			String:     "Exit",
+			Size:       100 * gameScale.Min,
+			Spacing:    10 * gameScale.Min,
+			VAlignment: text.MiddleVAlignment,
+			HAlignment: text.CenterHAlignment,
+		},
+		color.Gradient{
+			From: color.Blue,
+			To:   color.SkyBlue,
+		},
+		effects.Layer{Depth: 0},
+	))
 
-type buttonSystem struct{}
-
-func (bs buttonSystem) Update(_ *world.World, _ float32) error {
-	return nil
-}
-
-func (bs *buttonSystem) Notify(wld *world.World, e interface{}, _ float32) error {
-	switch v := e.(type) {
-	case events.MouseMoveEvent:
-		for it := wld.Iterator(buttonType, color.TYPE.Solid); it.HasNext(); {
-			ent := it.Value()
-			btn := ent.Get(buttonType).(button)
-
-			pos := geometry.Get.Point(ent)
-			box := shapes.Get.Box(ent)
-
-			clr := btn.color.normal
-			tcl := btn.txt.normal
-
-			if box.Contains(pos, v.Point) {
-				clr = btn.color.hover
-				tcl = btn.txt.hover
-			}
-
-			ent.Set(clr)
-			btn.txt.ref.Set(tcl)
-		}
-	case events.MouseUpEvent:
-		for it := wld.Iterator(buttonType, geometry.TYPE.Point); it.HasNext(); {
-			ent := it.Value()
-			btn := ent.Get(buttonType).(button)
-
-			pos := geometry.Get.Point(ent)
-			box := shapes.Get.Box(ent)
-			if box.Contains(pos, v.Point) {
-				return wld.Notify(btn.event)
-			}
-		}
-	}
 	return nil
 }

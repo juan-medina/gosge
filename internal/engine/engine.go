@@ -140,6 +140,9 @@ func (ei *engineImpl) prepare() error {
 	ei.gWorld.AddSystemWithPriority(ei, highPriority)
 	ei.gWorld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
 
+	// uis system will run after game system but before the effect systems
+	ei.gWorld.AddSystemWithPriority(systems.UISystem(), lowPriority)
+
 	// effect system will run after game system but before the rendering systems
 	ei.gWorld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
 
