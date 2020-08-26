@@ -20,34 +20,15 @@
  *  THE SOFTWARE.
  */
 
-// Package events contain the events for our engine
-package events
+// Package device include device related types
+package device
 
-import (
-	"github.com/juan-medina/gosge/pkg/components/device"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
+// MouseButton indicates a mouse button
+type MouseButton int
+
+//goland:noinspection GoUnusedConst
+const (
+	MouseLeftButton   = MouseButton(0) // MouseLeftButton is the left mouse button
+	MouseRightButton  = MouseButton(1) // MouseRightButton is the right mouse button
+	MouseMiddleButton = MouseButton(2) // MouseMiddleButton is the middle mouse button
 )
-
-// GameCloseEvent is an event that indicates that game need to close
-type GameCloseEvent struct{}
-
-// MouseMoveEvent is an event that indicates that the mouse is moving
-type MouseMoveEvent struct {
-	geometry.Point
-}
-
-// MouseUpEvent is an event that indicates that the mouse is release
-type MouseUpEvent struct {
-	// Point is the geometry.Point where the mouse is  when released
-	Point geometry.Point
-	// MouseButton is the device.MouseButton been released
-	MouseButton device.MouseButton
-}
-
-// ChangeGameStage is an event that indicates that change game stage, all entities,
-//systems, sprites sheets and textures will be removed. If the Stage does not exist
-//the game.Run method will return an error. Stages must be created with engine.AddGameStage
-type ChangeGameStage struct {
-	// Stage is the name of the stage to change to, it must be created with engine.AddGameStage
-	Stage string
-}

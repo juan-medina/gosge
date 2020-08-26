@@ -3,6 +3,7 @@ package systems
 import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/render"
+	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/events"
 )
@@ -34,6 +35,12 @@ type eventSystem struct {
 	rdr render.Render
 }
 
+var (
+	mouseButtonsTocCheck = []device.MouseButton{
+		device.MouseLeftButton, device.MouseMiddleButton, device.MouseRightButton,
+	}
+)
+
 func (es eventSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
 	return nil
 }
@@ -44,6 +51,10 @@ func (es eventSystem) sendGameClose(wld *world.World) error {
 
 func (es eventSystem) sendMouseMove(wld *world.World) error {
 	return wld.Notify(es.mme)
+}
+
+func (es eventSystem) sendMouseRelease(wld *world.World, button device.MouseButton) error {
+	return wld.Notify(events.MouseUpEvent{Point: es.mme.Point, MouseButton: button})
 }
 
 func (es *eventSystem) Update(world *world.World, _ float32) error {
@@ -58,6 +69,14 @@ func (es *eventSystem) Update(world *world.World, _ float32) error {
 		es.mme.Point = mp
 		if err := es.sendMouseMove(world); err != nil {
 			return err
+		}
+	}
+
+	for _, v := range mouseButtonsTocCheck {
+		if es.rdr.IsMouseRelease(v) {
+			if err := es.sendMouseRelease(world, v); err != nil {
+				return err
+			}
 		}
 	}
 

@@ -112,7 +112,13 @@ func mainStage(eng engine.Engine) error {
 	))
 
 	wld := eng.World()
-	wld.AddSystem(&stageChangeSystem{stage: "menu", time: 5})
+
+	measure := eng.MeasureText("Menu", 100, 10)
+
+	createButton(gWorld, designResolution.Width/2, designResolution.Height-90, measure.Width, measure.Height, gameScale,
+		color.Beige, color.Yellow, "Menu", events.ChangeGameStage{Stage: "menu"})
+
+	wld.AddSystem(newButtonSystem())
 
 	return nil
 }
@@ -165,17 +171,15 @@ func menuStage(eng engine.Engine) error {
 		effects.Layer{Depth: 1},
 	))
 
-	measure := eng.MeasureText(" Exit ", 100, 10)
+	measure := eng.MeasureText("Play!", 100, 10)
 
 	createButton(gWorld, designResolution.Width/2, designResolution.Height-200, measure.Width, measure.Height, gameScale,
-		color.SkyBlue, color.Yellow, "Play!")
+		color.SkyBlue, color.Yellow, "Play!", events.ChangeGameStage{Stage: "main"})
 
 	createButton(gWorld, designResolution.Width/2, designResolution.Height-90, measure.Width, measure.Height, gameScale,
-		color.Beige, color.Yellow, "Exit")
+		color.Beige, color.Yellow, "Exit", events.GameCloseEvent{})
 
-	gWorld.AddSystem(newButtonOverSystem())
-
-	//eng.World().AddSystem(&stageChangeSystem{stage: "main", time: 5})
+	gWorld.AddSystem(newButtonSystem())
 
 	return nil
 }
@@ -193,13 +197,15 @@ type buttonText struct {
 type button struct {
 	color buttonColor
 	txt   buttonText
+	event interface{}
 }
 
 var (
-	tagType = reflect.TypeOf(button{})
+	buttonType = reflect.TypeOf(button{})
 )
 
-func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale, bc, tc color.Solid, str string) {
+func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale,
+	bc, tc color.Solid, str string, event interface{}) {
 	boxPos := geometry.Point{
 		X: (x - (w / 2)) * scale.Point.X,
 		Y: (y - (h / 2)) * scale.Point.Y,
@@ -213,7 +219,7 @@ func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale, bc
 	txt := wld.Add(entity.New(
 		text.Text{
 			String:     str,
-			Size:       (h - 20) * scale.Min,
+			Size:       h * 0.8 * scale.Min,
 			Spacing:    10 * scale.Min,
 			VAlignment: text.MiddleVAlignment,
 			HAlignment: text.CenterHAlignment,
@@ -240,6 +246,7 @@ func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale, bc
 		button{
 			color: buttonColor{normal: bnc, hover: bc},
 			txt:   buttonText{normal: tnc, hover: tc, ref: txt},
+			event: event,
 		},
 	))
 
@@ -260,40 +267,22 @@ func createButton(wld *world.World, x, y, w, h float32, scale geometry.Scale, bc
 	))
 }
 
-// stageChangeSystem is a world.System that will automatically change to game stage in a giving time
-type stageChangeSystem struct {
-	time  float32 // time to change to the given stage
-	stage string  // stage name, must be create with engine.AddGameStage
+func newButtonSystem() world.System {
+	return &buttonSystem{}
 }
 
-func (s *stageChangeSystem) Update(world *world.World, delta float32) error {
-	// we discount time until zero, them we will notify to change the stage
-	if s.time -= delta; s.time <= 0 {
-		return world.Notify(events.ChangeGameStage{Stage: s.stage})
-	}
+type buttonSystem struct{}
+
+func (bs buttonSystem) Update(_ *world.World, _ float32) error {
 	return nil
 }
 
-func (s stageChangeSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
-	return nil
-}
-
-func newButtonOverSystem() world.System {
-	return &buttonOverSystem{}
-}
-
-type buttonOverSystem struct{}
-
-func (bos buttonOverSystem) Update(_ *world.World, _ float32) error {
-	return nil
-}
-
-func (bos *buttonOverSystem) Notify(wld *world.World, e interface{}, _ float32) error {
+func (bs *buttonSystem) Notify(wld *world.World, e interface{}, _ float32) error {
 	switch v := e.(type) {
 	case events.MouseMoveEvent:
-		for it := wld.Iterator(tagType, color.TYPE.Solid); it.HasNext(); {
+		for it := wld.Iterator(buttonType, color.TYPE.Solid); it.HasNext(); {
 			ent := it.Value()
-			btn := ent.Get(tagType).(button)
+			btn := ent.Get(buttonType).(button)
 
 			pos := geometry.Get.Point(ent)
 			box := shapes.Get.Box(ent)
@@ -308,6 +297,17 @@ func (bos *buttonOverSystem) Notify(wld *world.World, e interface{}, _ float32) 
 
 			ent.Set(clr)
 			btn.txt.ref.Set(tcl)
+		}
+	case events.MouseUpEvent:
+		for it := wld.Iterator(buttonType, geometry.TYPE.Point); it.HasNext(); {
+			ent := it.Value()
+			btn := ent.Get(buttonType).(button)
+
+			pos := geometry.Get.Point(ent)
+			box := shapes.Get.Box(ent)
+			if box.Contains(pos, v.Point) {
+				return wld.Notify(btn.event)
+			}
 		}
 	}
 	return nil

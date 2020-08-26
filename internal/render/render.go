@@ -27,6 +27,7 @@ import (
 	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/internal/render/ray"
 	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
@@ -49,10 +50,12 @@ type Render interface {
 
 	// GetScreenSize get the current screen size
 	GetScreenSize() geometry.Size
+
 	// GetMousePoint returns the current Point of the mouse
 	GetMousePoint() geometry.Point
-	// IsScreenScaleChange returns if the current screen scale has changed
-	IsScreenScaleChange() bool
+
+	// IsMouseRelease check if the given MouseButton has been release
+	IsMouseRelease(button device.MouseButton) bool
 
 	// GetFrameTime returns the time from the delta time for current frame
 	GetFrameTime() float32

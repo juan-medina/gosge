@@ -24,6 +24,7 @@ package ray
 
 import (
 	"github.com/gen2brain/raylib-go/raylib"
+	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 )
 
@@ -38,7 +39,7 @@ func (rr RenderImpl) GetMousePoint() geometry.Point {
 	return geometry.Point{X: pos.X, Y: pos.Y}
 }
 
-// IsScreenScaleChange returns if the current screen scale has changed
-func (rr RenderImpl) IsScreenScaleChange() bool {
-	return rl.IsWindowResized()
+// IsMouseRelease check if the given MouseButton has been release
+func (rr RenderImpl) IsMouseRelease(button device.MouseButton) bool {
+	return rl.IsMouseButtonReleased(int32(button))
 }
