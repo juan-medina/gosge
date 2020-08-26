@@ -54,7 +54,7 @@ func (uis uiSystem) Update(wld *world.World, _ float32) error {
 			ent.Set(btn)
 		}
 
-		// calculate normal (no hover color if is not done yet
+		// calculate normal (no hover) color if is not done yet
 		if !btn.Normal.Set {
 			if ent.Contains(color.TYPE.Solid) {
 				btn.Normal.Solid = color.Get.Solid(ent).Blend(color.Black, normalColorDarken)

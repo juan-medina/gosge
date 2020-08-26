@@ -65,14 +65,14 @@ func loadGame(eng engine.Engine) error {
 
 // game constants
 const (
-	buttonExtraWidth  = 0.20
-	buttonExtraHeight = 0.20
-	shadowExtraWidth  = 5
-	shadowExtraHeight = 5
-	fontTittle        = 300
-	fontBig           = 100
-	fontSmall         = 50
-	fontSpacing       = 10
+	buttonExtraWidth  = 0.20 // the additional width for a button si it is not only the text size
+	buttonExtraHeight = 0.20 // the additional width for a button si it is not only the text size
+	shadowExtraWidth  = 5    // the x offset for the buttons shadow
+	shadowExtraHeight = 5    // the y offset for the buttons shadow
+	fontTittle        = 300  // tittle font size
+	fontBig           = 100  // big buttons font size
+	fontSmall         = 50   // small buttons font size
+	fontSpacing       = 10   // font spacing
 )
 
 func mainStage(eng engine.Engine) error {
@@ -81,11 +81,13 @@ func mainStage(eng engine.Engine) error {
 		return err
 	}
 
+	// get the world
 	wld := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
+	// each stage will have it own bacgkround color
 	eng.SetBackgroundColor(color.SkyBlue)
 
 	// add the centered text
@@ -110,6 +112,7 @@ func mainStage(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
+	// add the center sprite
 	wld.Add(entity.New(
 		sprite.Sprite{
 			Sheet: "resources/stages.json",
@@ -123,11 +126,13 @@ func mainStage(eng engine.Engine) error {
 		effects.Layer{Depth: 1},
 	))
 
+	// measure the text so we could make a button just for it
 	measure := eng.MeasureText("< back", fontSmall, fontSpacing)
 
 	measure.Width += measure.Width * buttonExtraWidth
 	measure.Height += measure.Height * buttonExtraHeight
 
+	// add the back button in the top right corner
 	wld.Add(entity.New(
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
@@ -168,11 +173,13 @@ func menuStage(eng engine.Engine) error {
 		return err
 	}
 
+	// get the world
 	wld := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
+	// customize background color
 	eng.SetBackgroundColor(color.Gopher)
 
 	// add the centered text
@@ -197,6 +204,7 @@ func menuStage(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
+	// add the center sprite
 	wld.Add(entity.New(
 		sprite.Sprite{
 			Sheet: "resources/stages.json",
@@ -210,10 +218,12 @@ func menuStage(eng engine.Engine) error {
 		effects.Layer{Depth: 1},
 	))
 
+	// measuring the biggest text for size all the buttons equally
 	measure := eng.MeasureText("Play!", fontBig, fontSpacing)
 	measure.Width += measure.Width * buttonExtraWidth
 	measure.Height += measure.Height * buttonExtraHeight
 
+	// add the play button, it will sent a event to change to the main stage
 	wld.Add(entity.New(
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
@@ -244,6 +254,7 @@ func menuStage(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
+	// add the exit button, it will trigger the event to close the game
 	wld.Add(entity.New(
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
