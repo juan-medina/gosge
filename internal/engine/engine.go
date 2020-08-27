@@ -71,6 +71,7 @@ type engineImpl struct {
 }
 
 func (ei *engineImpl) SetBackgroundColor(color color.Solid) {
+	ei.opt.BackGround = color
 	ei.rdr.SetBackgroundColor(color)
 }
 
@@ -128,13 +129,21 @@ func (ei *engineImpl) initialize() error {
 	return nil
 }
 
-func (ei *engineImpl) prepare() error {
-	ei.rdr.BeginFrame()
-	ei.rdr.EndFrame()
+func (ei *engineImpl) drawLoading() {
+	time := float32(.125)
+	clr := ei.opt.BackGround
+	ei.rdr.SetBackgroundColor(color.Black)
+	for time > 0 {
+		ei.rdr.BeginFrame()
+		ei.rdr.EndFrame()
+		time -= ei.rdr.GetFrameTime()
+	}
+	ei.rdr.SetBackgroundColor(clr)
+}
 
-	ei.rdr.BeginFrame()
+func (ei *engineImpl) prepare() error {
+	ei.drawLoading()
 	err := ei.init(ei)
-	ei.rdr.EndFrame()
 
 	// main systems will update before the game systems
 	ei.wld.AddSystemWithPriority(ei, highPriority)
