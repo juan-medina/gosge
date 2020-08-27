@@ -63,8 +63,8 @@ func loadGame(eng engine.Engine) error {
 
 // game constants
 const (
-	buttonExtraWidth  = 0.20                       // the additional width for a button si it is not only the text size
-	buttonExtraHeight = 0.20                       // the additional width for a button si it is not only the text size
+	buttonExtraWidth  = 0.15                       // the additional width for a button si it is not only the text size
+	buttonExtraHeight = 0.15                       // the additional width for a button si it is not only the text size
 	shadowExtraWidth  = 5                          // the x offset for the buttons shadow
 	shadowExtraHeight = 5                          // the y offset for the buttons shadow
 	fontTittle        = 100                        // tittle font size
@@ -235,6 +235,9 @@ func menuStage(eng engine.Engine) error {
 	if measure, err = eng.MeasureText(fontName, "Play !", fontBig); err != nil {
 		return err
 	}
+
+	measure.Width += measure.Width * buttonExtraWidth
+	measure.Height += measure.Height * buttonExtraHeight
 
 	// add the play button, it will sent a event to change to the main stage
 	wld.Add(entity.New(
