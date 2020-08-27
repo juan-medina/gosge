@@ -35,6 +35,8 @@ type Engine interface {
 	World() *world.World
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(fileName string) error
+	// LoadFont preloads a font
+	LoadFont(fileName string) error
 	// GetSpriteSize returns the geometry.Size of a given sprite
 	GetSpriteSize(sheet string, name string) (geometry.Size, error)
 	// GetScreenSize returns the current screen size
@@ -45,7 +47,7 @@ type Engine interface {
 	// SetBackgroundColor changes the current background color.Solid
 	SetBackgroundColor(color color.Solid)
 	// MeasureText return the geometry.Size of a string with a defined size and spacing
-	MeasureText(str string, size, spacing float32) geometry.Size
+	MeasureText(font string, str string, size float32) (geometry.Size, error)
 }
 
 // InitFunc is a function that will get call for our game to load

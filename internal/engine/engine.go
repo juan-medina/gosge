@@ -26,6 +26,7 @@ package engine
 import (
 	"fmt"
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/internal/storage"
 	"github.com/juan-medina/gosge/internal/systems"
@@ -129,6 +130,9 @@ func (ei *engineImpl) initialize() error {
 
 func (ei *engineImpl) prepare() error {
 	ei.rdr.BeginFrame()
+	ei.rdr.EndFrame()
+
+	ei.rdr.BeginFrame()
 	err := ei.init(ei)
 	ei.rdr.EndFrame()
 
@@ -215,6 +219,15 @@ func (ei *engineImpl) changeStage(name string) error {
 	return fmt.Errorf("stage %q not found", name)
 }
 
-func (ei engineImpl) MeasureText(str string, size, spacing float32) geometry.Size {
-	return ei.rdr.MeasureText(str, size, spacing)
+func (ei engineImpl) MeasureText(font string, str string, size float32) (result geometry.Size, err error) {
+	var fnt components.FontDef
+	if fnt, err = ei.ds.GetFontDef(font); err == nil {
+		result = ei.rdr.MeasureText(fnt, str, size)
+	}
+
+	return
+}
+
+func (ei engineImpl) LoadFont(fileName string) error {
+	return ei.ds.LoadFont(fileName)
 }

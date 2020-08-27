@@ -36,3 +36,8 @@ type SpriteDef struct {
 	Origin  geometry.Rect  // Origin is where the sprite is on the texture
 	Pivot   geometry.Point // Pivot is the relative pivot 0..1 in each axis
 }
+
+// FontDef defines a font
+type FontDef struct {
+	Data interface{} // Data is the font data
+}

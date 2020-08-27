@@ -59,7 +59,25 @@ type spriteSheet map[string]components.SpriteDef
 type dataStorage struct {
 	sheets   map[string]spriteSheet
 	textures map[string]components.TextureDef
+	fonts    map[string]components.FontDef
 	rdr      render.Render
+}
+
+func (ds *dataStorage) LoadFont(fileName string) (err error) {
+	var font components.FontDef
+	if _, ok := ds.fonts[fileName]; !ok {
+		if font, err = ds.rdr.LoadFont(fileName); err == nil {
+			ds.fonts[fileName] = font
+		}
+	}
+	return
+}
+
+func (ds *dataStorage) GetFontDef(fileName string) (components.FontDef, error) {
+	if _, ok := ds.fonts[fileName]; ok {
+		return ds.fonts[fileName], nil
+	}
+	return components.FontDef{}, fmt.Errorf("can not find font %q", fileName)
 }
 
 // Storage is a storage for our game data
@@ -70,6 +88,10 @@ type Storage interface {
 	GetSpriteSize(sheet string, name string) (geometry.Size, error)
 	//GetSpriteDef returns the components.SpriteDef for an sprite
 	GetSpriteDef(sheet string, name string) (components.SpriteDef, error)
+	// LoadFont preloads a font
+	LoadFont(fileName string) error
+	//GetFontDef returns the components.FontDef for a font
+	GetFontDef(name string) (components.FontDef, error)
 	//Clear all loaded data
 	Clear()
 }
@@ -155,6 +177,11 @@ func (ds *dataStorage) Clear() {
 		ds.rdr.UnloadTexture(v)
 	}
 	ds.textures = make(map[string]components.TextureDef, 0)
+
+	for _, v := range ds.fonts {
+		ds.rdr.UnloadFont(v)
+	}
+	ds.fonts = make(map[string]components.FontDef, 0)
 }
 
 // New returns a new storage.Storage
@@ -162,6 +189,7 @@ func New(rdr render.Render) Storage {
 	return &dataStorage{
 		sheets:   make(map[string]spriteSheet, 0),
 		textures: make(map[string]components.TextureDef, 0),
+		fonts:    make(map[string]components.FontDef, 0),
 		rdr:      rdr,
 	}
 }

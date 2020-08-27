@@ -63,17 +63,22 @@ func loadGame(eng engine.Engine) error {
 
 // game constants
 const (
-	buttonExtraWidth  = 0.20 // the additional width for a button si it is not only the text size
-	buttonExtraHeight = 0.20 // the additional width for a button si it is not only the text size
-	shadowExtraWidth  = 5    // the x offset for the buttons shadow
-	shadowExtraHeight = 5    // the y offset for the buttons shadow
-	fontTittle        = 300  // tittle font size
-	fontBig           = 100  // big buttons font size
-	fontSmall         = 50   // small buttons font size
-	fontSpacing       = 10   // font spacing
+	buttonExtraWidth  = 0.20                       // the additional width for a button si it is not only the text size
+	buttonExtraHeight = 0.20                       // the additional width for a button si it is not only the text size
+	shadowExtraWidth  = 5                          // the x offset for the buttons shadow
+	shadowExtraHeight = 5                          // the y offset for the buttons shadow
+	fontTittle        = 100                        // tittle font size
+	fontBig           = 100                        // big buttons font size
+	fontSmall         = 50                         // small buttons font size
+	fontName          = "resources/go_regular.fnt" // game font
 )
 
 func mainStage(eng engine.Engine) error {
+	// Preload font
+	if err := eng.LoadFont(fontName); err != nil {
+		return err
+	}
+
 	// pre load sprites
 	if err := eng.LoadSpriteSheet("resources/stages.json"); err != nil {
 		return err
@@ -85,7 +90,7 @@ func mainStage(eng engine.Engine) error {
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
-	// each stage will have it own bacgkround color
+	// each stage will have it own background color
 	eng.SetBackgroundColor(color.SkyBlue)
 
 	// add the centered text
@@ -95,7 +100,7 @@ func mainStage(eng engine.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.TopVAlignment,
 			Size:       fontTittle * gameScale.Min,
-			Spacing:    fontSpacing * gameScale.Min,
+			Font:       fontName,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -125,7 +130,11 @@ func mainStage(eng engine.Engine) error {
 	))
 
 	// measure the text so we could make a button just for it
-	measure := eng.MeasureText("< back", fontSmall, fontSpacing)
+	var measure geometry.Size
+	var err error
+	if measure, err = eng.MeasureText(fontName, "< back", fontSmall); err != nil {
+		return err
+	}
 
 	measure.Width += measure.Width * buttonExtraWidth
 	measure.Height += measure.Height * buttonExtraHeight
@@ -150,7 +159,7 @@ func mainStage(eng engine.Engine) error {
 		ui.Text{
 			String:     "< back",
 			Size:       fontSmall * gameScale.Min,
-			Spacing:    fontSpacing * gameScale.Min,
+			Font:       fontName,
 			VAlignment: ui.MiddleVAlignment,
 			HAlignment: ui.CenterHAlignment,
 		},
@@ -165,6 +174,11 @@ func mainStage(eng engine.Engine) error {
 }
 
 func menuStage(eng engine.Engine) error {
+	// Preload font
+	if err := eng.LoadFont(fontName); err != nil {
+		return err
+	}
+
 	// pre load sprites
 	if err := eng.LoadSpriteSheet("resources/stages.json"); err != nil {
 		return err
@@ -186,7 +200,7 @@ func menuStage(eng engine.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.TopVAlignment,
 			Size:       fontTittle * gameScale.Min,
-			Spacing:    fontSpacing * gameScale.Min,
+			Font:       fontName,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -216,9 +230,11 @@ func menuStage(eng engine.Engine) error {
 	))
 
 	// measuring the biggest text for size all the buttons equally
-	measure := eng.MeasureText("Play!", fontBig, fontSpacing)
-	measure.Width += measure.Width * buttonExtraWidth
-	measure.Height += measure.Height * buttonExtraHeight
+	var measure geometry.Size
+	var err error
+	if measure, err = eng.MeasureText(fontName, "Play !", fontBig); err != nil {
+		return err
+	}
 
 	// add the play button, it will sent a event to change to the main stage
 	wld.Add(entity.New(
@@ -240,7 +256,7 @@ func menuStage(eng engine.Engine) error {
 		ui.Text{
 			String:     "Play!",
 			Size:       fontBig * gameScale.Min,
-			Spacing:    fontSpacing * gameScale.Min,
+			Font:       fontName,
 			VAlignment: ui.MiddleVAlignment,
 			HAlignment: ui.CenterHAlignment,
 		},
@@ -271,7 +287,7 @@ func menuStage(eng engine.Engine) error {
 		ui.Text{
 			String:     "Exit",
 			Size:       fontBig * gameScale.Min,
-			Spacing:    fontSpacing * gameScale.Min,
+			Font:       fontName,
 			VAlignment: ui.MiddleVAlignment,
 			HAlignment: ui.CenterHAlignment,
 		},

@@ -130,8 +130,12 @@ func (rs renderingSystem) renderFlatButton(ent *entity.Entity) error {
 			colorCmp = gra.From.Inverse()
 		}
 
-		// draw the text
-		rs.rdr.DrawText(textCmp, textPos, colorCmp)
+		if ftd, err := rs.ds.GetFontDef(textCmp.Font); err == nil {
+			// draw the text
+			rs.rdr.DrawText(ftd, textCmp, textPos, colorCmp)
+		} else {
+			return err
+		}
 	}
 
 	return nil
@@ -142,7 +146,13 @@ func (rs renderingSystem) renderText(v *entity.Entity) error {
 	posCmp := geometry.Get.Point(v)
 	colorCmp := color.Get.Solid(v)
 
-	rs.rdr.DrawText(textCmp, posCmp, colorCmp)
+	if ftd, err := rs.ds.GetFontDef(textCmp.Font); err == nil {
+		// draw the text
+		rs.rdr.DrawText(ftd, textCmp, posCmp, colorCmp)
+	} else {
+		return err
+	}
+
 	return nil
 }
 

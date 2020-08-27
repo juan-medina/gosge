@@ -72,14 +72,20 @@ var (
 
 // game constants
 const (
-	itemsToAdd   = 200         // itemsToAdd is how many items we are going to add
-	timeToChange = float32(10) // timeToChange is how many seconds to change layers
-	uiFontSize   = 75          // uiFontSize is the size for UI font
-	itemFontSize = 50          // itemFontSize is the size for Items font
+	itemsToAdd   = 200                     // itemsToAdd is how many items we are going to add
+	timeToChange = float32(10)             // timeToChange is how many seconds to change layers
+	uiFontSize   = 75                      // uiFontSize is the size for UI font
+	itemFontSize = 50                      // itemFontSize is the size for Items font
+	fontName     = "resources/go_mono.fnt" // fontName is the font that we use
 )
 
 // load the game
 func load(eng engine.Engine) error {
+	// Preload font
+	if err := eng.LoadFont(fontName); err != nil {
+		return err
+	}
+
 	// get the world
 	wld := eng.World()
 
@@ -97,7 +103,7 @@ func load(eng engine.Engine) error {
 	// set the Point with scale
 	boxSize := geometry.Size{Width: boxWidth * gameScale.Point.X, Height: uiFontSize * gameScale.Point.Y}
 	uiPos := geometry.Point{X: boxStartX * gameScale.Point.X, Y: 0}
-	uiTextPos := geometry.Point{X: uiPos.X, Y: boxSize.Height / 2}
+	uiTextPos := geometry.Point{X: (designResolution.Width / 2) * gameScale.Point.X, Y: boxSize.Height / 2}
 
 	// add the top box
 	wld.Add(entity.New(
@@ -112,9 +118,9 @@ func load(eng engine.Engine) error {
 		ui.Text{
 			String:     "xx is Front",
 			VAlignment: ui.MiddleVAlignment,
-			HAlignment: ui.LeftHAlignment,
+			HAlignment: ui.CenterHAlignment,
+			Font:       fontName,
 			Size:       uiFontSize * gameScale.Min,
-			Spacing:    (uiFontSize / 10) * gameScale.Min,
 		},
 		uiTextPos,
 		color.SkyBlue,
@@ -127,8 +133,8 @@ func load(eng engine.Engine) error {
 			String:     "press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
+			Font:       fontName,
 			Size:       uiFontSize * gameScale.Min,
-			Spacing:    (uiFontSize / 10) * gameScale.Min,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -188,8 +194,8 @@ func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 					String:     gr.name,
 					VAlignment: ui.MiddleVAlignment,
 					HAlignment: ui.CenterHAlignment,
+					Font:       fontName,
 					Size:       itemFontSize * scl.Min,
-					Spacing:    itemFontSize / 10 * scl.Min,
 				},
 				stp,
 				color.DarkGray.Alpha(127),
@@ -202,8 +208,8 @@ func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 					String:     gr.name,
 					VAlignment: ui.MiddleVAlignment,
 					HAlignment: ui.CenterHAlignment,
+					Font:       fontName,
 					Size:       itemFontSize * scl.Min,
-					Spacing:    itemFontSize / 10 * scl.Min,
 				},
 				pos,
 				gr.clr,

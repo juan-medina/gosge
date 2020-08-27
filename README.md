@@ -32,6 +32,10 @@ var opt = options.Options{
 	Title:      "Hello Game",
 	BackGround: color.Black,
 }
+const (
+	fontName  = "resources/go_regular.fnt"
+	fontSize  = 100
+)
 
 var (
 	// designResolution is how our game is designed
@@ -45,6 +49,11 @@ func main() {
 }
 
 func loadGame(eng engine.Engine) error {
+	// Preload font
+	if err := eng.LoadFont(fontName); err != nil {
+		return err
+	}
+
 	// get the ECS world
 	wld := eng.World()
 
@@ -57,8 +66,8 @@ func loadGame(eng engine.Engine) error {
 			String:     "Hello World",
 			HAlignment: text.CenterHAlignment,
 			VAlignment: text.MiddleVAlignment,
-			Size:       300 * gameScale.Min,
-			Spacing:    10,
+			Font:       fontName,
+			Size:       fontSize * gameScale.Min,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,

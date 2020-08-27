@@ -39,6 +39,7 @@ func (rr *RenderImpl) color2RayColor(color color.Solid) rl.Color {
 
 var (
 	emptyTexture = components.TextureDef{}
+	emptyFont    = components.FontDef{}
 )
 
 // LoadTexture giving it file name into VRAM
@@ -49,14 +50,27 @@ func (rr RenderImpl) LoadTexture(fileName string) (components.TextureDef, error)
 	return emptyTexture, fmt.Errorf("error loading texture: %q", fileName)
 }
 
+// LoadFont giving it file name into VRAM
+func (rr RenderImpl) LoadFont(fileName string) (components.FontDef, error) {
+	if f := rl.LoadFont(fileName); f.Texture.ID != 0 {
+		return components.FontDef{Data: f}, nil
+	}
+	return emptyFont, fmt.Errorf("error loading font: %q", fileName)
+}
+
+// UnloadFont from VRAM
+func (rr RenderImpl) UnloadFont(textureDef components.FontDef) {
+	rl.UnloadFont(textureDef.Data.(rl.Font))
+}
+
 // UnloadTexture from VRAM
 func (rr RenderImpl) UnloadTexture(textureDef components.TextureDef) {
 	rl.UnloadTexture(textureDef.Data.(rl.Texture2D))
 }
 
 // DrawText will draw a text.Text in the given geometry.Point with the correspondent color.Color
-func (rr RenderImpl) DrawText(txt ui.Text, pos geometry.Point, color color.Solid) {
-	font := rl.GetFontDefault()
+func (rr RenderImpl) DrawText(ftd components.FontDef, txt ui.Text, pos geometry.Point, color color.Solid) {
+	font := ftd.Data.(rl.Font)
 
 	vec := rl.Vector2{
 		X: pos.X,
@@ -64,7 +78,7 @@ func (rr RenderImpl) DrawText(txt ui.Text, pos geometry.Point, color color.Solid
 	}
 
 	if txt.HAlignment != ui.LeftHAlignment || txt.VAlignment != ui.BottomVAlignment {
-		av := rl.MeasureTextEx(font, txt.String, txt.Size, txt.Spacing)
+		av := rl.MeasureTextEx(font, txt.String, txt.Size, 0)
 
 		switch txt.HAlignment {
 		case ui.LeftHAlignment:
@@ -88,7 +102,7 @@ func (rr RenderImpl) DrawText(txt ui.Text, pos geometry.Point, color color.Solid
 		vec.Y += av.Y
 	}
 
-	rl.DrawTextEx(font, txt.String, vec, txt.Size, txt.Spacing, rr.color2RayColor(color))
+	rl.DrawTextEx(font, txt.String, vec, txt.Size, 0, rr.color2RayColor(color))
 }
 
 // DrawSprite draws a sprite.Sprite in the given geometry.Point with the tint color.Color
@@ -151,9 +165,9 @@ func (rr *RenderImpl) SetBackgroundColor(color color.Solid) {
 }
 
 // MeasureText return the geometry.Size of a string with a defined size and spacing
-func (rr *RenderImpl) MeasureText(str string, size, spacing float32) geometry.Size {
-	font := rl.GetFontDefault()
-	av := rl.MeasureTextEx(font, str, size, spacing)
+func (rr *RenderImpl) MeasureText(fnt components.FontDef, str string, size float32) geometry.Size {
+	fray := fnt.Data.(rl.Font)
+	av := rl.MeasureTextEx(fray, str, size, 0)
 	return geometry.Size{
 		Width:  av.X,
 		Height: av.Y,

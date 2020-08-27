@@ -98,7 +98,7 @@ var (
 	Black      = Solid{A: 255}                         // Black Color
 	White      = Solid{R: 255, G: 255, B: 255, A: 255} // White Color
 	Magenta    = Solid{R: 255, B: 255, A: 255}         // Magenta Color
-	LightGray  = Solid{R: 200, G: 200, B: 200, A: 25}  // LightGray is a Light Gray Color
+	LightGray  = Solid{R: 200, G: 200, B: 200, A: 255} // LightGray is a Light Gray Color
 	Gray       = Solid{R: 130, G: 130, B: 130, A: 255} // Gray Color
 	DarkGray   = Solid{R: 80, G: 80, B: 80, A: 255}    // DarkGray Dark Gray
 	Yellow     = Solid{R: 253, G: 249, A: 255}         // Yellow Color

@@ -62,8 +62,9 @@ var (
 const (
 	noseVerticalGap = 300
 	eyesGap         = 400
-	textSmallSize   = 40
-	textBigSize     = 70
+	fontName        = "resources/go_regular.fnt"
+	textSmallSize   = 60
+	textBigSize     = 100
 	dizzyBarWith    = 1500
 	dizzyBarHeight  = 100
 	dizzyBarGap     = 50
@@ -80,6 +81,12 @@ func main() {
 
 func loadGame(eng engine.Engine) error {
 	var err error
+
+	// Preload font
+	if err = eng.LoadFont(fontName); err != nil {
+		return err
+	}
+
 	// pre load sprites
 	if err = eng.LoadSpriteSheet("resources/gopher.json"); err != nil {
 		return err
@@ -161,11 +168,11 @@ func loadGame(eng engine.Engine) error {
 			String:     "press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
+			Font:       fontName,
 			Size:       textSmallSize * gameScale.Min,
-			Spacing:    (textSmallSize / 4) * gameScale.Min,
 		},
 		textPos,
-		color.Black,
+		color.White,
 	))
 
 	// our bar shape
@@ -198,7 +205,7 @@ func loadGame(eng engine.Engine) error {
 
 	// Add the empty dizzy bar
 	dizzyBarEmpty = gw.Add(entity.New(
-		color.Black,
+		color.LightGray,
 		box,
 		dizzyBarPoint,
 	))
@@ -209,8 +216,8 @@ func loadGame(eng engine.Engine) error {
 			String:     "Dizzy! Level",
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.MiddleVAlignment,
+			Font:       fontName,
 			Size:       textBigSize * gameScale.Min,
-			Spacing:    (textBigSize / 4) * gameScale.Min,
 		},
 		color.Green,
 		dizzyTextPoint,

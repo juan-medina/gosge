@@ -65,19 +65,24 @@ type Render interface {
 	// UnloadTexture from VRAM
 	UnloadTexture(textureDef components.TextureDef)
 
+	// LoadFont giving it file name into VRAM
+	LoadFont(fileName string) (components.FontDef, error)
+	// UnloadFont from VRAM
+	UnloadFont(textureDef components.FontDef)
+
 	// SetBackgroundColor changes the current background color.Solid
 	SetBackgroundColor(color color.Solid)
 
 	// DrawText will draw a text.Text in the given geometry.Point with the correspondent color.Color
-	DrawText(txt ui.Text, pos geometry.Point, color color.Solid)
+	DrawText(ftd components.FontDef, txt ui.Text, pos geometry.Point, color color.Solid)
 	// DrawSprite draws a sprite.Sprite in the given geometry.Point with the tint color.Color
 	DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Point, tint color.Solid) error
 	// DrawSolidBox draws a solid box with an color.Solid and a scale
 	DrawSolidBox(pos geometry.Point, box shapes.Box, solid color.Solid)
 	// DrawGradientBox draws a solid box with an color.Solid and a scale
 	DrawGradientBox(pos geometry.Point, box shapes.Box, gradient color.Gradient)
-	// MeasureText return the geometry.Size of a string with a defined size and spacing
-	MeasureText(str string, size, spacing float32) geometry.Size
+	// MeasureText return the geometry.Size of a string with a defined size
+	MeasureText(fnt components.FontDef, str string, size float32) geometry.Size
 }
 
 // New return the Render system

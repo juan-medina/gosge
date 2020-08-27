@@ -46,7 +46,7 @@ const (
 type Text struct {
 	String     string     // String is the Text string
 	Size       float32    // Size is the Text size
-	Spacing    float32    // Spacing is the Text spacing
+	Font       string     // Font is the font to use
 	VAlignment VAlignment // VAlignment is the text.VAlignment
 	HAlignment HAlignment // HAlignment is the text.HAlignment
 }
