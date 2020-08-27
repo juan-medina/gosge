@@ -20,42 +20,24 @@
  *  THE SOFTWARE.
  */
 
-// Package ui contains the components for displaying ui elements
 package ui
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
-	"reflect"
+	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/pkg/components/geometry"
 )
 
-type types struct {
-	// FlatButton is the reflect.Type for ui.FlatButton
-	FlatButton reflect.Type
-	// Text is the reflect.Type for ui.Text
-	Text reflect.Type
+// FlatButtonColors represent the colors of the button
+type FlatButtonColors struct {
+	Solid    color.Solid    // Solid is a color.Solid
+	Gradient color.Gradient // Gradient is a color.Gradient
+	Set      bool           // Set indicates is this has been set
 }
 
-// TYPE hold the reflect.Type for our ui components
-var TYPE = types{
-	FlatButton: reflect.TypeOf(FlatButton{}),
-	Text:       reflect.TypeOf(Text{}),
-}
-
-type gets struct {
-	// FlatButton gets a ui.FlatButton from a entity.Entity
-	FlatButton func(e *entity.Entity) FlatButton
-	// FlatButton gets a ui.FlatButton from a entity.Entity
-	Text func(e *entity.Entity) Text
-}
-
-// Get a ui component
-var Get = gets{
-	// FlatButton gets a ui.FlatButton from a entity.Entity
-	FlatButton: func(e *entity.Entity) FlatButton {
-		return e.Get(TYPE.FlatButton).(FlatButton)
-	},
-	// Text gets a ui.Text from a entity.Entity
-	Text: func(e *entity.Entity) Text {
-		return e.Get(TYPE.Text).(Text)
-	},
+// FlatButton is a UI element for displaying a button
+type FlatButton struct {
+	Shadow geometry.Size    // Shadow is the offset of the shadow on the ui.FlatButton
+	Normal FlatButtonColors // Normal is the ui.FlatButtonColors on normal state
+	Hover  FlatButtonColors // Hover is the  ui.FlatButtonColors on hover state
+	Event  interface{}      // Event is the event that will be trigger when this button is click
 }

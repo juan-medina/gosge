@@ -9,7 +9,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/text"
+	"github.com/juan-medina/gosge/pkg/components/ui"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
@@ -109,10 +109,10 @@ func load(eng engine.Engine) error {
 
 	// add the text
 	uiText = wld.Add(entity.New(
-		text.Text{
+		ui.Text{
 			String:     "xx is Front",
-			VAlignment: text.MiddleVAlignment,
-			HAlignment: text.LeftHAlignment,
+			VAlignment: ui.MiddleVAlignment,
+			HAlignment: ui.LeftHAlignment,
 			Size:       uiFontSize * gameScale.Min,
 			Spacing:    (uiFontSize / 10) * gameScale.Min,
 		},
@@ -123,10 +123,10 @@ func load(eng engine.Engine) error {
 
 	// add the bottom text
 	wld.Add(entity.New(
-		text.Text{
+		ui.Text{
 			String:     "press <ESC> to close",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.BottomVAlignment,
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.BottomVAlignment,
 			Size:       uiFontSize * gameScale.Min,
 			Spacing:    (uiFontSize / 10) * gameScale.Min,
 		},
@@ -184,10 +184,10 @@ func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 
 			// add the texts shadow
 			wld.Add(entity.New(
-				text.Text{
+				ui.Text{
 					String:     gr.name,
-					VAlignment: text.MiddleVAlignment,
-					HAlignment: text.CenterHAlignment,
+					VAlignment: ui.MiddleVAlignment,
+					HAlignment: ui.CenterHAlignment,
 					Size:       itemFontSize * scl.Min,
 					Spacing:    itemFontSize / 10 * scl.Min,
 				},
@@ -198,10 +198,10 @@ func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 
 			// add the text
 			wld.Add(entity.New(
-				text.Text{
+				ui.Text{
 					String:     gr.name,
-					VAlignment: text.MiddleVAlignment,
-					HAlignment: text.CenterHAlignment,
+					VAlignment: ui.MiddleVAlignment,
+					HAlignment: ui.CenterHAlignment,
 					Size:       itemFontSize * scl.Min,
 					Spacing:    itemFontSize / 10 * scl.Min,
 				},
@@ -287,7 +287,7 @@ func (sls *swapLayersOnTimeSystem) updateUI(_ *world.World) error {
 		}
 	}
 
-	txt := text.Get(uiText)
+	txt := ui.Get.Text(uiText)
 	txt.String = fmt.Sprintf("top layer %s, change in %02.02f", groups[top].name, timeToChange-sls.time)
 	uiText.Set(txt)
 

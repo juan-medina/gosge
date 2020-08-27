@@ -27,7 +27,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/text"
+	"github.com/juan-medina/gosge/pkg/components/ui"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
@@ -59,10 +59,10 @@ func loadGame(eng engine.Engine) error {
 
 	// add the centered text
 	wld.Add(entity.New(
-		text.Text{
+		ui.Text{
 			String:     "Hello World",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.MiddleVAlignment,
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.MiddleVAlignment,
 			Size:       300 * gameScale.Min,
 			Spacing:    10,
 		},
@@ -80,10 +80,10 @@ func loadGame(eng engine.Engine) error {
 
 	// add the bottom text
 	wld.Add(entity.New(
-		text.Text{
+		ui.Text{
 			String:     "press <ESC> to close",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.BottomVAlignment,
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.BottomVAlignment,
 			Size:       60 * gameScale.Min,
 			Spacing:    10,
 		},

@@ -31,7 +31,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/text"
+	"github.com/juan-medina/gosge/pkg/components/ui"
 	"github.com/juan-medina/gosge/pkg/options"
 )
 
@@ -69,7 +69,7 @@ type Render interface {
 	SetBackgroundColor(color color.Solid)
 
 	// DrawText will draw a text.Text in the given geometry.Point with the correspondent color.Color
-	DrawText(txt text.Text, pos geometry.Point, color color.Solid)
+	DrawText(txt ui.Text, pos geometry.Point, color color.Solid)
 	// DrawSprite draws a sprite.Sprite in the given geometry.Point with the tint color.Color
 	DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Point, tint color.Solid) error
 	// DrawSolidBox draws a solid box with an color.Solid and a scale

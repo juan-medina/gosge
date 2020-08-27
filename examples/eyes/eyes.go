@@ -29,7 +29,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/text"
+	"github.com/juan-medina/gosge/pkg/components/ui"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/game"
@@ -157,10 +157,10 @@ func loadGame(eng engine.Engine) error {
 
 	// add our text
 	gw.Add(entity.New(
-		text.Text{
+		ui.Text{
 			String:     "press <ESC> to close",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.BottomVAlignment,
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.BottomVAlignment,
 			Size:       textSmallSize * gameScale.Min,
 			Spacing:    (textSmallSize / 4) * gameScale.Min,
 		},
@@ -205,10 +205,10 @@ func loadGame(eng engine.Engine) error {
 
 	// add the dizzy text
 	dizzyText = gw.Add(entity.New(
-		text.Text{
+		ui.Text{
 			String:     "Dizzy! Level",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.MiddleVAlignment,
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.MiddleVAlignment,
 			Size:       textBigSize * gameScale.Min,
 			Spacing:    (textBigSize / 4) * gameScale.Min,
 		},

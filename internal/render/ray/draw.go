@@ -30,7 +30,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/text"
+	"github.com/juan-medina/gosge/pkg/components/ui"
 )
 
 func (rr *RenderImpl) color2RayColor(color color.Solid) rl.Color {
@@ -55,7 +55,7 @@ func (rr RenderImpl) UnloadAllTextures() {
 }
 
 // DrawText will draw a text.Text in the given geometry.Point with the correspondent color.Color
-func (rr RenderImpl) DrawText(txt text.Text, pos geometry.Point, color color.Solid) {
+func (rr RenderImpl) DrawText(txt ui.Text, pos geometry.Point, color color.Solid) {
 	font := rl.GetFontDefault()
 
 	vec := rl.Vector2{
@@ -63,24 +63,24 @@ func (rr RenderImpl) DrawText(txt text.Text, pos geometry.Point, color color.Sol
 		Y: pos.Y,
 	}
 
-	if txt.HAlignment != text.LeftHAlignment || txt.VAlignment != text.BottomVAlignment {
+	if txt.HAlignment != ui.LeftHAlignment || txt.VAlignment != ui.BottomVAlignment {
 		av := rl.MeasureTextEx(font, txt.String, txt.Size, txt.Spacing)
 
 		switch txt.HAlignment {
-		case text.LeftHAlignment:
+		case ui.LeftHAlignment:
 			av.X = 0
-		case text.CenterHAlignment:
+		case ui.CenterHAlignment:
 			av.X = -av.X / 2
-		case text.RightHAlignment:
+		case ui.RightHAlignment:
 			av.X = -av.X
 		}
 
 		switch txt.VAlignment {
-		case text.BottomVAlignment:
+		case ui.BottomVAlignment:
 			av.Y = -av.Y
-		case text.MiddleVAlignment:
+		case ui.MiddleVAlignment:
 			av.Y = -av.Y / 2
-		case text.TopVAlignment:
+		case ui.TopVAlignment:
 			av.Y = 0
 			break
 		}

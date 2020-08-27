@@ -32,7 +32,6 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/components/ui"
 	"sort"
 )
@@ -106,9 +105,9 @@ func (rs renderingSystem) renderFlatButton(ent *entity.Entity) error {
 	}
 
 	// if contains a text component
-	if ent.Contains(text.TYPE) {
+	if ent.Contains(ui.TYPE.Text) {
 		// get the text component
-		textCmp := text.Get(ent)
+		textCmp := ui.Get.Text(ent)
 
 		// calculate position on the center of the button
 		textPos := geometry.Point{
@@ -139,7 +138,7 @@ func (rs renderingSystem) renderFlatButton(ent *entity.Entity) error {
 }
 
 func (rs renderingSystem) renderText(v *entity.Entity) error {
-	textCmp := text.Get(v)
+	textCmp := ui.Get.Text(v)
 	posCmp := geometry.Get.Point(v)
 	colorCmp := color.Get.Solid(v)
 
@@ -149,7 +148,7 @@ func (rs renderingSystem) renderText(v *entity.Entity) error {
 
 func (rs renderingSystem) isRenderable(ent *entity.Entity) bool {
 	return ent.Contains(geometry.TYPE.Point) &&
-		(ent.Contains(sprite.TYPE) || ent.Contains(text.TYPE) || ent.Contains(shapes.TYPE.Box) ||
+		(ent.Contains(sprite.TYPE) || ent.Contains(ui.TYPE.Text) || ent.Contains(shapes.TYPE.Box) ||
 			ent.Contains(ui.TYPE.FlatButton))
 }
 
@@ -200,7 +199,7 @@ func (rs renderingSystem) Update(world *world.World, _ float32) error {
 			if err := rs.renderShape(v); err != nil {
 				return err
 			}
-		} else if v.Contains(text.TYPE, color.TYPE.Solid) {
+		} else if v.Contains(ui.TYPE.Text, color.TYPE.Solid) {
 			if err := rs.renderText(v); err != nil {
 				return err
 			}

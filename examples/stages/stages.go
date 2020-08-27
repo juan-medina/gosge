@@ -29,7 +29,6 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/text"
 	"github.com/juan-medina/gosge/pkg/components/ui"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
@@ -92,10 +91,10 @@ func mainStage(eng engine.Engine) error {
 
 	// add the centered text
 	wld.Add(entity.New(
-		text.Text{
+		ui.Text{
 			String:     "Main Stage",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.TopVAlignment,
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.TopVAlignment,
 			Size:       fontTittle * gameScale.Min,
 			Spacing:    fontSpacing * gameScale.Min,
 		},
@@ -149,12 +148,12 @@ func mainStage(eng engine.Engine) error {
 			},
 			Scale: gameScale.Min,
 		},
-		text.Text{
+		ui.Text{
 			String:     "< back",
 			Size:       fontSmall * gameScale.Min,
 			Spacing:    fontSpacing * gameScale.Min,
-			VAlignment: text.MiddleVAlignment,
-			HAlignment: text.CenterHAlignment,
+			VAlignment: ui.MiddleVAlignment,
+			HAlignment: ui.CenterHAlignment,
 		},
 		color.Gradient{
 			From: color.Red,
@@ -184,10 +183,10 @@ func menuStage(eng engine.Engine) error {
 
 	// add the centered text
 	wld.Add(entity.New(
-		text.Text{
+		ui.Text{
 			String:     "Menu",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.TopVAlignment,
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.TopVAlignment,
 			Size:       fontTittle * gameScale.Min,
 			Spacing:    fontSpacing * gameScale.Min,
 		},
@@ -240,12 +239,12 @@ func menuStage(eng engine.Engine) error {
 			},
 			Scale: gameScale.Min,
 		},
-		text.Text{
+		ui.Text{
 			String:     "Play!",
 			Size:       fontBig * gameScale.Min,
 			Spacing:    fontSpacing * gameScale.Min,
-			VAlignment: text.MiddleVAlignment,
-			HAlignment: text.CenterHAlignment,
+			VAlignment: ui.MiddleVAlignment,
+			HAlignment: ui.CenterHAlignment,
 		},
 		color.Gradient{
 			From: color.Blue,
@@ -271,12 +270,12 @@ func menuStage(eng engine.Engine) error {
 			},
 			Scale: gameScale.Min,
 		},
-		text.Text{
+		ui.Text{
 			String:     "Exit",
 			Size:       fontBig * gameScale.Min,
 			Spacing:    fontSpacing * gameScale.Min,
-			VAlignment: text.MiddleVAlignment,
-			HAlignment: text.CenterHAlignment,
+			VAlignment: ui.MiddleVAlignment,
+			HAlignment: ui.CenterHAlignment,
 		},
 		color.Gradient{
 			From: color.Blue,
