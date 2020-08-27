@@ -27,7 +27,7 @@ import (
 	"fmt"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/internal/store"
+	"github.com/juan-medina/gosge/internal/storage"
 	"github.com/juan-medina/gosge/internal/systems"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
@@ -64,7 +64,7 @@ type engineImpl struct {
 	status    engineStatus
 	init      engine.InitFunc
 	frameTime float32
-	ss        store.SpriteStorage
+	ds        storage.Storage
 	rdr       render.Render
 	stages    map[string]engine.InitFunc
 }
@@ -78,15 +78,11 @@ func (ei *engineImpl) GetScreenSize() geometry.Size {
 }
 
 func (ei *engineImpl) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
-	return ei.ss.GetSpriteSize(sheet, name)
+	return ei.ds.GetSpriteSize(sheet, name)
 }
 
 func (ei *engineImpl) LoadSpriteSheet(fileName string) error {
-	return ei.ss.LoadSpriteSheet(fileName)
-}
-
-func (ei *engineImpl) LoadTexture(fileName string) error {
-	return ei.rdr.LoadTexture(fileName)
+	return ei.ds.LoadSpriteSheet(fileName)
 }
 
 func (ei *engineImpl) World() *world.World {
@@ -115,7 +111,7 @@ func New(opt options.Options, init engine.InitFunc) Impl {
 		wld:    world.New(),
 		status: statusInitializing,
 		init:   init,
-		ss:     store.NewSpriteStorage(rdr),
+		ds:     storage.New(rdr),
 		rdr:    rdr,
 		stages: make(map[string]engine.InitFunc),
 	}
@@ -147,7 +143,7 @@ func (ei *engineImpl) prepare() error {
 	ei.wld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
 
 	// rendering system will run last
-	ei.wld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ss), lastPriority)
+	ei.wld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ds), lastPriority)
 	ei.status = statusRunning
 
 	return err
@@ -174,6 +170,7 @@ func (ei *engineImpl) running() error {
 }
 
 func (ei *engineImpl) end() error {
+	ei.ds.Clear()
 	ei.rdr.End()
 	return nil
 }
@@ -191,11 +188,9 @@ func (ei *engineImpl) Run() error {
 			err = ei.prepare()
 		case statusRunning:
 			err = ei.running()
-		case statusEnding:
-			err = ei.end()
 		}
 	}
-	if err != nil && ei.status == statusRunning {
+	if err == nil && ei.status == statusEnding {
 		_ = ei.end()
 	}
 	return err
@@ -209,10 +204,8 @@ func (ei *engineImpl) changeStage(name string) error {
 	if _, ok := ei.stages[name]; ok {
 		// clear all entities and systems
 		ei.wld.Clear()
-		// clear all sprites storage
-		ei.ss.Clear()
-		// unload all textures
-		ei.rdr.UnloadAllTextures()
+		// clear all storage
+		ei.ds.Clear()
 
 		ei.init = ei.stages[name]
 		ei.status = statusChangeStage

@@ -24,9 +24,15 @@ package components
 
 import "github.com/juan-medina/gosge/pkg/components/geometry"
 
+// TextureDef defines a texture
+type TextureDef struct {
+	Data interface{}   // Data is the texture data
+	Size geometry.Size // Size is the texture size
+}
+
 // SpriteDef defines an sprite.Sprite
 type SpriteDef struct {
-	Texture string         // Texture is the texture file name
+	Texture TextureDef     // Texture is the TextureDef
 	Origin  geometry.Rect  // Origin is where the sprite is on the texture
 	Pivot   geometry.Point // Pivot is the relative pivot 0..1 in each axis
 }

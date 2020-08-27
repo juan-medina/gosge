@@ -20,7 +20,8 @@
  *  THE SOFTWARE.
  */
 
-package store
+// Package storage x
+package storage
 
 import (
 	"encoding/json"
@@ -55,32 +56,45 @@ type spriteSheetData struct {
 
 type spriteSheet map[string]components.SpriteDef
 
-type spriteStorage struct {
-	sheets map[string]spriteSheet
-	rdr    render.Render
+type dataStorage struct {
+	sheets   map[string]spriteSheet
+	textures map[string]components.TextureDef
+	rdr      render.Render
 }
 
-// SpriteStorage is a storage for sprite.Sprite
-type SpriteStorage interface {
+// Storage is a storage for our game data
+type Storage interface {
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(fileName string) error
 	//GetSpriteSize returns the geometry.Size of a given sprite
 	GetSpriteSize(sheet string, name string) (geometry.Size, error)
 	//GetSpriteDef returns the components.SpriteDef for an sprite
 	GetSpriteDef(sheet string, name string) (components.SpriteDef, error)
-	//Clear all loaded sprite sheets
+	//Clear all loaded data
 	Clear()
 }
 
-func (ss *spriteStorage) handleSheet(data spriteSheetData, name string) (err error) {
+func (ds *dataStorage) loadTexture(name string) (def components.TextureDef, err error) {
+	if _, ok := ds.textures[name]; !ok {
+		if texture, err := ds.rdr.LoadTexture(name); err != nil {
+			ds.textures[name] = texture
+		} else {
+			return texture, err
+		}
+	}
+	return ds.textures[name], nil
+}
+
+func (ds *dataStorage) handleSheet(data spriteSheetData, name string) (err error) {
+	var texture components.TextureDef
 	st := make(spriteSheet, 0)
-	ss.sheets[name] = st
+	ds.sheets[name] = st
 	dir := filepath.Dir(name)
 	texturePath := path.Join(dir, data.Meta.Image)
-	if err = ss.rdr.LoadTexture(texturePath); err == nil {
+	if texture, err = ds.rdr.LoadTexture(texturePath); err == nil {
 		for _, spr := range data.Frames {
 			st[spr.Filename] = components.SpriteDef{
-				Texture: texturePath,
+				Texture: texture,
 				Origin: geometry.Rect{
 					From: geometry.Point{
 						X: spr.Frame.X,
@@ -102,7 +116,7 @@ func (ss *spriteStorage) handleSheet(data spriteSheetData, name string) (err err
 	return
 }
 
-func (ss *spriteStorage) LoadSpriteSheet(fileName string) (err error) {
+func (ds *dataStorage) LoadSpriteSheet(fileName string) (err error) {
 	data := spriteSheetData{}
 	var jsonFile *os.File
 	if jsonFile, err = os.Open(fileName); err == nil {
@@ -111,15 +125,15 @@ func (ss *spriteStorage) LoadSpriteSheet(fileName string) (err error) {
 		var bytes []byte
 		if bytes, err = ioutil.ReadAll(jsonFile); err == nil {
 			if err = json.Unmarshal(bytes, &data); err == nil {
-				return ss.handleSheet(data, fileName)
+				return ds.handleSheet(data, fileName)
 			}
 		}
 	}
 	return
 }
 
-func (ss spriteStorage) GetSpriteDef(sheet string, name string) (components.SpriteDef, error) {
-	if sh, ok := ss.sheets[sheet]; ok {
+func (ds dataStorage) GetSpriteDef(sheet string, name string) (components.SpriteDef, error) {
+	if sh, ok := ds.sheets[sheet]; ok {
 		if def, ok := sh[name]; ok {
 			return def, nil
 		}
@@ -128,20 +142,26 @@ func (ss spriteStorage) GetSpriteDef(sheet string, name string) (components.Spri
 	return components.SpriteDef{}, fmt.Errorf("can not find sprite sheet %q", sheet)
 }
 
-func (ss spriteStorage) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
-	def, err := ss.GetSpriteDef(sheet, name)
+func (ds dataStorage) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
+	def, err := ds.GetSpriteDef(sheet, name)
 	//goland:noinspection GoNilness
 	return def.Origin.Size, err
 }
 
-func (ss *spriteStorage) Clear() {
-	ss.sheets = make(map[string]spriteSheet, 0)
+func (ds *dataStorage) Clear() {
+	ds.sheets = make(map[string]spriteSheet, 0)
+
+	for _, v := range ds.textures {
+		ds.rdr.UnloadTexture(v)
+	}
+	ds.textures = make(map[string]components.TextureDef, 0)
 }
 
-// NewSpriteStorage returns a new storage for sprite.Sprite
-func NewSpriteStorage(rdr render.Render) SpriteStorage {
-	return &spriteStorage{
-		sheets: make(map[string]spriteSheet, 0),
-		rdr:    rdr,
+// New returns a new storage.Storage
+func New(rdr render.Render) Storage {
+	return &dataStorage{
+		sheets:   make(map[string]spriteSheet, 0),
+		textures: make(map[string]components.TextureDef, 0),
+		rdr:      rdr,
 	}
 }

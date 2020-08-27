@@ -26,7 +26,7 @@ import (
 	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/internal/store"
+	"github.com/juan-medina/gosge/internal/storage"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
@@ -38,7 +38,7 @@ import (
 
 type renderingSystem struct {
 	rdr render.Render
-	ss  store.SpriteStorage
+	ds  storage.Storage
 }
 
 var noTint = color.White
@@ -58,7 +58,7 @@ func (rs renderingSystem) renderSprite(ent *entity.Entity) error {
 		tint = noTint
 	}
 
-	if def, err := rs.ss.GetSpriteDef(spr.Sheet, spr.Name); err == nil {
+	if def, err := rs.ds.GetSpriteDef(spr.Sheet, spr.Name); err == nil {
 		if err := rs.rdr.DrawSprite(def, spr, pos, tint); err != nil {
 			return err
 		}
@@ -213,9 +213,9 @@ func (rs renderingSystem) Notify(_ *world.World, _ interface{}, _ float32) error
 }
 
 // RenderingSystem returns a world.System that will handle rendering
-func RenderingSystem(rdr render.Render, ss store.SpriteStorage) world.System {
+func RenderingSystem(rdr render.Render, ds storage.Storage) world.System {
 	return &renderingSystem{
 		rdr: rdr,
-		ss:  ss,
+		ds:  ds,
 	}
 }

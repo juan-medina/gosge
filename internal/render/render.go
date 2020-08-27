@@ -61,9 +61,9 @@ type Render interface {
 	GetFrameTime() float32
 
 	// LoadTexture giving it file name into VRAM
-	LoadTexture(fileName string) error
-	// UnloadAllTextures from VRAM
-	UnloadAllTextures()
+	LoadTexture(fileName string) (components.TextureDef, error)
+	// UnloadTexture from VRAM
+	UnloadTexture(textureDef components.TextureDef)
 
 	// SetBackgroundColor changes the current background color.Solid
 	SetBackgroundColor(color color.Solid)

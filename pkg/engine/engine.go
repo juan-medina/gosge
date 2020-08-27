@@ -33,8 +33,6 @@ import (
 type Engine interface {
 	// World returns the game world.World
 	World() *world.World
-	// LoadTexture preloads a texture
-	LoadTexture(fileName string) error
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(fileName string) error
 	// GetSpriteSize returns the geometry.Size of a given sprite

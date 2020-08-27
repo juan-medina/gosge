@@ -24,20 +24,17 @@
 package ray
 
 import (
-	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/options"
 )
 
 //RenderImpl is our render.Render based on raylib
 type RenderImpl struct {
-	saveOpts    options.Options
-	textureHold map[string]rl.Texture2D
+	saveOpts options.Options
 }
 
 // New create a new render.Render base on raylib
 func New() *RenderImpl {
 	return &RenderImpl{
-		saveOpts:    options.Options{},
-		textureHold: make(map[string]rl.Texture2D, 0),
+		saveOpts: options.Options{},
 	}
 }

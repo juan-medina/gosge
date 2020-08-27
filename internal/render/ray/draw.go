@@ -37,21 +37,21 @@ func (rr *RenderImpl) color2RayColor(color color.Solid) rl.Color {
 	return rl.NewColor(color.R, color.G, color.B, color.A)
 }
 
+var (
+	emptyTexture = components.TextureDef{}
+)
+
 // LoadTexture giving it file name into VRAM
-func (rr RenderImpl) LoadTexture(fileName string) error {
+func (rr RenderImpl) LoadTexture(fileName string) (components.TextureDef, error) {
 	if t := rl.LoadTexture(fileName); t.ID != 0 {
-		rr.textureHold[fileName] = t
-		return nil
+		return components.TextureDef{Data: t, Size: geometry.Size{Width: float32(t.Width), Height: float32(t.Height)}}, nil
 	}
-	return fmt.Errorf("error loading texture: %q", fileName)
+	return emptyTexture, fmt.Errorf("error loading texture: %q", fileName)
 }
 
-// UnloadAllTextures from VRAM
-func (rr RenderImpl) UnloadAllTextures() {
-	for k, v := range rr.textureHold {
-		delete(rr.textureHold, k)
-		rl.UnloadTexture(v)
-	}
+// UnloadTexture from VRAM
+func (rr RenderImpl) UnloadTexture(textureDef components.TextureDef) {
+	rl.UnloadTexture(textureDef.Data.(rl.Texture2D))
 }
 
 // DrawText will draw a text.Text in the given geometry.Point with the correspondent color.Color
@@ -93,29 +93,27 @@ func (rr RenderImpl) DrawText(txt ui.Text, pos geometry.Point, color color.Solid
 
 // DrawSprite draws a sprite.Sprite in the given geometry.Point with the tint color.Color
 func (rr RenderImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Point, tint color.Solid) error {
-	if val, ok := rr.textureHold[def.Texture]; ok {
-		scale := sprite.Scale
-		px := def.Origin.Size.Width * def.Pivot.X
-		py := def.Origin.Size.Height * def.Pivot.Y
-		rc := rr.color2RayColor(tint)
-		rotation := sprite.Rotation
-		sourceRec := rl.Rectangle{
-			X:      def.Origin.From.X,
-			Y:      def.Origin.From.Y,
-			Width:  def.Origin.Size.Width,
-			Height: def.Origin.Size.Height,
-		}
-		destRec := rl.Rectangle{
-			X:      pos.X - (px * scale),
-			Y:      pos.Y - (py * scale),
-			Width:  def.Origin.Size.Width * scale,
-			Height: def.Origin.Size.Height * scale,
-		}
-		origin := rl.Vector2{X: 0, Y: 0}
-		rl.DrawTexturePro(val, sourceRec, destRec, origin, rotation, rc)
-	} else {
-		return fmt.Errorf("error drawing sprite, texture not found: %q", sprite.Name)
+	scale := sprite.Scale
+	px := def.Origin.Size.Width * def.Pivot.X
+	py := def.Origin.Size.Height * def.Pivot.Y
+	rc := rr.color2RayColor(tint)
+	rotation := sprite.Rotation
+	sourceRec := rl.Rectangle{
+		X:      def.Origin.From.X,
+		Y:      def.Origin.From.Y,
+		Width:  def.Origin.Size.Width,
+		Height: def.Origin.Size.Height,
 	}
+	destRec := rl.Rectangle{
+		X:      pos.X - (px * scale),
+		Y:      pos.Y - (py * scale),
+		Width:  def.Origin.Size.Width * scale,
+		Height: def.Origin.Size.Height * scale,
+	}
+	origin := rl.Vector2{X: 0, Y: 0}
+	texture := def.Texture.Data.(rl.Texture2D)
+	rl.DrawTexturePro(texture, sourceRec, destRec, origin, rotation, rc)
+
 	return nil
 }
 
