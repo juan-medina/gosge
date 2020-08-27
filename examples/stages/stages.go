@@ -41,7 +41,6 @@ var opt = options.Options{
 	Title:      "Stages Game",
 	BackGround: color.Black,
 	Icon:       "resources/icon.png",
-	Windowed:   true,
 }
 
 var (
@@ -139,7 +138,7 @@ func mainStage(eng engine.Engine) error {
 		},
 		geometry.Point{
 			X: (designResolution.Width - (measure.Width) - shadowExtraWidth) * gameScale.Point.X,
-			Y: ((measure.Height / 2) - shadowExtraHeight) * gameScale.Point.Y,
+			Y: (shadowExtraHeight) * gameScale.Point.Y,
 		},
 		shapes.Box{
 			Size: geometry.Size{
@@ -166,7 +165,6 @@ func mainStage(eng engine.Engine) error {
 }
 
 func menuStage(eng engine.Engine) error {
-	log.Printf("load menu stage")
 	// pre load sprites
 	if err := eng.LoadSpriteSheet("resources/stages.json"); err != nil {
 		return err
