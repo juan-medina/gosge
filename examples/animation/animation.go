@@ -138,6 +138,8 @@ type Animation struct {
 	Sequences map[string]AnimationSequence // Sequences is the different AnimationSequence for this Animation
 	Current   string                       // Current is the animation that be like to run
 	Speed     float32                      // Speed is a multiplier of th speed of the current animation
+	FlipX     bool                         // FlipX indicates if the Animation is flipped in the X-Assis
+	FlipY     bool                         // FlipY indicates if the Animation is flipped in the Y-Assis
 }
 
 // AnimationType is the reflect.Type for an Animation
@@ -198,6 +200,8 @@ func (as *animationSystem) Update(world *world.World, delta float32) error {
 			Name:     spriteName,
 			Scale:    seq.Scale,
 			Rotation: seq.Rotation,
+			FlipX:    anim.FlipX,
+			FlipY:    anim.FlipY,
 		}
 
 		ent.Set(spr)
@@ -213,17 +217,17 @@ func (as animationSystem) Notify(_ *world.World, e interface{}, _ float32) error
 
 	switch v := e.(type) {
 	case events.MouseUpEvent:
+		anim := robot.Get(AnimationType).(Animation)
 		if v.MouseButton == device.MouseLeftButton {
-			anim := robot.Get(AnimationType).(Animation)
-
 			if anim.Current == idleAnim {
 				anim.Current = runAnim
 			} else {
 				anim.Current = idleAnim
 			}
-
-			robot.Set(anim)
+		} else if v.MouseButton == device.MouseRightButton {
+			anim.FlipX = !anim.FlipX
 		}
+		robot.Set(anim)
 	}
 	return nil
 }
