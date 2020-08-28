@@ -23,19 +23,17 @@
 package main
 
 import (
-	"fmt"
 	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/pkg/components/animation"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
 	"log"
-	"reflect"
 )
 
 var opt = options.Options{
@@ -82,19 +80,19 @@ func loadGame(eng engine.Engine) error {
 
 	robot = wld.Add(entity.New(
 		spritePos,
-		Animation{
-			Sequences: map[string]AnimationSequence{
+		animation.Animation{
+			Sequences: map[string]animation.Sequence{
 				runAnim: {
 					Sheet:  robotSheet,
 					Base:   robotRun,
-					Scale:  gameScale.Min * 0.5,
+					Scale:  gameScale.Min,
 					Frames: 8,
 					Delay:  0.065,
 				},
 				idleAnim: {
 					Sheet:  robotSheet,
 					Base:   robotIdle,
-					Scale:  gameScale.Min * 0.5,
+					Scale:  gameScale.Min,
 					Frames: 10,
 					Delay:  0.065,
 				},
@@ -104,120 +102,21 @@ func loadGame(eng engine.Engine) error {
 		},
 	))
 
-	wld.AddSystem(NewAnimationSystem())
+	wld.AddSystem(RobotMoveSystem())
 
 	return nil
 }
 
-// AnimationSequence represent a set of frames that will be render with a delay
-type AnimationSequence struct {
-	Sheet    string  // Sheet is the sprite sheet where the animation sprites are
-	Base     string  // Base is the base name for each frame. ex : Idle_%d.png
-	Rotation float32 // Rotation for this AnimationSequence
-	Scale    float32 // Scale for this AnimationSequence
-	Frames   int32   // Frames are the number of frame in this animation
-	Delay    float32 // Delay number of seconds to wait in each frame
-}
+type robotMoveSystem struct{}
 
-// AnimationSequenceType is the reflect.Type for an AnimationSequence
-var AnimationSequenceType = reflect.TypeOf(AnimationSequence{})
-
-// AnimationState allow to easily switch animations
-type AnimationState struct {
-	Current string  // Current is the animation that is running
-	Speed   float32 // Speed is the current animation speed
-	Time    float32 // Time is the time in this frame
-	Frame   int32   // Frame is the current frame number
-}
-
-// AnimationStateType is the reflect.Type for an AnimationState
-var AnimationStateType = reflect.TypeOf(AnimationState{})
-
-// Animation allow to easily switch animations
-type Animation struct {
-	Sequences map[string]AnimationSequence // Sequences is the different AnimationSequence for this Animation
-	Current   string                       // Current is the animation that be like to run
-	Speed     float32                      // Speed is a multiplier of th speed of the current animation
-	FlipX     bool                         // FlipX indicates if the Animation is flipped in the X-Assis
-	FlipY     bool                         // FlipY indicates if the Animation is flipped in the Y-Assis
-}
-
-// AnimationType is the reflect.Type for an Animation
-var AnimationType = reflect.TypeOf(Animation{})
-
-type animationSystem struct{}
-
-func (as *animationSystem) Update(world *world.World, delta float32) error {
-	for it := world.Iterator(AnimationType); it.HasNext(); {
-		ent := it.Value()
-
-		anim := ent.Get(AnimationType).(Animation)
-
-		var state AnimationState
-
-		if ent.Contains(AnimationStateType) {
-			state = ent.Get(AnimationStateType).(AnimationState)
-		} else {
-			state = AnimationState{}
-		}
-
-		if state.Current != anim.Current {
-			state = AnimationState{}
-			state.Current = anim.Current
-			if _, ok := anim.Sequences[anim.Current]; !ok {
-				return fmt.Errorf("can not find animation: %q", anim.Current)
-			}
-			seq := anim.Sequences[anim.Current]
-			ent.Set(seq)
-			ent.Set(state)
-			ent.Set(anim)
-		}
-
-		if state.Speed != anim.Speed {
-			state.Speed = anim.Speed
-			ent.Set(state)
-		}
-	}
-
-	for it := world.Iterator(AnimationSequenceType, AnimationType, AnimationStateType); it.HasNext(); {
-		ent := it.Value()
-
-		seq := ent.Get(AnimationSequenceType).(AnimationSequence)
-		anim := ent.Get(AnimationType).(Animation)
-		state := ent.Get(AnimationStateType).(AnimationState)
-
-		if state.Time += delta * state.Speed; state.Time > seq.Delay {
-			state.Time = 0
-			if state.Frame++; state.Frame >= seq.Frames {
-				state.Frame = 0
-			}
-		}
-
-		spriteName := fmt.Sprintf(seq.Base, state.Frame+1)
-
-		spr := sprite.Sprite{
-			Sheet:    seq.Sheet,
-			Name:     spriteName,
-			Scale:    seq.Scale,
-			Rotation: seq.Rotation,
-			FlipX:    anim.FlipX,
-			FlipY:    anim.FlipY,
-		}
-
-		ent.Set(spr)
-		ent.Set(seq)
-		ent.Set(state)
-		ent.Set(anim)
-	}
-
+func (rms *robotMoveSystem) Update(_ *world.World, _ float32) error {
 	return nil
 }
 
-func (as animationSystem) Notify(_ *world.World, e interface{}, _ float32) error {
-
+func (rms robotMoveSystem) Notify(_ *world.World, e interface{}, _ float32) error {
 	switch v := e.(type) {
 	case events.MouseUpEvent:
-		anim := robot.Get(AnimationType).(Animation)
+		anim := animation.Get.Animation(robot)
 		if v.MouseButton == device.MouseLeftButton {
 			if anim.Current == idleAnim {
 				anim.Current = runAnim
@@ -232,7 +131,7 @@ func (as animationSystem) Notify(_ *world.World, e interface{}, _ float32) error
 	return nil
 }
 
-// NewAnimationSystem creates a animation world.System
-func NewAnimationSystem() world.System {
-	return &animationSystem{}
+// RobotMoveSystem creates a system to move our robot
+func RobotMoveSystem() world.System {
+	return &robotMoveSystem{}
 }
