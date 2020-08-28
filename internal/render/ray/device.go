@@ -24,6 +24,7 @@ package ray
 
 import (
 	"github.com/gen2brain/raylib-go/raylib"
+	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/options"
 	"os"
 	"runtime"
@@ -75,4 +76,30 @@ func (rr RenderImpl) EndFrame() {
 // ShouldClose returns if th engine should close
 func (rr RenderImpl) ShouldClose() bool {
 	return rl.WindowShouldClose()
+}
+
+var engineKeyToRayKey = map[device.Key]int32{
+	device.KeyLeft:      rl.KeyLeft,
+	device.KeyRight:     rl.KeyRight,
+	device.KeyUp:        rl.KeyUp,
+	device.KeyDown:      rl.KeyDown,
+	device.KeySpace:     rl.KeySpace,
+	device.KeyAltLeft:   rl.KeyLeftAlt,
+	device.KeyCtrlLeft:  rl.KeyLeftControl,
+	device.KeyAltRight:  rl.KeyRightAlt,
+	device.KeyCtrlRight: rl.KeyRightControl,
+}
+
+// GetKeyStatus returns the device.KeyStatus for a given device.Key
+func (rr RenderImpl) GetKeyStatus(key device.Key) device.KeyStatus {
+	status := device.KeyStatus{}
+
+	if v, ok := engineKeyToRayKey[key]; ok {
+		status.Down = rl.IsKeyDown(v)
+		status.Up = rl.IsKeyUp(v)
+		status.Pressed = rl.IsKeyPressed(v)
+		status.Released = rl.IsKeyReleased(v)
+	}
+
+	return status
 }

@@ -115,18 +115,21 @@ func (rms *robotMoveSystem) Update(_ *world.World, _ float32) error {
 
 func (rms robotMoveSystem) Notify(_ *world.World, e interface{}, _ float32) error {
 	switch v := e.(type) {
-	case events.MouseUpEvent:
-		anim := animation.Get.Animation(robot)
-		if v.MouseButton == device.MouseLeftButton {
-			if anim.Current == idleAnim {
-				anim.Current = runAnim
-			} else {
-				anim.Current = idleAnim
+	case events.KeyEvent:
+		if v.Key == device.KeyRight || v.Key == device.KeyLeft {
+			anim := animation.Get.Animation(robot)
+			if v.Status.Down {
+				if anim.Current == idleAnim {
+					anim.Current = runAnim
+				}
+			} else if v.Status.Released {
+				if anim.Current == runAnim {
+					anim.Current = idleAnim
+				}
 			}
-		} else if v.MouseButton == device.MouseRightButton {
-			anim.FlipX = !anim.FlipX
+			anim.FlipX = v.Key == device.KeyLeft
+			robot.Set(anim)
 		}
-		robot.Set(anim)
 	}
 	return nil
 }

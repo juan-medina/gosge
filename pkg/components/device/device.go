@@ -32,3 +32,34 @@ const (
 	MouseRightButton  = MouseButton(1) // MouseRightButton is the right mouse button
 	MouseMiddleButton = MouseButton(2) // MouseMiddleButton is the middle mouse button
 )
+
+// Key represents a device key
+type Key int
+
+//goland:noinspection GoUnusedConst
+const (
+	FirstKey     = Key(iota) // FirstKey is the initial value for keys
+	KeyLeft                  // KeyLeft if the left cursor key
+	KeyRight                 // KeyRight if the right cursor key
+	KeyUp                    // KeyUp if the up cursor key
+	KeyDown                  // KeyDown if the down cursor key
+	KeySpace                 // KeySpace if the space cursor key
+	KeyAltLeft               // KeySpace if the left alt key
+	KeyCtrlLeft              // KeyCtrlLeft if the left control key
+	KeyAltRight              // KeyAltRight if the right alt key
+	KeyCtrlRight             // KeyCtrlRight if the right control key
+	TotalKeys                // TotalKeys is the total number of keys
+)
+
+// KeyStatus represent the status of a Key
+type KeyStatus struct {
+	Up       bool // Up indicates if the key is up
+	Down     bool // Down indicates if the key is down
+	Pressed  bool // Pressed indicates if the key was pressed once
+	Released bool // Released indicates if the key was released once
+}
+
+// Equals return if this device.KeyStatus is equals to other
+func (ks KeyStatus) Equals(other KeyStatus) bool {
+	return ks.Down == other.Down && ks.Pressed == other.Pressed && ks.Released == other.Released
+}

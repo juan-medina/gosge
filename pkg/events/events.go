@@ -51,3 +51,9 @@ type ChangeGameStage struct {
 	// Stage is the name of the stage to change to, it must be created with engine.AddGameStage
 	Stage string
 }
+
+// KeyEvent this event triggers when the status of a key change
+type KeyEvent struct {
+	Key    device.Key
+	Status device.KeyStatus
+}

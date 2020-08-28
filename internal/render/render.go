@@ -57,6 +57,9 @@ type Render interface {
 	// IsMouseRelease check if the given MouseButton has been release
 	IsMouseRelease(button device.MouseButton) bool
 
+	// GetKeyStatus returns the device.KeyStatus for a given device.Key
+	GetKeyStatus(key device.Key) device.KeyStatus
+
 	// GetFrameTime returns the time from the delta time for current frame
 	GetFrameTime() float32
 

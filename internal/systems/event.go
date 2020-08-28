@@ -33,6 +33,7 @@ import (
 type eventSystem struct {
 	mme events.MouseMoveEvent
 	rdr render.Render
+	ks  []device.KeyStatus
 }
 
 var (
@@ -55,6 +56,10 @@ func (es eventSystem) sendMouseMove(wld *world.World) error {
 
 func (es eventSystem) sendMouseRelease(wld *world.World, button device.MouseButton) error {
 	return wld.Notify(events.MouseUpEvent{Point: es.mme.Point, MouseButton: button})
+}
+
+func (es eventSystem) sendKeyEvent(wld *world.World, key device.Key, status device.KeyStatus) error {
+	return wld.Notify(events.KeyEvent{Key: key, Status: status})
 }
 
 func (es *eventSystem) Update(world *world.World, _ float32) error {
@@ -80,6 +85,16 @@ func (es *eventSystem) Update(world *world.World, _ float32) error {
 		}
 	}
 
+	for key := device.FirstKey + 1; key < device.TotalKeys; key++ {
+		status := es.rdr.GetKeyStatus(key)
+		if !status.Equals(es.ks[key]) {
+			es.ks[key] = status
+			if err := es.sendKeyEvent(world, key, status); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -93,5 +108,6 @@ func EventSystem(rdr render.Render) world.System {
 				Y: -1,
 			},
 		},
+		ks: make([]device.KeyStatus, device.TotalKeys),
 	}
 }
