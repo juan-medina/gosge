@@ -2,6 +2,7 @@
 Go Simple Game Engine using an [ECS](https://github.com/juan-medina/goecs)
 
 [![License: Apache2](https://img.shields.io/badge/license-Apache%202-blue.svg)](/LICENSE)
+[![go version](https://img.shields.io/github/v/tag/juan-medina/gosge?label=version)](https://pkg.go.dev/mod/github.com/juan-medina/gosge)
 [![godoc](https://godoc.org/github.com/juan-medina/gosge?status.svg)](https://pkg.go.dev/mod/github.com/juan-medina/gosge)
 
 ## Info
@@ -81,20 +82,24 @@ func loadGame(eng engine.Engine) error {
 
 ## Run examples
 
-The examples are available on this folder, or can be run using make:
+The examples are available on [this folder](/examples), or can be run using make:
 
 ```bash
 $ make run example=hello
 $ make run example=eyes
 $ make run example=layers
+$ make run example=stages
+$ make run example=animation
 ```
 
-Alternatively you could run the with :
+Alternatively you could run them with :
 
 ```bash
-$ cd example/hello && run hello.go
-$ cd example/eyes && run eyes.go
-$ cd example/layers && run layers.go
+$ go run examples/hello/hello.go
+$ go run examples/eyes/eyes.go
+$ go run examples/layers/layers.go
+$ go run examples/stages/stages.go
+$ go run examples/animation/animation.go
 ```
 
 ## Requirements
@@ -121,11 +126,11 @@ $ cd example/layers && run layers.go
 
 ### macOS
 
-On macOS you need Xcode or Command Line Tools for Xcode.
+On macOS, you need Xcode or Command Line Tools for Xcode.
 
 ### Windows
 
-On Windows you need C compiler, like [Mingw-w64](https://mingw-w64.org) or [TDM-GCC](http://tdm-gcc.tdragon.net/).
+On Windows, you need C compiler, like [Mingw-w64](https://mingw-w64.org) or [TDM-GCC](http://tdm-gcc.tdragon.net/).
 You can also build binary in [MSYS2](https://msys2.github.io/) shell.
 
 ## Installation
@@ -139,7 +144,7 @@ go get -v -u github.com/juan-medina/gosge
 - `opengl21` : uses OpenGL 2.1 backend (default is 3.3)
 - `wayland` : builds against Wayland libraries
 
-## Resources
+## Examples Resources
 - Gopher Graphics
     - https://awesomeopensource.com/project/egonelbre/gophers
 - Game art 2D:
