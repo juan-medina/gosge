@@ -39,7 +39,7 @@ import (
 )
 
 var opt = options.Options{
-	Title:      "AnimationFrame Game",
+	Title:      "Animation Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
 }
@@ -83,7 +83,7 @@ func loadGame(eng engine.Engine) error {
 	robot = wld.Add(entity.New(
 		spritePos,
 		Animation{
-			Frames: map[string]AnimationFrame{
+			Sequences: map[string]AnimationSequence{
 				runAnim: {
 					Sheet:  robotSheet,
 					Base:   robotRun,
@@ -100,6 +100,7 @@ func loadGame(eng engine.Engine) error {
 				},
 			},
 			Current: idleAnim,
+			Speed:   1,
 		},
 	))
 
@@ -108,26 +109,35 @@ func loadGame(eng engine.Engine) error {
 	return nil
 }
 
-// AnimationFrame represent a set of frames that will be render with a delay
-type AnimationFrame struct {
+// AnimationSequence represent a set of frames that will be render with a delay
+type AnimationSequence struct {
 	Sheet    string  // Sheet is the sprite sheet where the animation sprites are
 	Base     string  // Base is the base name for each frame. ex : Idle_%d.png
-	Rotation float32 // Rotation for this AnimationFrame
-	Scale    float32 // Scale for this AnimationFrame
+	Rotation float32 // Rotation for this AnimationSequence
+	Scale    float32 // Scale for this AnimationSequence
 	Frames   int32   // Frames are the number of frame in this animation
 	Delay    float32 // Delay number of seconds to wait in each frame
-	Current  float32 // Current is the time in this frame
-	Frame    int32   // Frame is the current frame number
 }
 
-// AnimationFrameType is the reflect.Type for an AnimationFrame
-var AnimationFrameType = reflect.TypeOf(AnimationFrame{})
+// AnimationSequenceType is the reflect.Type for an AnimationSequence
+var AnimationSequenceType = reflect.TypeOf(AnimationSequence{})
+
+// AnimationState allow to easily switch animations
+type AnimationState struct {
+	Current string  // Current is the animation that is running
+	Speed   float32 // Speed is the current animation speed
+	Time    float32 // Time is the time in this frame
+	Frame   int32   // Frame is the current frame number
+}
+
+// AnimationStateType is the reflect.Type for an AnimationState
+var AnimationStateType = reflect.TypeOf(AnimationState{})
 
 // Animation allow to easily switch animations
 type Animation struct {
-	Frames  map[string]AnimationFrame // AnimationFrame is the different AnimationFrame for this set
-	Current string                    // Current is the animation that like to run
-	Running string                    // Running is the animation that is running
+	Sequences map[string]AnimationSequence // Sequences is the different AnimationSequence for this Animation
+	Current   string                       // Current is the animation that be like to run
+	Speed     float32                      // Speed is a multiplier of th speed of the current animation
 }
 
 // AnimationType is the reflect.Type for an Animation
@@ -141,39 +151,59 @@ func (as *animationSystem) Update(world *world.World, delta float32) error {
 
 		anim := ent.Get(AnimationType).(Animation)
 
-		if anim.Running != anim.Current {
-			anim.Running = anim.Current
-			if _, ok := anim.Frames[anim.Current]; !ok {
+		var state AnimationState
+
+		if ent.Contains(AnimationStateType) {
+			state = ent.Get(AnimationStateType).(AnimationState)
+		} else {
+			state = AnimationState{}
+		}
+
+		if state.Current != anim.Current {
+			state = AnimationState{}
+			state.Current = anim.Current
+			if _, ok := anim.Sequences[anim.Current]; !ok {
 				return fmt.Errorf("can not find animation: %q", anim.Current)
 			}
-			ent.Set(anim.Frames[anim.Current])
+			seq := anim.Sequences[anim.Current]
+			ent.Set(seq)
+			ent.Set(state)
 			ent.Set(anim)
+		}
+
+		if state.Speed != anim.Speed {
+			state.Speed = anim.Speed
+			ent.Set(state)
 		}
 	}
 
-	for it := world.Iterator(AnimationFrameType); it.HasNext(); {
+	for it := world.Iterator(AnimationSequenceType, AnimationType, AnimationStateType); it.HasNext(); {
 		ent := it.Value()
 
-		anf := ent.Get(AnimationFrameType).(AnimationFrame)
+		seq := ent.Get(AnimationSequenceType).(AnimationSequence)
+		anim := ent.Get(AnimationType).(Animation)
+		state := ent.Get(AnimationStateType).(AnimationState)
 
-		if anf.Current += delta; anf.Current > anf.Delay {
-			anf.Current = 0
-			if anf.Frame++; anf.Frame >= anf.Frames {
-				anf.Frame = 0
+		if state.Time += delta * state.Speed; state.Time > seq.Delay {
+			state.Time = 0
+			if state.Frame++; state.Frame >= seq.Frames {
+				state.Frame = 0
 			}
 		}
 
-		spriteName := fmt.Sprintf(anf.Base, anf.Frame+1)
+		spriteName := fmt.Sprintf(seq.Base, state.Frame+1)
 
 		spr := sprite.Sprite{
-			Sheet:    anf.Sheet,
+			Sheet:    seq.Sheet,
 			Name:     spriteName,
-			Scale:    anf.Scale,
-			Rotation: anf.Rotation,
+			Scale:    seq.Scale,
+			Rotation: seq.Rotation,
 		}
 
 		ent.Set(spr)
-		ent.Set(anf)
+		ent.Set(seq)
+		ent.Set(state)
+		ent.Set(anim)
 	}
 
 	return nil
