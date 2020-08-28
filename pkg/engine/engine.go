@@ -35,6 +35,8 @@ type Engine interface {
 	World() *world.World
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(fileName string) error
+	// LoadSprite preloads a single sprite.Sprite with a given pivot
+	LoadSprite(filename string, pivot geometry.Point) error
 	// LoadFont preloads a font
 	LoadFont(fileName string) error
 	// GetSpriteSize returns the geometry.Size of a given sprite

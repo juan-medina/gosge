@@ -243,3 +243,8 @@ func (ei engineImpl) MeasureText(font string, str string, size float32) (result 
 func (ei engineImpl) LoadFont(fileName string) error {
 	return ei.ds.LoadFont(fileName)
 }
+
+// LoadSprite preloads a single sprite.Sprite
+func (ei engineImpl) LoadSprite(filename string, pivot geometry.Point) error {
+	return ei.ds.LoadSingleSprite("", filename, pivot)
+}

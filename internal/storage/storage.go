@@ -84,6 +84,8 @@ func (ds *dataStorage) GetFontDef(fileName string) (components.FontDef, error) {
 type Storage interface {
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(fileName string) error
+	// LoadSingleSprite preloads a sprite.Sprite in a sheet
+	LoadSingleSprite(sheet string, name string, pivot geometry.Point) error
 	//GetSpriteSize returns the geometry.Size of a given sprite
 	GetSpriteSize(sheet string, name string) (geometry.Size, error)
 	//GetSpriteDef returns the components.SpriteDef for an sprite
@@ -152,6 +154,29 @@ func (ds *dataStorage) LoadSpriteSheet(fileName string) (err error) {
 		}
 	}
 	return
+}
+
+func (ds *dataStorage) LoadSingleSprite(sheet string, name string, pivot geometry.Point) error {
+	if texture, err := ds.loadTexture(name); err == nil {
+		if _, ok := ds.sheets[sheet]; !ok {
+			st := make(spriteSheet, 0)
+			ds.sheets[sheet] = st
+		}
+		ds.sheets[sheet][name] = components.SpriteDef{
+			Texture: texture,
+			Origin: geometry.Rect{
+				From: geometry.Point{
+					X: 0,
+					Y: 0,
+				},
+				Size: texture.Size,
+			},
+			Pivot: pivot,
+		}
+	} else {
+		return err
+	}
+	return nil
 }
 
 func (ds dataStorage) GetSpriteDef(sheet string, name string) (components.SpriteDef, error) {

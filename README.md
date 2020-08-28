@@ -142,3 +142,7 @@ go get -v -u github.com/juan-medina/gosge
 ## Resources
 - Gopher Graphics
     - https://awesomeopensource.com/project/egonelbre/gophers
+- Game art 2D:
+    - https://www.gameart2d.com
+-  Mobile Game Graphics
+    - https://mobilegamegraphics.com/product/free-parallax-backgrounds
