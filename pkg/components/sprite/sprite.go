@@ -34,6 +34,8 @@ type Sprite struct {
 	Name     string  // Name is the Sprite name
 	Rotation float32 // Rotation is the Sprite rotation
 	Scale    float32 // Scale is the Sprite scale
+	FlipX    bool    // FlipX indicates if the Sprite is flipped in the X-Assis
+	FlipY    bool    // FlipY indicates if the Sprite is flipped in the Y-Assis
 }
 
 // TYPE is the reflect.Type of the Sprite

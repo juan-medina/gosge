@@ -110,13 +110,26 @@ func (rr RenderImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, 
 	scale := sprite.Scale
 	px := def.Origin.Size.Width * def.Pivot.X
 	py := def.Origin.Size.Height * def.Pivot.Y
+
+	sourceFlip := geometry.Size{
+		Width:  def.Origin.Size.Width,
+		Height: def.Origin.Size.Height,
+	}
+
+	if sprite.FlipX {
+		sourceFlip.Width *= -1
+	}
+	if sprite.FlipY {
+		sourceFlip.Height *= -1
+	}
+
 	rc := rr.color2RayColor(tint)
 	rotation := sprite.Rotation
 	sourceRec := rl.Rectangle{
 		X:      def.Origin.From.X,
 		Y:      def.Origin.From.Y,
-		Width:  def.Origin.Size.Width,
-		Height: def.Origin.Size.Height,
+		Width:  sourceFlip.Width,
+		Height: sourceFlip.Height,
 	}
 	destRec := rl.Rectangle{
 		X:      pos.X - (px * scale),
