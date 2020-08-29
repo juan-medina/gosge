@@ -35,6 +35,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/options"
+	"github.com/rs/zerolog/log"
 )
 
 type engineStatus int
@@ -120,9 +121,13 @@ func New(opt options.Options, init engine.InitFunc) Impl {
 }
 
 func (ei *engineImpl) initialize() error {
+	log.Info().Interface("options", ei.opt).Msg("Initializing engine")
 	ei.rdr.Init(ei.opt)
 	ei.rdr.BeginFrame()
 	ei.rdr.EndFrame()
+
+	ss := ei.rdr.GetScreenSize()
+	log.Trace().Interface("size", ss).Msg("Screen ready")
 
 	ei.status = statusPrepare
 
