@@ -100,7 +100,7 @@ type Storage interface {
 
 func (ds *dataStorage) loadTexture(name string) (def components.TextureDef, err error) {
 	if _, ok := ds.textures[name]; !ok {
-		if texture, err := ds.rdr.LoadTexture(name); err != nil {
+		if texture, err := ds.rdr.LoadTexture(name); err == nil {
 			ds.textures[name] = texture
 		} else {
 			return texture, err
