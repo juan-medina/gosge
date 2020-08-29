@@ -31,7 +31,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
-	"log"
+	"github.com/rs/zerolog/log"
 )
 
 var opt = options.Options{
@@ -53,7 +53,7 @@ var (
 
 func main() {
 	if err := game.Run(opt, loadGame); err != nil {
-		log.Fatalf("error running the game: %v", err)
+		log.Fatal().Err(err).Msg("error running the game")
 	}
 }
 

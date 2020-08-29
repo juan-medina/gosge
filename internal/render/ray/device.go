@@ -23,9 +23,10 @@
 package ray
 
 import (
-	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/options"
+	"github.com/juan-medina/raylib-go/raylib"
+	"github.com/rs/zerolog/log"
 	"os"
 	"runtime"
 	"strings"
@@ -34,6 +35,24 @@ import (
 // Init the rendering device
 func (rr *RenderImpl) Init(opt options.Options) {
 	rr.saveOpts = opt
+	rl.SetTraceLogCallback(func(logType int, str string) {
+		switch logType {
+		case rl.LogDebug:
+			log.Debug().Msg(str)
+		case rl.LogError:
+			log.Error().Msg(str)
+		case rl.LogInfo:
+			log.Info().Msg(str)
+		case rl.LogTrace:
+			log.Trace().Msg(str)
+		case rl.LogWarning:
+			log.Warn().Msg(str)
+		case rl.LogFatal:
+			log.Fatal().Msg(str)
+		default:
+			log.Trace().Msg(str)
+		}
+	})
 
 	w := rl.GetMonitorWidth(opt.Monitor)
 	h := rl.GetMonitorHeight(opt.Monitor)

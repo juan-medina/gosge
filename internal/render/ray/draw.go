@@ -24,13 +24,13 @@ package ray
 
 import (
 	"fmt"
-	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/ui"
+	"github.com/juan-medina/raylib-go/raylib"
 )
 
 func (rr *RenderImpl) color2RayColor(color color.Solid) rl.Color {

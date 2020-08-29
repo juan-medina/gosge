@@ -13,7 +13,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
-	"log"
+	"github.com/rs/zerolog/log"
 	"math/rand"
 )
 
@@ -27,7 +27,7 @@ var opt = options.Options{
 func main() {
 	// create and load the game
 	if err := game.Run(opt, load); err != nil {
-		log.Fatalf("error running the game: %v", err)
+		log.Fatal().Err(err).Msg("error running the game")
 	}
 }
 
