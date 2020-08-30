@@ -22,8 +22,8 @@ A clear and concise description of what you expected to happen.
  - OS: [e.g. Mac, Windows, Ubuntu]
  - Version [e.g. Mojave, 10 Home, 19.04]
  - Architecture: [e.g. x86, ARMv7]
- - GPU: [e.g. ATI Radeon 5500 XT, GeForge GTX1080]
  - CPU: [e.g. Intel i7, Cortex-A9]
+ - GPU: [e.g. ATI Radeon 5500 XT, GeForge GTX1080]
  - RAM: [e.g. 4GB]
 
 **Additional context**
