@@ -31,19 +31,24 @@ import (
 type types struct {
 	// FlatButton is the reflect.Type for ui.FlatButton
 	FlatButton reflect.Type
+	// ButtonHoverColors is the reflect.Type for ui.ButtonHoverColors
+	ButtonHoverColors reflect.Type
 	// Text is the reflect.Type for ui.Text
 	Text reflect.Type
 }
 
 // TYPE hold the reflect.Type for our ui components
 var TYPE = types{
-	FlatButton: reflect.TypeOf(FlatButton{}),
-	Text:       reflect.TypeOf(Text{}),
+	FlatButton:        reflect.TypeOf(FlatButton{}),
+	ButtonHoverColors: reflect.TypeOf(ButtonHoverColors{}),
+	Text:              reflect.TypeOf(Text{}),
 }
 
 type gets struct {
 	// FlatButton gets a ui.FlatButton from a entity.Entity
 	FlatButton func(e *entity.Entity) FlatButton
+	// ButtonHoverColors gets a ui.ButtonHoverColors from a entity.Entity
+	ButtonHoverColors func(e *entity.Entity) ButtonHoverColors
 	// FlatButton gets a ui.FlatButton from a entity.Entity
 	Text func(e *entity.Entity) Text
 }
@@ -53,6 +58,10 @@ var Get = gets{
 	// FlatButton gets a ui.FlatButton from a entity.Entity
 	FlatButton: func(e *entity.Entity) FlatButton {
 		return e.Get(TYPE.FlatButton).(FlatButton)
+	},
+	// FlatButton gets a ui.FlatButton from a entity.Entity
+	ButtonHoverColors: func(e *entity.Entity) ButtonHoverColors {
+		return e.Get(TYPE.ButtonHoverColors).(ButtonHoverColors)
 	},
 	// Text gets a ui.Text from a entity.Entity
 	Text: func(e *entity.Entity) Text {

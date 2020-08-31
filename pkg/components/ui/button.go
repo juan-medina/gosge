@@ -27,17 +27,20 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 )
 
-// FlatButtonColors represent the colors of the button
-type FlatButtonColors struct {
+// ButtonColor represent the colors of the button
+type ButtonColor struct {
 	Solid    color.Solid    // Solid is a color.Solid
 	Gradient color.Gradient // Gradient is a color.Gradient
-	Set      bool           // Set indicates is this has been set
+}
+
+// ButtonHoverColors is the hover colors for a FlatButton
+type ButtonHoverColors struct {
+	Normal ButtonColor // Normal is the ui.ButtonColor on normal state
+	Hover  ButtonColor // Hover is the  ui.ButtonColor on hover state
 }
 
 // FlatButton is a UI element for displaying a button
 type FlatButton struct {
-	Shadow geometry.Size    // Shadow is the offset of the shadow on the ui.FlatButton
-	Normal FlatButtonColors // Normal is the ui.FlatButtonColors on normal state
-	Hover  FlatButtonColors // Hover is the  ui.FlatButtonColors on hover state
-	Event  interface{}      // Event is the event that will be trigger when this button is click
+	Shadow geometry.Size // Shadow is the offset of the shadow on the ui.FlatButton
+	Event  interface{}   // Event is the event that will be trigger when this button is click
 }
