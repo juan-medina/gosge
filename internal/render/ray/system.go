@@ -22,7 +22,7 @@
 
 package ray
 
-import "github.com/juan-medina/raylib-go/raylib"
+import "github.com/gen2brain/raylib-go/raylib"
 
 // GetFrameTime returns the time from the delta time for current frame
 func (rr RenderImpl) GetFrameTime() float32 {

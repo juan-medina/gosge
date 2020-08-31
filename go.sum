@@ -1,8 +1,8 @@
 github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
+github.com/gen2brain/raylib-go v0.0.0-20200831092459-f2de21371ccf h1:6ERBHJA8MLfJTxvkBnVPRl6QxSGxjfp3NZgDc3QDgyw=
+github.com/gen2brain/raylib-go v0.0.0-20200831092459-f2de21371ccf/go.mod h1:LUVRDQbnxUaOgzLzW5lMS+IcbqlXHIqIA9wq8wxzmcA=
 github.com/juan-medina/goecs v1.0.0 h1:nWx+DMNKAShnmq548PMw+WmfQecyUzHEy6baHuzGMFs=
 github.com/juan-medina/goecs v1.0.0/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
-github.com/juan-medina/raylib-go v0.0.0-20200828201918-ca72d271e159 h1:qCDOM29UbDzGuJsC2oTNfjjVfiYB/1WvcF7TjAS/kkA=
-github.com/juan-medina/raylib-go v0.0.0-20200828201918-ca72d271e159/go.mod h1:z8egEwOO4O/WXKEfN71Pla3Ou+XZ0pY/OdCBJOU/Txo=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/rs/xid v1.2.1/go.mod h1:+uKXf+4Djp6Md1KODXJxgGQPKngRmWyn10oCKFzNHOQ=
 github.com/rs/zerolog v1.19.0 h1:hYz4ZVdUgjXTBUmrkrw55j1nHx68LfOKIQk5IYtyScg=

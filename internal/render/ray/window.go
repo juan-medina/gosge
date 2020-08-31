@@ -23,9 +23,9 @@
 package ray
 
 import (
+	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/raylib-go/raylib"
 )
 
 // GetScreenSize get the current screen size
