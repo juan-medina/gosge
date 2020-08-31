@@ -29,24 +29,20 @@ import (
 	"reflect"
 )
 
-// EffectState is the state for an effect
-type EffectState int
-
-// EffectState states
-const (
-	NoState      = EffectState(iota) // NoState represents a not set EffectState
-	StateStopped                     // StateStopped represent an EffectState that is stopped
-	StateRunning                     // StateRunning represent an EffectState that is running
-)
+// AlternateColorState is the state for an effect
+type AlternateColorState struct {
+	CurrentTime float32     // CurrentTime time that this effects has been running
+	Running     bool        // Running indicates if this effect is running
+	From        color.Solid // From is color.Solid that we start from in the current state
+	To          color.Solid // To is the color.Solid that we will end to the current state
+}
 
 // AlternateColor effects will cycle between two colors From and To in given Time with an Optional Delay
 type AlternateColor struct {
-	From    color.Solid // From is color.Solid that we start from
-	To      color.Solid // To is the color.Solid that we will end to
-	Time    float32     // Time is how long will be get to go from From to To in seconds
-	Delay   float32     // Delay is how long will stay in the final To until switching again to To
-	Current float32     // Current time that the effects is running
-	State   EffectState // State is the current EffectState
+	From  color.Solid // From is color.Solid that we start from
+	To    color.Solid // To is the color.Solid that we will end to
+	Time  float32     // Time is how long will be get to go from From to To in seconds
+	Delay float32     // Delay is how long will stay in the final To until switching again to To
 }
 
 // Layer effect is use to render thins in a logical layer
@@ -55,6 +51,8 @@ type Layer struct {
 }
 
 type types struct {
+	// AlternateColorState is the reflect.Type for effects.AlternateColorState
+	AlternateColorState reflect.Type
 	// AlternateColor is the reflect.Type for effects.AlternateColor
 	AlternateColor reflect.Type
 	// Layer is the reflect.Type for effects.Layer
@@ -63,11 +61,14 @@ type types struct {
 
 // TYPE hold the reflect.Type for our effects components
 var TYPE = types{
-	AlternateColor: reflect.TypeOf(AlternateColor{}),
-	Layer:          reflect.TypeOf(Layer{}),
+	AlternateColorState: reflect.TypeOf(AlternateColorState{}),
+	AlternateColor:      reflect.TypeOf(AlternateColor{}),
+	Layer:               reflect.TypeOf(Layer{}),
 }
 
 type gets struct {
+	// AlternateColorState gets a AlternateColorState from a entity.Entity
+	AlternateColorState func(e *entity.Entity) AlternateColorState
 	// AlternateColor gets a AlternateColor from a entity.Entity
 	AlternateColor func(e *entity.Entity) AlternateColor
 	// Layer gets a Layer from a entity.Entity
@@ -76,6 +77,10 @@ type gets struct {
 
 // Get effect component
 var Get = gets{
+	// AlternateColorState gets a AlternateColorState from a entity.Entity
+	AlternateColorState: func(e *entity.Entity) AlternateColorState {
+		return e.Get(TYPE.AlternateColorState).(AlternateColorState)
+	},
 	// AlternateColor gets a AlternateColor from a entity.Entity
 	AlternateColor: func(e *entity.Entity) AlternateColor {
 		return e.Get(TYPE.AlternateColor).(AlternateColor)

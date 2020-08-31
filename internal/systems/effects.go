@@ -32,38 +32,49 @@ type alternateColorSystem struct{}
 
 func (rcs alternateColorSystem) Update(world *world.World, delta float32) error {
 	for it := world.Iterator(effects.TYPE.AlternateColor); it.HasNext(); {
-		v := it.Value()
-		ac := effects.Get.AlternateColor(v)
+		ent := it.Value()
+		ac := effects.Get.AlternateColor(ent)
 
+		// init the state or get it from entity
+		var state effects.AlternateColorState
+		if ent.NotContains(effects.TYPE.AlternateColorState) {
+			state = effects.AlternateColorState{
+				CurrentTime: 0,
+				Running:     false,
+				From:        ac.From,
+				To:          ac.To,
+			}
+		} else {
+			state = effects.Get.AlternateColorState(ent)
+		}
+
+		// calculate color base on the state
 		var clr color.Solid
-
-		switch ac.State {
-		case effects.NoState, effects.StateStopped:
-			clr = ac.From
-		case effects.StateRunning:
-			clr = ac.From.Blend(ac.To, ac.Current/ac.Time)
+		if !state.Running {
+			clr = state.From
+		} else {
+			clr = state.From.Blend(state.To, state.CurrentTime/ac.Time)
 		}
 
-		ac.Current += delta
+		// move current time
+		state.CurrentTime += delta
 
-		switch ac.State {
-		case effects.NoState, effects.StateStopped:
-			if ac.Current > ac.Delay {
-				ac.State = effects.StateRunning
-				ac.Current = 0
+		// if we are running
+		if state.Running {
+			// when we are on the time stop and swap colors in the state
+			if state.CurrentTime > ac.Time {
+				state.Running = false
+				state.CurrentTime = 0
+				aux := state.From
+				state.From = state.To
+				state.To = aux
 			}
-		case effects.StateRunning:
-			if ac.Current > ac.Time {
-				ac.State = effects.StateStopped
-				ac.Current = 0
-				aux := ac.From
-				ac.From = ac.To
-				ac.To = aux
-			}
+		} else if state.CurrentTime > ac.Delay { // wait the delay time
+			state.Running = true
 		}
 
-		v.Set(clr)
-		v.Set(ac)
+		ent.Set(state)
+		ent.Set(clr)
 	}
 	return nil
 }
