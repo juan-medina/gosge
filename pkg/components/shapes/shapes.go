@@ -43,7 +43,7 @@ func (b Box) Contains(at geometry.Point, point geometry.Point) bool {
 			Width:  b.Size.Width * b.Scale,
 			Height: b.Size.Height * b.Scale,
 		},
-	}.PointInRect(point)
+	}.IsPointInRect(point)
 }
 
 type types struct {

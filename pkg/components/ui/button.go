@@ -44,3 +44,12 @@ type FlatButton struct {
 	Shadow geometry.Size // Shadow is the offset of the shadow on the ui.FlatButton
 	Event  interface{}   // Event is the event that will be trigger when this button is click
 }
+
+// SpriteButton is a UI element for displaying a image base button
+type SpriteButton struct {
+	Sheet  string      // Sheet is the Sprite sheet
+	Normal string      // Normal is the sprite on normal state
+	Hover  string      // Hover is the  sprite on hover state
+	Scale  float32     // Scale is the Sprite scale
+	Event  interface{} // Event is the event that will be trigger when this button is click
+}

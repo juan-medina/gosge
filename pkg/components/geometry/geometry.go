@@ -62,14 +62,22 @@ func (s Size) CalculateScale(other Size) Scale {
 	}
 }
 
+// Scale return a geometry.Size scaled by a factor
+func (s Size) Scale(factor float32) Size {
+	return Size{
+		Width:  s.Width * factor,
+		Height: s.Height * factor,
+	}
+}
+
 // Rect is a rectangular area
 type Rect struct {
 	From Point // From is the origin of the area
 	Size Size  // Size is the size of the area
 }
 
-// PointInRect return if a given geometry.Point is inside the geometry.Rect
-func (r Rect) PointInRect(point Point) bool {
+// IsPointInRect return if a given geometry.Point is inside the geometry.Rect
+func (r Rect) IsPointInRect(point Point) bool {
 	return r.From.X <= point.X &&
 		r.From.Y <= point.Y &&
 		r.From.X+r.Size.Width >= point.X &&

@@ -27,6 +27,7 @@ import (
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/pkg/components/sprite"
 )
 
 // Engine is the interface for the game engine
@@ -50,6 +51,8 @@ type Engine interface {
 	SetBackgroundColor(color color.Solid)
 	// MeasureText return the geometry.Size of a string with a defined size and spacing
 	MeasureText(font string, str string, size float32) (geometry.Size, error)
+	// SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
+	SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool
 }
 
 // InitFunc is a function that will get call for our game to load

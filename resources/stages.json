@@ -3,8 +3,8 @@
     {
       "filename": "go-fuzz.png",
       "frame": {
-        "x": 0,
-        "y": 0,
+        "x": 5,
+        "y": 5,
         "w": 567,
         "h": 611
       },
@@ -28,22 +28,72 @@
     {
       "filename": "gamer.png",
       "frame": {
-        "x": 0,
-        "y": 611,
-        "w": 456,
-        "h": 480
+        "x": 582,
+        "y": 5,
+        "w": 490,
+        "h": 516
       },
       "rotated": false,
-      "trimmed": true,
+      "trimmed": false,
       "spriteSourceSize": {
-        "x": 17,
-        "y": 18,
-        "w": 456,
-        "h": 480
+        "x": 0,
+        "y": 0,
+        "w": 490,
+        "h": 516
       },
       "sourceSize": {
         "w": 490,
         "h": 516
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "button_exit_hover.png",
+      "frame": {
+        "x": 582,
+        "y": 531,
+        "w": 92,
+        "h": 96
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 92,
+        "h": 96
+      },
+      "sourceSize": {
+        "w": 92,
+        "h": 96
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "button_exit_normal.png",
+      "frame": {
+        "x": 684,
+        "y": 531,
+        "w": 92,
+        "h": 96
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 92,
+        "h": 96
+      },
+      "sourceSize": {
+        "w": 92,
+        "h": 96
       },
       "pivot": {
         "x": 0.5,
@@ -57,8 +107,8 @@
     "image": "stages.png",
     "format": "RGBA8888",
     "size": {
-      "w": 567,
-      "h": 1091
+      "w": 1077,
+      "h": 632
     },
     "scale": 1
   }

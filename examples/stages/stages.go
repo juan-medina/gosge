@@ -63,24 +63,30 @@ func loadGame(eng engine.Engine) error {
 
 // game constants
 const (
-	buttonExtraWidth  = 0.15                       // the additional width for a button si it is not only the text size
-	buttonExtraHeight = 0.15                       // the additional width for a button si it is not only the text size
-	shadowExtraWidth  = 5                          // the x offset for the buttons shadow
-	shadowExtraHeight = 5                          // the y offset for the buttons shadow
-	fontTittle        = 100                        // tittle font size
-	fontBig           = 100                        // big buttons font size
-	fontSmall         = 50                         // small buttons font size
-	fontName          = "resources/go_regular.fnt" // game font
+	buttonExtraWidth       = 0.15                       // the additional width for a button si it is not only the text size
+	buttonExtraHeight      = 0.15                       // the additional width for a button si it is not only the text size
+	shadowExtraWidth       = 5                          // the x offset for the buttons shadow
+	shadowExtraHeight      = 5                          // the y offset for the buttons shadow
+	fontTittle             = 100                        // tittle font size
+	fontBig                = 100                        // big buttons font size
+	fontName               = "resources/go_regular.fnt" // game font
+	spriteSheetName        = "resources/stages.json"    // game sprite sheet
+	gameSprite             = "go-fuzz.png"              // game sprite
+	menuSprite             = "gamer.png"                // menu sprite
+	buttonExitNormalSprite = "button_exit_normal.png"   // exit button sprite normal state
+	buttonExitHoverSprite  = "button_exit_hover.png"    // exit button sprite hover state
 )
 
 func mainStage(eng engine.Engine) error {
+	var err error
+
 	// Preload font
-	if err := eng.LoadFont(fontName); err != nil {
+	if err = eng.LoadFont(fontName); err != nil {
 		return err
 	}
 
 	// pre load sprites
-	if err := eng.LoadSpriteSheet("resources/stages.json"); err != nil {
+	if err = eng.LoadSpriteSheet(spriteSheetName); err != nil {
 		return err
 	}
 
@@ -118,8 +124,8 @@ func mainStage(eng engine.Engine) error {
 	// add the center sprite
 	wld.Add(entity.New(
 		sprite.Sprite{
-			Sheet: "resources/stages.json",
-			Name:  "go-fuzz.png",
+			Sheet: spriteSheetName,
+			Name:  gameSprite,
 			Scale: 1 * gameScale.Min,
 		},
 		geometry.Point{
@@ -129,43 +135,25 @@ func mainStage(eng engine.Engine) error {
 		effects.Layer{Depth: 1},
 	))
 
-	// measure the text so we could make a button just for it
-	var measure geometry.Size
-	var err error
-	if measure, err = eng.MeasureText(fontName, "< back", fontSmall); err != nil {
+	spriteScale := float32(0.5)
+	var spriteSize geometry.Size
+	if spriteSize, err = eng.GetSpriteSize(spriteSheetName, buttonExitNormalSprite); err != nil {
 		return err
 	}
+	spriteSize.Width *= spriteScale
+	spriteSize.Height *= spriteScale
 
-	measure.Width += measure.Width * buttonExtraWidth
-	measure.Height += measure.Height * buttonExtraHeight
-
-	// add the back button in the top right corner
 	wld.Add(entity.New(
-		ui.FlatButton{
-			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
+		ui.SpriteButton{
+			Sheet:  spriteSheetName,
+			Normal: buttonExitNormalSprite,
+			Hover:  buttonExitHoverSprite,
+			Scale:  gameScale.Min * spriteScale,
 			Event:  events.ChangeGameStage{Stage: "menu"},
 		},
 		geometry.Point{
-			X: (designResolution.Width - (measure.Width) - shadowExtraWidth) * gameScale.Point.X,
-			Y: (shadowExtraHeight) * gameScale.Point.Y,
-		},
-		shapes.Box{
-			Size: geometry.Size{
-				Width:  measure.Width,
-				Height: measure.Height,
-			},
-			Scale: gameScale.Min,
-		},
-		ui.Text{
-			String:     "< back",
-			Size:       fontSmall * gameScale.Min,
-			Font:       fontName,
-			VAlignment: ui.MiddleVAlignment,
-			HAlignment: ui.CenterHAlignment,
-		},
-		color.Gradient{
-			From: color.Red,
-			To:   color.Beige,
+			X: (designResolution.Width - (spriteSize.Width / 2)) * gameScale.Point.X,
+			Y: (spriteSize.Height / 2) * gameScale.Point.Y,
 		},
 		effects.Layer{Depth: 0},
 	))
@@ -180,7 +168,7 @@ func menuStage(eng engine.Engine) error {
 	}
 
 	// pre load sprites
-	if err := eng.LoadSpriteSheet("resources/stages.json"); err != nil {
+	if err := eng.LoadSpriteSheet(spriteSheetName); err != nil {
 		return err
 	}
 
@@ -218,8 +206,8 @@ func menuStage(eng engine.Engine) error {
 	// add the center sprite
 	wld.Add(entity.New(
 		sprite.Sprite{
-			Sheet: "resources/stages.json",
-			Name:  "gamer.png",
+			Sheet: spriteSheetName,
+			Name:  menuSprite,
 			Scale: 1 * gameScale.Min,
 		},
 		geometry.Point{

@@ -32,6 +32,7 @@ import (
 	"github.com/juan-medina/gosge/internal/systems"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/options"
@@ -158,7 +159,7 @@ func (ei *engineImpl) prepare() error {
 	ei.wld.AddSystemWithPriority(systems.AnimationSystem(), lowPriority)
 
 	// ui system will run after game system but before the effect systems
-	ei.wld.AddSystemWithPriority(systems.UISystem(), lowPriority)
+	ei.wld.AddSystemWithPriority(systems.UISystem(ei), lowPriority)
 
 	// effect system will run after game system but before the rendering systems
 	ei.wld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
@@ -252,4 +253,23 @@ func (ei engineImpl) LoadFont(fileName string) error {
 // LoadSprite preloads a single sprite.Sprite
 func (ei engineImpl) LoadSprite(filename string, pivot geometry.Point) error {
 	return ei.ds.LoadSingleSprite("", filename, pivot)
+}
+
+// getSpriteRect return a geometry.Rect for a given sprite.Sprite at a geometry.Point
+func (ei *engineImpl) getSpriteRect(spr sprite.Sprite, at geometry.Point) geometry.Rect {
+	def, _ := ei.ds.GetSpriteDef(spr.Sheet, spr.Name)
+	size := def.Origin.Size.Scale(spr.Scale)
+
+	return geometry.Rect{
+		From: geometry.Point{
+			X: at.X - (size.Width * def.Pivot.X),
+			Y: at.Y - (size.Height * def.Pivot.Y),
+		},
+		Size: size,
+	}
+}
+
+// SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
+func (ei *engineImpl) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool {
+	return ei.getSpriteRect(spr, at).IsPointInRect(point)
 }
