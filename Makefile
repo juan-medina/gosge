@@ -27,6 +27,8 @@ COVERAGE=$(GOTOOL) cover
 GOFORMAT=$(GOCMD) fmt
 GOVET=$(GOCMD) vet
 GORUN=$(GOCMD) run
+GOGET=$(GOCMD) get
+GOMOD=$(GOCMD) mod
 GOLINT=golint
 
 default: test
@@ -44,3 +46,6 @@ run:
 lint:
 	$(GOLINT) -set_exit_status ./...
 validate: lint
+update:
+	$(GOGET) -u all
+	$(GOMOD) tidy
