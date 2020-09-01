@@ -25,6 +25,7 @@ package main
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/pkg/components/animation"
 	"github.com/juan-medina/gosge/pkg/components/audio"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
@@ -55,10 +56,15 @@ const (
 	stopButtonHoverSprite   = "stop_button_hover.png"
 	pauseButtonNormalSprite = "pause_button_normal.png"
 	pauseButtonHoverSprite  = "pause_button_hover.png"
+	danceAnim               = "dance"
+	idleAnim                = "idle"
+	gopherIdle              = "gopher_coffee_%02d.png"
+	gopherDance             = "gopher_dance_%02d.png"
 )
 
 var (
 	playButton *entity.Entity
+	gopher     *entity.Entity
 )
 
 var (
@@ -157,6 +163,36 @@ func loadGame(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
+	spriteScale = float32(2)
+
+	// add the gopher with it animations
+	gopher = wld.Add(entity.New(
+		animation.Animation{
+			Sequences: map[string]animation.Sequence{
+				danceAnim: {
+					Sheet:  spriteSheet,
+					Base:   gopherDance,
+					Scale:  gameScale.Min * spriteScale,
+					Frames: 24,
+					Delay:  0.100,
+				},
+				idleAnim: {
+					Sheet:  spriteSheet,
+					Base:   gopherIdle,
+					Scale:  gameScale.Min * spriteScale,
+					Frames: 10,
+					Delay:  0.100,
+				},
+			},
+			Current: idleAnim, // current animation is idle
+			Speed:   1,
+		},
+		geometry.Point{
+			X: (designResolution.Width / 2) * gameScale.Point.X,
+			Y: (designResolution.Height/2)*gameScale.Point.Y - 300,
+		},
+	))
+
 	wld.AddSystem(UISystem())
 	return err
 }
@@ -167,6 +203,8 @@ func (us uiSystem) Notify(_ *world.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
 	case events.MusicStateChangeEvent:
 		sb := ui.Get.SpriteButton(playButton)
+		anim := animation.Get.Animation(gopher)
+
 		switch e.New {
 		case audio.StatePlaying:
 			sb.Normal = pauseButtonNormalSprite
@@ -174,6 +212,7 @@ func (us uiSystem) Notify(_ *world.World, event interface{}, _ float32) error {
 			sb.Event = events.PauseMusicEvent{
 				Name: e.Name,
 			}
+			anim.Current = danceAnim
 		case audio.StateStopped:
 			sb.Normal = playButtonNormalSprite
 			sb.Hover = playButtonHoverSprite
@@ -181,14 +220,17 @@ func (us uiSystem) Notify(_ *world.World, event interface{}, _ float32) error {
 				Name:  e.Name,
 				Loops: audio.LoopForever,
 			}
+			anim.Current = idleAnim
 		case audio.StatePaused:
 			sb.Normal = playButtonNormalSprite
 			sb.Hover = playButtonHoverSprite
 			sb.Event = events.ResumeMusicEvent{
 				Name: e.Name,
 			}
+			anim.Current = idleAnim
 		}
 		playButton.Set(sb)
+		gopher.Set(anim)
 	}
 	return nil
 }
