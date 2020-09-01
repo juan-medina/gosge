@@ -45,26 +45,30 @@ var opt = options.Options{
 }
 
 const (
-	fontName                = "resources/go_regular.fnt"
-	fontSmall               = 60
-	musicFile               = "resources/audio/loop.ogg"
-	spriteSheet             = "resources/audio.json"
-	buttonsGap              = 5
-	playButtonNormalSprite  = "play_button_normal.png"
-	playButtonHoverSprite   = "play_button_hover.png"
-	stopButtonNormalSprite  = "stop_button_normal.png"
-	stopButtonHoverSprite   = "stop_button_hover.png"
-	pauseButtonNormalSprite = "pause_button_normal.png"
-	pauseButtonHoverSprite  = "pause_button_hover.png"
-	danceAnim               = "dance"
-	idleAnim                = "idle"
-	gopherIdle              = "gopher_coffee_%02d.png"
-	gopherDance             = "gopher_dance_%02d.png"
+	fontName                = "resources/go_regular.fnt" // the font for the game
+	fontSmall               = 60                         // the font size
+	musicFile               = "resources/audio/loop.ogg" // music file
+	spriteSheet             = "resources/audio.json"     // sprite sheet with our graphics
+	buttonsGap              = 5                          // separation between buttons
+	playButtonNormalSprite  = "play_button_normal.png"   // the normal sprite for the play button
+	playButtonHoverSprite   = "play_button_hover.png"    // the hover sprite for the play button
+	stopButtonNormalSprite  = "stop_button_normal.png"   // the normal sprite for the stop button
+	stopButtonHoverSprite   = "stop_button_hover.png"    // the hover sprite for the stop button
+	pauseButtonNormalSprite = "pause_button_normal.png"  // the normal sprite for the pause button
+	pauseButtonHoverSprite  = "pause_button_hover.png"   // the hover sprite for the pause button
+	gopherVerticalGap       = 300                        // vertical gap from the center for our gopher
+	danceAnim               = "dance"                    // the dance animation name
+	idleAnim                = "idle"                     // the idle animation name
+	gopherIdle              = "gopher_coffee_%02d.png"   // sprite frame base name for the idle animation
+	gopherIdleFrames        = 10                         // number of frames for the gopher idle animation
+	gopherDance             = "gopher_dance_%02d.png"    // sprite frame base name for the dance animation
+	gopherDanceFrames       = 24                         // number of frames for the gopher dance animation
+	gopherFrameDelay        = 0.100                      // delay between frames for the gopher animations
 )
 
 var (
-	playButton *entity.Entity
-	gopher     *entity.Entity
+	playButton *entity.Entity // the play button entity
+	gopher     *entity.Entity // the gopher sprite entity
 )
 
 var (
@@ -95,6 +99,7 @@ func loadGame(eng engine.Engine) error {
 		return err
 	}
 
+	// Get the ECS world
 	wld := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
@@ -120,6 +125,7 @@ func loadGame(eng engine.Engine) error {
 		},
 	))
 
+	// calculate the size of the buttons
 	spriteScale := float32(0.25)
 	var spriteSize geometry.Size
 	if spriteSize, err = eng.GetSpriteSize(spriteSheet, playButtonNormalSprite); err != nil {
@@ -128,13 +134,14 @@ func loadGame(eng engine.Engine) error {
 	spriteSize.Width *= spriteScale
 	spriteSize.Height *= spriteScale
 
+	// add the play button
 	playButton = wld.Add(entity.New(
 		ui.SpriteButton{
 			Sheet:  spriteSheet,
 			Normal: playButtonNormalSprite,
 			Hover:  playButtonHoverSprite,
 			Scale:  gameScale.Min * spriteScale,
-			Event: events.PlayMusicEvent{
+			Event: events.PlayMusicEvent{ // on click send a event to play the music
 				Name:  musicFile,
 				Loops: audio.LoopForever,
 			},
@@ -146,13 +153,14 @@ func loadGame(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
+	// add the stop button
 	wld.Add(entity.New(
 		ui.SpriteButton{
 			Sheet:  spriteSheet,
 			Normal: stopButtonNormalSprite,
 			Hover:  stopButtonHoverSprite,
 			Scale:  gameScale.Min * spriteScale,
-			Event: events.StopMusicEvent{
+			Event: events.StopMusicEvent{ // on click send a event to stop the music
 				Name: musicFile,
 			},
 		},
@@ -163,6 +171,7 @@ func loadGame(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
+	// the scale for our gopher sprite
 	spriteScale = float32(2)
 
 	// add the gopher with it animations
@@ -173,15 +182,15 @@ func loadGame(eng engine.Engine) error {
 					Sheet:  spriteSheet,
 					Base:   gopherDance,
 					Scale:  gameScale.Min * spriteScale,
-					Frames: 24,
-					Delay:  0.100,
+					Frames: gopherDanceFrames,
+					Delay:  gopherFrameDelay,
 				},
 				idleAnim: {
 					Sheet:  spriteSheet,
 					Base:   gopherIdle,
 					Scale:  gameScale.Min * spriteScale,
-					Frames: 10,
-					Delay:  0.100,
+					Frames: gopherIdleFrames,
+					Delay:  gopherFrameDelay,
 				},
 			},
 			Current: idleAnim, // current animation is idle
@@ -189,39 +198,50 @@ func loadGame(eng engine.Engine) error {
 		},
 		geometry.Point{
 			X: (designResolution.Width / 2) * gameScale.Point.X,
-			Y: (designResolution.Height/2)*gameScale.Point.Y - 300,
+			Y: (designResolution.Height/2)*gameScale.Point.Y - gopherVerticalGap,
 		},
 	))
 
+	// add the system that will handle the UI
 	wld.AddSystem(UISystem())
 	return err
 }
 
+// System for our game ui
 type uiSystem struct{}
 
+// notify a new event
 func (us uiSystem) Notify(_ *world.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
+	// if is the music state has change
 	case events.MusicStateChangeEvent:
+		// get the play button ui.SpriteButton
 		sb := ui.Get.SpriteButton(playButton)
+		// get the gopher current animation.Animation
 		anim := animation.Get.Animation(gopher)
-
 		switch e.New {
+		// if the music is playing
 		case audio.StatePlaying:
+			// update the play button hover and normal sprites pause sprites
 			sb.Normal = pauseButtonNormalSprite
 			sb.Hover = pauseButtonHoverSprite
-			sb.Event = events.PauseMusicEvent{
+			sb.Event = events.PauseMusicEvent{ // on click send an event to pause the music
 				Name: e.Name,
 			}
 			anim.Current = danceAnim
+		// if the music has stopped
 		case audio.StateStopped:
+			// update the play button hover and normal sprites with play sprites
 			sb.Normal = playButtonNormalSprite
 			sb.Hover = playButtonHoverSprite
-			sb.Event = events.PlayMusicEvent{
+			sb.Event = events.PlayMusicEvent{ // on click send a event to play the music
 				Name:  e.Name,
 				Loops: audio.LoopForever,
 			}
 			anim.Current = idleAnim
+		// if the music pause
 		case audio.StatePaused:
+			// update the play button hover an normal sprites with play sprites
 			sb.Normal = playButtonNormalSprite
 			sb.Hover = playButtonHoverSprite
 			sb.Event = events.ResumeMusicEvent{
@@ -229,7 +249,9 @@ func (us uiSystem) Notify(_ *world.World, event interface{}, _ float32) error {
 			}
 			anim.Current = idleAnim
 		}
+		// update the play button entity
 		playButton.Set(sb)
+		// update the gopher entity
 		gopher.Set(anim)
 	}
 	return nil
