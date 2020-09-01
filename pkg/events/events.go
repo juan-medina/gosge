@@ -57,3 +57,9 @@ type KeyEvent struct {
 	Key    device.Key
 	Status device.KeyStatus
 }
+
+// PlayMusicEvent is an event to play a music stream
+type PlayMusicEvent struct {
+	Name  string
+	Loops int32
+}

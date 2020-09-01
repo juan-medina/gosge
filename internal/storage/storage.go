@@ -37,8 +37,8 @@ import (
 
 type spriteSheetData struct {
 	Frames []struct {
-		Filename string `json:"filename"`
-		Frame    struct {
+		Name  string `json:"name"`
+		Frame struct {
 			X float32 `json:"x"`
 			Y float32 `json:"y"`
 			W float32 `json:"w"`
@@ -60,30 +60,48 @@ type dataStorage struct {
 	sheets   map[string]spriteSheet
 	textures map[string]components.TextureDef
 	fonts    map[string]components.FontDef
+	musics   map[string]components.MusicDef
 	rdr      render.Render
 }
 
-func (ds *dataStorage) LoadFont(fileName string) (err error) {
+func (ds *dataStorage) GetMusicDef(name string) (components.MusicDef, error) {
+	if _, ok := ds.musics[name]; ok {
+		return ds.musics[name], nil
+	}
+	return components.MusicDef{}, fmt.Errorf("can not find music %q", name)
+}
+
+func (ds *dataStorage) LoadMusic(name string) (err error) {
+	var music components.MusicDef
+	if _, ok := ds.musics[name]; !ok {
+		if music, err = ds.rdr.LoadMusic(name); err == nil {
+			ds.musics[name] = music
+		}
+	}
+	return err
+}
+
+func (ds *dataStorage) LoadFont(name string) (err error) {
 	var font components.FontDef
-	if _, ok := ds.fonts[fileName]; !ok {
-		if font, err = ds.rdr.LoadFont(fileName); err == nil {
-			ds.fonts[fileName] = font
+	if _, ok := ds.fonts[name]; !ok {
+		if font, err = ds.rdr.LoadFont(name); err == nil {
+			ds.fonts[name] = font
 		}
 	}
 	return
 }
 
-func (ds *dataStorage) GetFontDef(fileName string) (components.FontDef, error) {
-	if _, ok := ds.fonts[fileName]; ok {
-		return ds.fonts[fileName], nil
+func (ds *dataStorage) GetFontDef(name string) (components.FontDef, error) {
+	if _, ok := ds.fonts[name]; ok {
+		return ds.fonts[name], nil
 	}
-	return components.FontDef{}, fmt.Errorf("can not find font %q", fileName)
+	return components.FontDef{}, fmt.Errorf("can not find font %q", name)
 }
 
 // Storage is a storage for our game data
 type Storage interface {
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
-	LoadSpriteSheet(fileName string) error
+	LoadSpriteSheet(name string) error
 	// LoadSingleSprite preloads a sprite.Sprite in a sheet
 	LoadSingleSprite(sheet string, name string, pivot geometry.Point) error
 	//GetSpriteSize returns the geometry.Size of a given sprite
@@ -91,9 +109,13 @@ type Storage interface {
 	//GetSpriteDef returns the components.SpriteDef for an sprite
 	GetSpriteDef(sheet string, name string) (components.SpriteDef, error)
 	// LoadFont preloads a font
-	LoadFont(fileName string) error
+	LoadFont(name string) error
 	//GetFontDef returns the components.FontDef for a font
 	GetFontDef(name string) (components.FontDef, error)
+	//LoadMusic preload a music stream
+	LoadMusic(name string) error
+	//GetMusicDef returns the components.MusicDef for a music stream
+	GetMusicDef(name string) (components.MusicDef, error)
 	//Clear all loaded data
 	Clear()
 }
@@ -117,7 +139,7 @@ func (ds *dataStorage) handleSheet(data spriteSheetData, name string) (err error
 	texturePath := path.Join(dir, data.Meta.Image)
 	if texture, err = ds.rdr.LoadTexture(texturePath); err == nil {
 		for _, spr := range data.Frames {
-			st[spr.Filename] = components.SpriteDef{
+			st[spr.Name] = components.SpriteDef{
 				Texture: texture,
 				Origin: geometry.Rect{
 					From: geometry.Point{
@@ -140,16 +162,16 @@ func (ds *dataStorage) handleSheet(data spriteSheetData, name string) (err error
 	return
 }
 
-func (ds *dataStorage) LoadSpriteSheet(fileName string) (err error) {
+func (ds *dataStorage) LoadSpriteSheet(name string) (err error) {
 	data := spriteSheetData{}
 	var jsonFile *os.File
-	if jsonFile, err = os.Open(fileName); err == nil {
+	if jsonFile, err = os.Open(name); err == nil {
 		//goland:noinspection GoUnhandledErrorResult
 		defer jsonFile.Close()
 		var bytes []byte
 		if bytes, err = ioutil.ReadAll(jsonFile); err == nil {
 			if err = json.Unmarshal(bytes, &data); err == nil {
-				return ds.handleSheet(data, fileName)
+				return ds.handleSheet(data, name)
 			}
 		}
 	}
@@ -207,6 +229,11 @@ func (ds *dataStorage) Clear() {
 		ds.rdr.UnloadFont(v)
 	}
 	ds.fonts = make(map[string]components.FontDef, 0)
+
+	for _, v := range ds.musics {
+		ds.rdr.UnloadMusic(v)
+	}
+	ds.musics = make(map[string]components.MusicDef, 0)
 }
 
 // New returns a new storage.Storage
@@ -215,6 +242,7 @@ func New(rdr render.Render) Storage {
 		sheets:   make(map[string]spriteSheet, 0),
 		textures: make(map[string]components.TextureDef, 0),
 		fonts:    make(map[string]components.FontDef, 0),
+		musics:   make(map[string]components.MusicDef, 0),
 		rdr:      rdr,
 	}
 }

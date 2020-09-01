@@ -74,10 +74,12 @@ func (rr *RenderImpl) Init(opt options.Options) {
 			rl.ToggleFullscreen()
 		}
 	}
+	rl.InitAudioDevice()
 }
 
 // End the rendering device
 func (rr RenderImpl) End() {
+	rl.CloseAudioDevice()
 	rl.CloseWindow()
 }
 

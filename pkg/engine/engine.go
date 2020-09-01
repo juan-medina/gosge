@@ -34,25 +34,33 @@ import (
 type Engine interface {
 	// World returns the game world.World
 	World() *world.World
-	// LoadSpriteSheet preloads a sprite.Sprite sheet
+	// LoadSpriteSheet preloads a sprite.
+	//Sprite sheet
 	LoadSpriteSheet(fileName string) error
 	// LoadSprite preloads a single sprite.Sprite with a given pivot
 	LoadSprite(filename string, pivot geometry.Point) error
-	// LoadFont preloads a font
-	LoadFont(fileName string) error
 	// GetSpriteSize returns the geometry.Size of a given sprite
 	GetSpriteSize(sheet string, name string) (geometry.Size, error)
+	// SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
+	SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool
+
+	// LoadFont preloads a font
+	LoadFont(fileName string) error
+	// MeasureText return the geometry.Size of a string with a defined size and spacing
+	MeasureText(font string, str string, size float32) (geometry.Size, error)
+
+	// LoadMusic preloads a music stream
+	LoadMusic(filename string) error
+
 	// GetScreenSize returns the current screen size
 	GetScreenSize() geometry.Size
+
 	// AddGameStage adds a new game stage to our game with the given name, for changing
 	//to that stage send events.ChangeStage
 	AddGameStage(name string, init InitFunc)
+
 	// SetBackgroundColor changes the current background color.Solid
 	SetBackgroundColor(color color.Solid)
-	// MeasureText return the geometry.Size of a string with a defined size and spacing
-	MeasureText(font string, str string, size float32) (geometry.Size, error)
-	// SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
-	SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool
 }
 
 // InitFunc is a function that will get call for our game to load

@@ -155,6 +155,9 @@ func (ei *engineImpl) prepare() error {
 	ei.wld.AddSystemWithPriority(ei, highPriority)
 	ei.wld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
 
+	// add the music system
+	ei.wld.AddSystemWithPriority(systems.MusicSystem(ei.rdr, ei.ds), highPriority)
+
 	// animation  system will run after game system but before the rendering systems
 	ei.wld.AddSystemWithPriority(systems.AnimationSystem(), lowPriority)
 
@@ -272,4 +275,8 @@ func (ei *engineImpl) getSpriteRect(spr sprite.Sprite, at geometry.Point) geomet
 // SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
 func (ei *engineImpl) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool {
 	return ei.getSpriteRect(spr, at).IsPointInRect(point)
+}
+
+func (ei *engineImpl) LoadMusic(filename string) error {
+	return ei.ds.LoadMusic(filename)
 }

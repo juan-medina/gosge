@@ -73,6 +73,21 @@ type Render interface {
 	// UnloadFont from VRAM
 	UnloadFont(textureDef components.FontDef)
 
+	// LoadMusic giving it file name into memory
+	LoadMusic(fileName string) (components.MusicDef, error)
+	// UnloadMusic giving it file from memory
+	UnloadMusic(musicDef components.MusicDef)
+	// PlayMusic plays the given components.MusicDef
+	PlayMusic(musicDef components.MusicDef, loops int32)
+	// PauseMusic pauses the given components.MusicDef
+	PauseMusic(musicDef components.MusicDef)
+	// StopMusic stop the given components.MusicDef
+	StopMusic(musicDef components.MusicDef)
+	// ResumeMusic resumes the given components.MusicDef
+	ResumeMusic(musicDef components.MusicDef)
+	// UpdateMusic update the stream of the given components.MusicDef
+	UpdateMusic(musicDef components.MusicDef)
+
 	// SetBackgroundColor changes the current background color.Solid
 	SetBackgroundColor(color color.Solid)
 

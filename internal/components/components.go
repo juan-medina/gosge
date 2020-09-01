@@ -41,3 +41,8 @@ type SpriteDef struct {
 type FontDef struct {
 	Data interface{} // Data is the font data
 }
+
+// MusicDef defines a music stream
+type MusicDef struct {
+	Data interface{}
+}

@@ -153,3 +153,5 @@ go get -v -u github.com/juan-medina/gosge
     - https://www.gameart2d.com
 -  Mobile Game Graphics
     - https://mobilegamegraphics.com/product/free-parallax-backgrounds
+- Of Far Different Nature Music Loops
+    - https://fardifferent.itch.io/loops
