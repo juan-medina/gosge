@@ -92,6 +92,7 @@ $ make run example=eyes
 $ make run example=layers
 $ make run example=stages
 $ make run example=animation
+$ make run example=audio
 ```
 
 Alternatively you could run them with :
@@ -102,6 +103,7 @@ $ go run examples/eyes/eyes.go
 $ go run examples/layers/layers.go
 $ go run examples/stages/stages.go
 $ go run examples/animation/animation.go
+$ go run examples/audio/audio.go
 ```
 
 ## Requirements
