@@ -51,5 +51,6 @@ type SpriteButton struct {
 	Normal string      // Normal is the sprite on normal state
 	Hover  string      // Hover is the  sprite on hover state
 	Scale  float32     // Scale is the Sprite scale
+	Sound  string      // Sound is the click sound for this SpriteButton
 	Event  interface{} // Event is the event that will be trigger when this button is click
 }

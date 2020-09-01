@@ -181,6 +181,11 @@ func (uis uiSystem) spriteButtonsMouseUp(wld *world.World, mue events.MouseUpEve
 		sbn := ui.Get.SpriteButton(ent)
 
 		if uis.eng.SpriteAtContains(spr, pos, mue.Point) {
+			if sbn.Sound != "" {
+				if err := wld.Notify(events.PlaySoundEvent{Name: sbn.Sound}); err != nil {
+					return err
+				}
+			}
 			return wld.Notify(sbn.Event)
 		}
 	}

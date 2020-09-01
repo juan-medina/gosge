@@ -30,6 +30,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/ui"
 	"github.com/juan-medina/gosge/pkg/engine"
 	"github.com/juan-medina/gosge/pkg/events"
@@ -45,25 +46,27 @@ var opt = options.Options{
 }
 
 const (
-	fontName                = "resources/go_regular.fnt" // the font for the game
-	fontSmall               = 60                         // the font size
-	musicFile               = "resources/audio/loop.ogg" // music file
-	spriteSheet             = "resources/audio.json"     // sprite sheet with our graphics
-	buttonsGap              = 5                          // separation between buttons
-	playButtonNormalSprite  = "play_button_normal.png"   // the normal sprite for the play button
-	playButtonHoverSprite   = "play_button_hover.png"    // the hover sprite for the play button
-	stopButtonNormalSprite  = "stop_button_normal.png"   // the normal sprite for the stop button
-	stopButtonHoverSprite   = "stop_button_hover.png"    // the hover sprite for the stop button
-	pauseButtonNormalSprite = "pause_button_normal.png"  // the normal sprite for the pause button
-	pauseButtonHoverSprite  = "pause_button_hover.png"   // the hover sprite for the pause button
-	gopherVerticalGap       = 300                        // vertical gap from the center for our gopher
-	danceAnim               = "dance"                    // the dance animation name
-	idleAnim                = "idle"                     // the idle animation name
-	gopherIdle              = "gopher_coffee_%02d.png"   // sprite frame base name for the idle animation
-	gopherIdleFrames        = 10                         // number of frames for the gopher idle animation
-	gopherDance             = "gopher_dance_%02d.png"    // sprite frame base name for the dance animation
-	gopherDanceFrames       = 24                         // number of frames for the gopher dance animation
-	gopherFrameDelay        = 0.100                      // delay between frames for the gopher animations
+	fontName                = "resources/go_regular.fnt"        // the font for the game
+	fontSmall               = 60                                // the font size
+	musicFile               = "resources/audio/loop.ogg"        // music file
+	gopherSound             = "resources/audio/gopher.wav"      // gopher sound
+	clickSound              = "resources/audio/metal_click.wav" // click sound
+	spriteSheet             = "resources/audio.json"            // sprite sheet with our graphics
+	buttonsGap              = 5                                 // separation between buttons
+	playButtonNormalSprite  = "play_button_normal.png"          // the normal sprite for the play button
+	playButtonHoverSprite   = "play_button_hover.png"           // the hover sprite for the play button
+	stopButtonNormalSprite  = "stop_button_normal.png"          // the normal sprite for the stop button
+	stopButtonHoverSprite   = "stop_button_hover.png"           // the hover sprite for the stop button
+	pauseButtonNormalSprite = "pause_button_normal.png"         // the normal sprite for the pause button
+	pauseButtonHoverSprite  = "pause_button_hover.png"          // the hover sprite for the pause button
+	gopherVerticalGap       = 300                               // vertical gap from the center for our gopher
+	danceAnim               = "dance"                           // the dance animation name
+	idleAnim                = "idle"                            // the idle animation name
+	gopherIdle              = "gopher_coffee_%02d.png"          // sprite frame base name for the idle animation
+	gopherIdleFrames        = 10                                // number of frames for the gopher idle animation
+	gopherDance             = "gopher_dance_%02d.png"           // sprite frame base name for the dance animation
+	gopherDanceFrames       = 24                                // number of frames for the gopher dance animation
+	gopherFrameDelay        = 0.100                             // delay between frames for the gopher animations
 )
 
 var (
@@ -99,6 +102,14 @@ func loadGame(eng engine.Engine) error {
 		return err
 	}
 
+	// Preload sounds
+	if err = eng.LoadSound(gopherSound); err != nil {
+		return err
+	}
+	if err = eng.LoadSound(clickSound); err != nil {
+		return err
+	}
+
 	// Get the ECS world
 	wld := eng.World()
 
@@ -108,7 +119,7 @@ func loadGame(eng engine.Engine) error {
 	// add the bottom text
 	wld.Add(entity.New(
 		ui.Text{
-			String:     "press <ESC> to close",
+			String:     "click on the buttons or the gopher, press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
@@ -141,6 +152,7 @@ func loadGame(eng engine.Engine) error {
 			Normal: playButtonNormalSprite,
 			Hover:  playButtonHoverSprite,
 			Scale:  gameScale.Min * spriteScale,
+			Sound:  clickSound,
 			Event: events.PlayMusicEvent{ // on click send a event to play the music
 				Name:  musicFile,
 				Loops: audio.LoopForever,
@@ -160,6 +172,7 @@ func loadGame(eng engine.Engine) error {
 			Normal: stopButtonNormalSprite,
 			Hover:  stopButtonHoverSprite,
 			Scale:  gameScale.Min * spriteScale,
+			Sound:  clickSound,
 			Event: events.StopMusicEvent{ // on click send a event to stop the music
 				Name: musicFile,
 			},
@@ -203,16 +216,28 @@ func loadGame(eng engine.Engine) error {
 	))
 
 	// add the system that will handle the UI
-	wld.AddSystem(UISystem())
+	wld.AddSystem(UISystem(eng))
 	return err
 }
 
 // System for our game ui
-type uiSystem struct{}
+type uiSystem struct {
+	eng engine.Engine
+}
 
 // notify a new event
-func (us uiSystem) Notify(_ *world.World, event interface{}, _ float32) error {
+func (us uiSystem) Notify(wld *world.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
+	// check if we get a mouse up
+	case events.MouseUpEvent:
+		// get our gopher sprite and position
+		pos := geometry.Get.Point(gopher)
+		spr := sprite.Get(gopher)
+		// if we click on the gopher
+		if us.eng.SpriteAtContains(spr, pos, e.Point) {
+			// play the gopher sound
+			return wld.Notify(events.PlaySoundEvent{Name: gopherSound})
+		}
 	// if is the music state has change
 	case events.MusicStateChangeEvent:
 		// get the play button ui.SpriteButton
@@ -262,6 +287,8 @@ func (us uiSystem) Update(_ *world.World, _ float32) error {
 }
 
 // UISystem create our example UI world.System
-func UISystem() world.System {
-	return &uiSystem{}
+func UISystem(eng engine.Engine) world.System {
+	return &uiSystem{
+		eng: eng,
+	}
 }

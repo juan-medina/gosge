@@ -20,34 +20,40 @@
  *  THE SOFTWARE.
  */
 
-package components
+package systems
 
-import "github.com/juan-medina/gosge/pkg/components/geometry"
+import (
+	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/internal/render"
+	"github.com/juan-medina/gosge/internal/storage"
+	"github.com/juan-medina/gosge/pkg/events"
+)
 
-// TextureDef defines a texture
-type TextureDef struct {
-	Data interface{}   // Data is the texture data
-	Size geometry.Size // Size is the texture size
+type soundSystem struct {
+	rdr render.Render
+	ds  storage.Storage
 }
 
-// SpriteDef defines an sprite.Sprite
-type SpriteDef struct {
-	Texture TextureDef     // Texture is the TextureDef
-	Origin  geometry.Rect  // Origin is where the sprite is on the texture
-	Pivot   geometry.Point // Pivot is the relative pivot 0..1 in each axis
+func (ss soundSystem) Update(_ *world.World, _ float32) error {
+	return nil
 }
 
-// FontDef defines a font
-type FontDef struct {
-	Data interface{} // Data is the font data
+func (ss soundSystem) Notify(_ *world.World, event interface{}, _ float32) error {
+	switch e := event.(type) {
+	case events.PlaySoundEvent:
+		if def, err := ss.ds.GetSoundDef(e.Name); err == nil {
+			ss.rdr.PlaySound(def)
+		} else {
+			return err
+		}
+	}
+	return nil
 }
 
-// MusicDef defines a music stream
-type MusicDef struct {
-	Data interface{}
-}
-
-// SoundDef defines a sound wave
-type SoundDef struct {
-	Data interface{}
+// SoundSystem returns a world.System that handle audio waves
+func SoundSystem(rdr render.Render, ds storage.Storage) world.System {
+	return soundSystem{
+		rdr: rdr,
+		ds:  ds,
+	}
 }

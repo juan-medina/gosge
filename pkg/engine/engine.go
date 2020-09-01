@@ -51,6 +51,8 @@ type Engine interface {
 
 	// LoadMusic preloads a music stream
 	LoadMusic(filename string) error
+	//LoadSound preload a sound wave
+	LoadSound(filename string) error
 
 	// GetScreenSize returns the current screen size
 	GetScreenSize() geometry.Size

@@ -39,7 +39,6 @@ func (rr RenderImpl) LoadMusic(fileName string) (components.MusicDef, error) {
 	}
 	_ = file.Close()
 	rlMusic := rl.LoadMusicStream(fileName)
-	//rl.SetMusicLoopCount(rlMusic, -1)
 	return components.MusicDef{
 		Data: rlMusic,
 	}, nil
@@ -75,4 +74,34 @@ func (rr RenderImpl) ResumeMusic(musicDef components.MusicDef) {
 // UpdateMusic update the stream of the given components.MusicDef
 func (rr RenderImpl) UpdateMusic(musicDef components.MusicDef) {
 	rl.UpdateMusicStream(musicDef.Data.(rl.Music))
+}
+
+// LoadSound giving it file name into memory
+func (rr *RenderImpl) LoadSound(fileName string) (components.SoundDef, error) {
+	var file *os.File
+	var err error
+
+	if file, err = os.Open(fileName); err != nil {
+		return components.SoundDef{}, fmt.Errorf("we could not find the sound file %q", fileName)
+	}
+	_ = file.Close()
+	rlSound := rl.LoadSound(fileName)
+	return components.SoundDef{
+		Data: rlSound,
+	}, nil
+}
+
+// UnloadSound giving it file from memory
+func (rr *RenderImpl) UnloadSound(soundDef components.SoundDef) {
+	rl.UnloadSound(soundDef.Data.(rl.Sound))
+}
+
+// PlaySound plays the given components.SoundDef
+func (rr *RenderImpl) PlaySound(soundDef components.SoundDef) {
+	rl.PlaySoundMulti(soundDef.Data.(rl.Sound))
+}
+
+// StopAllSounds currently playing
+func (rr *RenderImpl) StopAllSounds() {
+	rl.StopSoundMulti()
 }

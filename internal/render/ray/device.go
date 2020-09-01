@@ -79,6 +79,7 @@ func (rr *RenderImpl) Init(opt options.Options) {
 
 // End the rendering device
 func (rr RenderImpl) End() {
+	rr.StopAllSounds()
 	rl.CloseAudioDevice()
 	rl.CloseWindow()
 }

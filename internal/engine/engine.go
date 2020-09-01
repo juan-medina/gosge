@@ -155,6 +155,9 @@ func (ei *engineImpl) prepare() error {
 	ei.wld.AddSystemWithPriority(ei, highPriority)
 	ei.wld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
 
+	// add the sound system
+	ei.wld.AddSystemWithPriority(systems.SoundSystem(ei.rdr, ei.ds), highPriority)
+
 	// add the music system
 	ei.wld.AddSystemWithPriority(systems.MusicSystem(ei.rdr, ei.ds), highPriority)
 
@@ -227,6 +230,7 @@ func (ei *engineImpl) AddGameStage(name string, init engine.InitFunc) {
 
 func (ei *engineImpl) changeStage(name string) error {
 	if _, ok := ei.stages[name]; ok {
+		ei.rdr.StopAllSounds()
 		// clear all entities and systems
 		ei.wld.Clear()
 		// clear all storage
@@ -279,4 +283,8 @@ func (ei *engineImpl) SpriteAtContains(spr sprite.Sprite, at geometry.Point, poi
 
 func (ei *engineImpl) LoadMusic(filename string) error {
 	return ei.ds.LoadMusic(filename)
+}
+
+func (ei *engineImpl) LoadSound(filename string) error {
+	return ei.ds.LoadSound(filename)
 }

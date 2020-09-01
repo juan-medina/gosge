@@ -87,6 +87,14 @@ type Render interface {
 	ResumeMusic(musicDef components.MusicDef)
 	// UpdateMusic update the stream of the given components.MusicDef
 	UpdateMusic(musicDef components.MusicDef)
+	// LoadSound giving it file name into memory
+	LoadSound(fileName string) (components.SoundDef, error)
+	// UnloadSound giving it file from memory
+	UnloadSound(soundDef components.SoundDef)
+	// PlaySound plays the given components.SoundDef
+	PlaySound(soundDef components.SoundDef)
+	// StopAllSounds currently playing
+	StopAllSounds()
 
 	// SetBackgroundColor changes the current background color.Solid
 	SetBackgroundColor(color color.Solid)

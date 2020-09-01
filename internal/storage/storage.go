@@ -61,7 +61,25 @@ type dataStorage struct {
 	textures map[string]components.TextureDef
 	fonts    map[string]components.FontDef
 	musics   map[string]components.MusicDef
+	sounds   map[string]components.SoundDef
 	rdr      render.Render
+}
+
+func (ds *dataStorage) LoadSound(name string) (err error) {
+	var sound components.SoundDef
+	if _, ok := ds.sounds[name]; !ok {
+		if sound, err = ds.rdr.LoadSound(name); err == nil {
+			ds.sounds[name] = sound
+		}
+	}
+	return err
+}
+
+func (ds *dataStorage) GetSoundDef(name string) (components.SoundDef, error) {
+	if _, ok := ds.sounds[name]; ok {
+		return ds.sounds[name], nil
+	}
+	return components.SoundDef{}, fmt.Errorf("can not find sound %q", name)
 }
 
 func (ds *dataStorage) GetMusicDef(name string) (components.MusicDef, error) {
@@ -116,6 +134,10 @@ type Storage interface {
 	LoadMusic(name string) error
 	//GetMusicDef returns the components.MusicDef for a music stream
 	GetMusicDef(name string) (components.MusicDef, error)
+	//LoadSound preload a sound wave
+	LoadSound(name string) error
+	//GetSoundDef returns the components.SoundDef for a wave sound
+	GetSoundDef(name string) (components.SoundDef, error)
 	//Clear all loaded data
 	Clear()
 }
@@ -234,6 +256,11 @@ func (ds *dataStorage) Clear() {
 		ds.rdr.UnloadMusic(v)
 	}
 	ds.musics = make(map[string]components.MusicDef, 0)
+
+	for _, v := range ds.sounds {
+		ds.rdr.UnloadSound(v)
+	}
+	ds.sounds = make(map[string]components.SoundDef, 0)
 }
 
 // New returns a new storage.Storage
@@ -243,6 +270,7 @@ func New(rdr render.Render) Storage {
 		textures: make(map[string]components.TextureDef, 0),
 		fonts:    make(map[string]components.FontDef, 0),
 		musics:   make(map[string]components.MusicDef, 0),
+		sounds:   make(map[string]components.SoundDef, 0),
 		rdr:      rdr,
 	}
 }

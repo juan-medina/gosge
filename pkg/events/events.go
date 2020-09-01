@@ -86,3 +86,8 @@ type MusicStateChangeEvent struct {
 	Old  audio.MusicPlayingState // Old is the previous audio.MusicPlayingState
 	New  audio.MusicPlayingState // New is the current audio.MusicPlayingState
 }
+
+// PlaySoundEvent is an event to play a sound wave
+type PlaySoundEvent struct {
+	Name string
+}
