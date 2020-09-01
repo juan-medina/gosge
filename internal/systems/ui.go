@@ -23,7 +23,9 @@
 package systems
 
 import (
+	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/shapes"
@@ -40,6 +42,7 @@ const (
 
 type uiSystem struct {
 	eng engine.Engine
+	rdr render.Render
 }
 
 func (uis uiSystem) Update(wld *world.World, _ float32) error {
@@ -140,23 +143,33 @@ func (uis uiSystem) spriteButtons(wld *world.World) {
 				Scale: sb.Scale,
 			}
 			ent.Set(spr)
+		} else {
+			spr := sprite.Get(ent)
+			// if the sprite button has change
+			if !(spr.Name == sb.Normal || spr.Name == sb.Hover) {
+				uis.refreshButtonOnPoint(ent, uis.rdr.GetMousePoint())
+			}
 		}
 	}
+}
+
+func (uis uiSystem) refreshButtonOnPoint(ent *entity.Entity, pnt geometry.Point) {
+	spr := sprite.Get(ent)
+	pos := geometry.Get.Point(ent)
+	sbn := ui.Get.SpriteButton(ent)
+
+	if uis.eng.SpriteAtContains(spr, pos, pnt) {
+		spr.Name = sbn.Hover
+	} else {
+		spr.Name = sbn.Normal
+	}
+	ent.Set(spr)
 }
 
 func (uis uiSystem) spriteButtonsMouseMove(wld *world.World, mme events.MouseMoveEvent) {
 	for it := wld.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it.HasNext(); {
 		ent := it.Value()
-		spr := sprite.Get(ent)
-		pos := geometry.Get.Point(ent)
-		sbn := ui.Get.SpriteButton(ent)
-
-		if uis.eng.SpriteAtContains(spr, pos, mme.Point) {
-			spr.Name = sbn.Hover
-		} else {
-			spr.Name = sbn.Normal
-		}
-		ent.Set(spr)
+		uis.refreshButtonOnPoint(ent, mme.Point)
 	}
 }
 
@@ -175,6 +188,6 @@ func (uis uiSystem) spriteButtonsMouseUp(wld *world.World, mue events.MouseUpEve
 }
 
 // UISystem returns a world.System that handle ui components
-func UISystem(eng engine.Engine) world.System {
-	return &uiSystem{eng: eng}
+func UISystem(eng engine.Engine, rdr render.Render) world.System {
+	return &uiSystem{eng: eng, rdr: rdr}
 }

@@ -24,6 +24,7 @@
 package events
 
 import (
+	"github.com/juan-medina/gosge/pkg/components/audio"
 	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 )
@@ -67,4 +68,21 @@ type PlayMusicEvent struct {
 // StopMusicEvent is an event to play a music stream
 type StopMusicEvent struct {
 	Name string
+}
+
+// PauseMusicEvent is an event to pause a music stream
+type PauseMusicEvent struct {
+	Name string
+}
+
+// ResumeMusicEvent is an event to resume a music stream
+type ResumeMusicEvent struct {
+	Name string
+}
+
+// MusicStateChangeEvent is a event trigger when a music state change
+type MusicStateChangeEvent struct {
+	Name string                  // Name of the music
+	Old  audio.MusicPlayingState // Old is the previous audio.MusicPlayingState
+	New  audio.MusicPlayingState // New is the current audio.MusicPlayingState
 }

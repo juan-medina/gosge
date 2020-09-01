@@ -24,6 +24,7 @@ package main
 
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/audio"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
@@ -43,11 +44,21 @@ var opt = options.Options{
 }
 
 const (
-	fontName    = "resources/go_regular.fnt"
-	fontSmall   = 60
-	musicFile   = "resources/audio/loop.ogg"
-	spriteSheet = "resources/audio.json"
-	buttonsGap  = 5
+	fontName                = "resources/go_regular.fnt"
+	fontSmall               = 60
+	musicFile               = "resources/audio/loop.ogg"
+	spriteSheet             = "resources/audio.json"
+	buttonsGap              = 5
+	playButtonNormalSprite  = "play_button_normal.png"
+	playButtonHoverSprite   = "play_button_hover.png"
+	stopButtonNormalSprite  = "stop_button_normal.png"
+	stopButtonHoverSprite   = "stop_button_hover.png"
+	pauseButtonNormalSprite = "pause_button_normal.png"
+	pauseButtonHoverSprite  = "pause_button_hover.png"
+)
+
+var (
+	playButton *entity.Entity
 )
 
 var (
@@ -105,17 +116,17 @@ func loadGame(eng engine.Engine) error {
 
 	spriteScale := float32(0.25)
 	var spriteSize geometry.Size
-	if spriteSize, err = eng.GetSpriteSize(spriteSheet, "play_button_normal.png"); err != nil {
+	if spriteSize, err = eng.GetSpriteSize(spriteSheet, playButtonNormalSprite); err != nil {
 		return err
 	}
 	spriteSize.Width *= spriteScale
 	spriteSize.Height *= spriteScale
 
-	wld.Add(entity.New(
+	playButton = wld.Add(entity.New(
 		ui.SpriteButton{
 			Sheet:  spriteSheet,
-			Normal: "play_button_normal.png",
-			Hover:  "play_button_hover.png",
+			Normal: playButtonNormalSprite,
+			Hover:  playButtonHoverSprite,
 			Scale:  gameScale.Min * spriteScale,
 			Event: events.PlayMusicEvent{
 				Name:  musicFile,
@@ -132,8 +143,8 @@ func loadGame(eng engine.Engine) error {
 	wld.Add(entity.New(
 		ui.SpriteButton{
 			Sheet:  spriteSheet,
-			Normal: "stop_button_normal.png",
-			Hover:  "stop_button_hover.png",
+			Normal: stopButtonNormalSprite,
+			Hover:  stopButtonHoverSprite,
 			Scale:  gameScale.Min * spriteScale,
 			Event: events.StopMusicEvent{
 				Name: musicFile,
@@ -146,5 +157,47 @@ func loadGame(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
+	wld.AddSystem(UISystem())
 	return err
+}
+
+type uiSystem struct{}
+
+func (us uiSystem) Notify(_ *world.World, event interface{}, _ float32) error {
+	switch e := event.(type) {
+	case events.MusicStateChangeEvent:
+		sb := ui.Get.SpriteButton(playButton)
+		switch e.New {
+		case audio.StatePlaying:
+			sb.Normal = pauseButtonNormalSprite
+			sb.Hover = pauseButtonHoverSprite
+			sb.Event = events.PauseMusicEvent{
+				Name: e.Name,
+			}
+		case audio.StateStopped:
+			sb.Normal = playButtonNormalSprite
+			sb.Hover = playButtonHoverSprite
+			sb.Event = events.PlayMusicEvent{
+				Name:  e.Name,
+				Loops: audio.LoopForever,
+			}
+		case audio.StatePaused:
+			sb.Normal = playButtonNormalSprite
+			sb.Hover = playButtonHoverSprite
+			sb.Event = events.ResumeMusicEvent{
+				Name: e.Name,
+			}
+		}
+		playButton.Set(sb)
+	}
+	return nil
+}
+
+func (us uiSystem) Update(_ *world.World, _ float32) error {
+	return nil
+}
+
+// UISystem create our example UI world.System
+func UISystem() world.System {
+	return &uiSystem{}
 }
