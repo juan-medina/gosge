@@ -37,7 +37,7 @@ import (
 
 type spriteSheetData struct {
 	Frames []struct {
-		Name  string `json:"name"`
+		Name  string `json:"filename"`
 		Frame struct {
 			X float32 `json:"x"`
 			Y float32 `json:"y"`

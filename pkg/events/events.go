@@ -63,3 +63,8 @@ type PlayMusicEvent struct {
 	Name  string
 	Loops int32
 }
+
+// StopMusicEvent is an event to play a music stream
+type StopMusicEvent struct {
+	Name string
+}

@@ -43,9 +43,11 @@ var opt = options.Options{
 }
 
 const (
-	fontName  = "resources/go_regular.fnt"
-	fontSmall = 60
-	musicFile = "resources/audio/loop.ogg"
+	fontName    = "resources/go_regular.fnt"
+	fontSmall   = 60
+	musicFile   = "resources/audio/loop.ogg"
+	spriteSheet = "resources/audio.json"
+	buttonsGap  = 5
 )
 
 var (
@@ -60,14 +62,19 @@ func main() {
 }
 
 func loadGame(eng engine.Engine) error {
-
+	var err error
 	// Preload font
-	if err := eng.LoadFont(fontName); err != nil {
+	if err = eng.LoadFont(fontName); err != nil {
 		return err
 	}
 
 	// Preload music
-	if err := eng.LoadMusic(musicFile); err != nil {
+	if err = eng.LoadMusic(musicFile); err != nil {
+		return err
+	}
+
+	// Preload sprites
+	if err = eng.LoadSpriteSheet(spriteSheet); err != nil {
 		return err
 	}
 
@@ -96,8 +103,48 @@ func loadGame(eng engine.Engine) error {
 		},
 	))
 
-	return wld.Notify(events.PlayMusicEvent{
-		Name:  musicFile,
-		Loops: audio.LoopForever,
-	})
+	spriteScale := float32(0.25)
+	var spriteSize geometry.Size
+	if spriteSize, err = eng.GetSpriteSize(spriteSheet, "play_button_normal.png"); err != nil {
+		return err
+	}
+	spriteSize.Width *= spriteScale
+	spriteSize.Height *= spriteScale
+
+	wld.Add(entity.New(
+		ui.SpriteButton{
+			Sheet:  spriteSheet,
+			Normal: "play_button_normal.png",
+			Hover:  "play_button_hover.png",
+			Scale:  gameScale.Min * spriteScale,
+			Event: events.PlayMusicEvent{
+				Name:  musicFile,
+				Loops: audio.LoopForever,
+			},
+		},
+		geometry.Point{
+			X: ((designResolution.Width / 2) - (spriteSize.Width / 2) - buttonsGap) * gameScale.Point.X,
+			Y: (designResolution.Height / 2) * gameScale.Point.Y,
+		},
+		effects.Layer{Depth: 0},
+	))
+
+	wld.Add(entity.New(
+		ui.SpriteButton{
+			Sheet:  spriteSheet,
+			Normal: "stop_button_normal.png",
+			Hover:  "stop_button_hover.png",
+			Scale:  gameScale.Min * spriteScale,
+			Event: events.StopMusicEvent{
+				Name: musicFile,
+			},
+		},
+		geometry.Point{
+			X: ((designResolution.Width / 2) + (spriteSize.Width / 2) + buttonsGap) * gameScale.Point.X,
+			Y: (designResolution.Height / 2) * gameScale.Point.Y,
+		},
+		effects.Layer{Depth: 0},
+	))
+
+	return err
 }

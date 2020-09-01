@@ -1,0 +1,165 @@
+{
+  "frames": [
+    {
+      "filename": "play_button_hover.png",
+      "frame": {
+        "x": 5,
+        "y": 5,
+        "w": 268,
+        "h": 267
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 268,
+        "h": 267
+      },
+      "sourceSize": {
+        "w": 268,
+        "h": 267
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "play_button_normal.png",
+      "frame": {
+        "x": 283,
+        "y": 5,
+        "w": 268,
+        "h": 267
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 268,
+        "h": 267
+      },
+      "sourceSize": {
+        "w": 268,
+        "h": 267
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "stop_button_hover.png",
+      "frame": {
+        "x": 561,
+        "y": 5,
+        "w": 268,
+        "h": 267
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 268,
+        "h": 267
+      },
+      "sourceSize": {
+        "w": 268,
+        "h": 267
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "stop_button_normal.png",
+      "frame": {
+        "x": 839,
+        "y": 5,
+        "w": 268,
+        "h": 267
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 268,
+        "h": 267
+      },
+      "sourceSize": {
+        "w": 268,
+        "h": 267
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "pause_button_hover.png",
+      "frame": {
+        "x": 1117,
+        "y": 5,
+        "w": 267,
+        "h": 267
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 267,
+        "h": 267
+      },
+      "sourceSize": {
+        "w": 267,
+        "h": 267
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "pause_button_normal.png",
+      "frame": {
+        "x": 1394,
+        "y": 5,
+        "w": 267,
+        "h": 267
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 267,
+        "h": 267
+      },
+      "sourceSize": {
+        "w": 267,
+        "h": 267
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.6",
+    "image": "audio.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1666,
+      "h": 277
+    },
+    "scale": 1
+  }
+}

@@ -44,15 +44,15 @@ type MusicPlayingState int32
 
 //goland:noinspection GoUnusedConst
 const (
-	Stopped = MusicPlayingState(iota) // Stopped is the audio.MusicPlayingState for a stopped music
-	Playing                           // Playing is the audio.MusicPlayingState for a playing music
-	Paused                            // Paused is the audio.MusicPlayingState for a paused music
+	StateStopped = MusicPlayingState(iota) // StateStopped is the audio.MusicPlayingState for a stopped music
+	StatePlaying                           // StatePlaying is the audio.MusicPlayingState for a playing music
+	StatePaused                            // StatePaused is the audio.MusicPlayingState for a paused music
 )
 
 // MusicState represent the state for a music
 type MusicState struct {
-	State MusicPlayingState // State is the current audio.MusicState for our music
-	Name  string            // Name is the current music Name
+	PlayingState MusicPlayingState // PlayingState is the current audio.MusicPlayingState for our music
+	Name         string            // Name is the current music Name
 }
 
 type types struct {

@@ -51,26 +51,67 @@ func (m musicSystem) Update(wld *world.World, _ float32) error {
 	return nil
 }
 
+func (m musicSystem) findMusicEnt(wld *world.World, name string) *entity.Entity {
+	for it := wld.Iterator(audio.TYPE.MusicState); it.HasNext(); {
+		ent := it.Value()
+		state := audio.Get.MusicState(ent)
+		if state.Name == name {
+			return ent
+		}
+	}
+	return nil
+}
+
 func (m musicSystem) Notify(wld *world.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
 	case events.PlayMusicEvent:
-		if def, err := m.ds.GetMusicDef(e.Name); err == nil {
-			m.rdr.PlayMusic(def, e.Loops)
-			wld.Add(entity.New(
+		return m.playMusicEvent(wld, e)
+	case events.StopMusicEvent:
+		return m.stopMusicEvent(wld, e)
+	}
+	return nil
+}
+
+func (m musicSystem) playMusicEvent(wld *world.World, pme events.PlayMusicEvent) error {
+	if def, err := m.ds.GetMusicDef(pme.Name); err == nil {
+		var ent *entity.Entity
+		if ent = m.findMusicEnt(wld, pme.Name); ent == nil {
+			ent = wld.Add(entity.New(
 				audio.Music{
-					Name:  e.Name,
-					Loops: e.Loops,
+					Name:  pme.Name,
+					Loops: pme.Loops,
 				},
 				audio.MusicState{
-					Name:  e.Name,
-					State: audio.Playing,
+					Name:         pme.Name,
+					PlayingState: audio.StateStopped,
 				},
 			))
-		} else {
-			return err
 		}
+		state := audio.Get.MusicState(ent)
+		if state.PlayingState == audio.StateStopped || state.PlayingState == audio.StatePaused {
+			state.PlayingState = audio.StatePlaying
+			ent.Set(state)
+			m.rdr.PlayMusic(def, pme.Loops)
+		}
+	} else {
+		return err
 	}
+	return nil
+}
 
+func (m musicSystem) stopMusicEvent(wld *world.World, sme events.StopMusicEvent) error {
+	if def, err := m.ds.GetMusicDef(sme.Name); err == nil {
+		if ent := m.findMusicEnt(wld, sme.Name); ent != nil {
+			state := audio.Get.MusicState(ent)
+			if state.PlayingState == audio.StatePlaying || state.PlayingState == audio.StatePaused {
+				state.PlayingState = audio.StateStopped
+				ent.Set(state)
+				m.rdr.StopMusic(def)
+			}
+		}
+	} else {
+		return err
+	}
 	return nil
 }
 
