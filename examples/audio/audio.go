@@ -67,6 +67,7 @@ const (
 	gopherDance             = "gopher_dance_%02d.png"           // sprite frame base name for the dance animation
 	gopherDanceFrames       = 24                                // number of frames for the gopher dance animation
 	gopherFrameDelay        = 0.100                             // delay between frames for the gopher animations
+	danceAnimSpeedIncrease  = 0.20                              // how much more faster will dance the gopher on click
 )
 
 var (
@@ -235,6 +236,13 @@ func (us uiSystem) Notify(wld *world.World, event interface{}, _ float32) error 
 		spr := sprite.Get(gopher)
 		// if we click on the gopher
 		if us.eng.SpriteAtContains(spr, pos, e.Point) {
+			// make the gopher move faster
+			anim := animation.Get.Animation(gopher)
+			// if we are dancing, dance faster
+			if anim.Current == danceAnim {
+				anim.Speed += danceAnimSpeedIncrease
+			}
+			gopher.Set(anim)
 			// play the gopher sound
 			return wld.Notify(events.PlaySoundEvent{Name: gopherSound})
 		}
@@ -264,6 +272,7 @@ func (us uiSystem) Notify(wld *world.World, event interface{}, _ float32) error 
 				Loops: audio.LoopForever,
 			}
 			anim.Current = idleAnim
+			anim.Speed = 1.0
 		// if the music pause
 		case audio.StatePaused:
 			// update the play button hover an normal sprites with play sprites
@@ -274,6 +283,8 @@ func (us uiSystem) Notify(wld *world.World, event interface{}, _ float32) error 
 			}
 			anim.Current = idleAnim
 		}
+		// reset anim speed
+		anim.Speed = 1
 		// update the play button entity
 		playButton.Set(sb)
 		// update the gopher entity
