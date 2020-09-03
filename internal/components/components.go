@@ -57,5 +57,9 @@ type SoundDef struct {
 
 // TiledMapDef defines a tiled map
 type TiledMapDef struct {
-	Data *tiled.Map
+	Data     *tiled.Map    // Data is the internal map data
+	Cols     int32         // Cols is the number of cols in the map
+	Rows     int32         // Rows is the number of rows in the map
+	Size     geometry.Size // Size is the map size in pixels
+	TileSize geometry.Size // TileSize is the size per each tile in pixels
 }

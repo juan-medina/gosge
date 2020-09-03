@@ -118,11 +118,22 @@ func (ds *dataStorage) GetTiledMapDef(name string) (components.TiledMapDef, erro
 func (ds dataStorage) loadTileMap(name string) (result components.TiledMapDef, err error) {
 	var tiledMap *tiled.Map
 	if tiledMap, err = tiled.LoadFromFile(name); err == nil {
+
+		result.Cols = int32(tiledMap.Width)
+		result.Rows = int32(tiledMap.Height)
+		result.TileSize = geometry.Size{
+			Width:  float32(tiledMap.TileWidth),
+			Height: float32(tiledMap.TileHeight),
+		}
+		result.Size = geometry.Size{
+			Width:  float32(result.Cols) * result.TileSize.Width,
+			Height: float32(result.Rows) * result.TileSize.Height,
+		}
+
 		result.Data = tiledMap
 		dir := filepath.Dir(name)
 		var texture components.TextureDef
 		for _, ts := range tiledMap.Tilesets {
-			//https://github.com/lafriks/go-tiled/blob/cf1a190e0d74ef79e067f0f632658d7fdbecf83a/render/renderer.go#L84
 			texturePath := path.Join(dir, ts.Image.Source)
 			if texture, err = ds.rdr.LoadTexture(texturePath); err != nil {
 				return

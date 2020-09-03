@@ -30,12 +30,14 @@ import (
 
 // Map is a tiled.Map
 type Map struct {
-	Name string // Name of our tiled.Map
+	Name  string  // Name of our tiled.Map
+	Scale float32 // Scale is the map scale
 }
 
 // MapState is the state for tiled.Map
 type MapState struct {
-	Pos geometry.Point
+	Position geometry.Point // Position is the map position
+	Scale    float32        // Scale is the map scale
 }
 
 type types struct {

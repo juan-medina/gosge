@@ -48,15 +48,16 @@ func (ts tiledSystem) Update(wld *world.World, _ float32) (err error) {
 	for it := wld.Iterator(tiled.TYPE.Map, geometry.TYPE.Point); it.HasNext(); {
 		ent := it.Value()
 		tiledMap := tiled.Get.Map(ent)
+		pos := geometry.Get.Point(ent)
 		if ent.NotContains(tiled.TYPE.MapState) {
 			depth := int32(render.DefaultLayer)
 			if ent.Contains(effects.TYPE.Layer) {
 				depth = effects.Get.Layer(ent).Depth
 			}
 
-			if err = ts.addSpriteFromTiledMap(wld, tiledMap, depth); err == nil {
+			if err = ts.addSpriteFromTiledMap(wld, tiledMap, depth, pos); err == nil {
 				pos := geometry.Get.Point(ent)
-				ent.Set(tiled.MapState{Pos: pos})
+				ent.Set(tiled.MapState{Position: pos, Scale: tiledMap.Scale})
 			}
 		}
 	}
@@ -74,7 +75,7 @@ func (ts *tiledSystem) GetTilePosition(x, y int, def components.TiledMapDef) geo
 	}
 }
 
-func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map, depth int32) (err error) {
+func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map, depth int32, mapPos geometry.Point) (err error) {
 	if mapDef, err := ts.ds.GetTiledMapDef(tiledMap.Name); err == nil {
 		if !(mapDef.Data.RenderOrder == "" || mapDef.Data.RenderOrder == rightDown) {
 			return fmt.Errorf("unsupported tiled render order : got %q, want %q", mapDef.Data.RenderOrder, rightDown)
@@ -102,11 +103,13 @@ func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map
 					}
 					sprName := strconv.Itoa(int(l.Tiles[i].ID))
 					pos := ts.GetTilePosition(x, y, mapDef)
+					pos.X = (pos.X * tiledMap.Scale) + mapPos.X
+					pos.Y = (pos.Y * tiledMap.Scale) + mapPos.Y
 					wld.Add(entity.New(
 						sprite.Sprite{
 							Sheet: tiledMap.Name,
 							Name:  sprName,
-							Scale: 1,
+							Scale: tiledMap.Scale,
 						},
 						pos,
 						effects.Layer{Depth: depth + int32(tl-ln)},

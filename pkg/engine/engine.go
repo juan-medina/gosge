@@ -56,6 +56,8 @@ type Engine interface {
 
 	// LoadTiledMap preload a tiled map
 	LoadTiledMap(filename string) error
+	// GeTiledMapSize returns the geometry.Size of a given tile map
+	GeTiledMapSize(name string) (geometry.Size, error)
 
 	// GetScreenSize returns the current screen size
 	GetScreenSize() geometry.Size

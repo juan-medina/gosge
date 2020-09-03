@@ -44,6 +44,7 @@ var opt = options.Options{
 const (
 	fontName  = "resources/go_regular.fnt"
 	fontSmall = 60
+	mapFile   = "resources/maps/gameart2d-desert.tmx"
 )
 
 var (
@@ -57,6 +58,10 @@ func main() {
 	}
 }
 
+var (
+	mapEnt *entity.Entity
+)
+
 func loadGame(eng engine.Engine) error {
 	var err error
 	// Preload font
@@ -64,7 +69,8 @@ func loadGame(eng engine.Engine) error {
 		return err
 	}
 
-	if err = eng.LoadTiledMap("resources/maps/gameart2d-desert.tmx"); err != nil {
+	// Preload map
+	if err = eng.LoadTiledMap(mapFile); err != nil {
 		return err
 	}
 
@@ -73,13 +79,21 @@ func loadGame(eng engine.Engine) error {
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
-	wld.Add(entity.New(
+	// Get map size
+	var mapSize geometry.Size
+	if mapSize, err = eng.GeTiledMapSize(mapFile); err != nil {
+		return err
+	}
+
+	// add the map
+	mapEnt = wld.Add(entity.New(
 		tiled.Map{
-			Name: "resources/maps/gameart2d-desert.tmx",
+			Name:  mapFile,
+			Scale: gameScale.Min,
 		},
 		geometry.Point{
 			X: 0,
-			Y: 0,
+			Y: (designResolution.Height - mapSize.Height) * gameScale.Point.Y,
 		},
 	))
 
@@ -102,5 +116,6 @@ func loadGame(eng engine.Engine) error {
 			To:   color.White.Alpha(0),
 		},
 	))
+
 	return nil
 }

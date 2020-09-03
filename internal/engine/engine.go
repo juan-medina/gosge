@@ -266,7 +266,7 @@ func (ei engineImpl) LoadSprite(filename string, pivot geometry.Point) error {
 }
 
 // getSpriteRect return a geometry.Rect for a given sprite.Sprite at a geometry.Point
-func (ei *engineImpl) getSpriteRect(spr sprite.Sprite, at geometry.Point) geometry.Rect {
+func (ei engineImpl) getSpriteRect(spr sprite.Sprite, at geometry.Point) geometry.Rect {
 	def, _ := ei.ds.GetSpriteDef(spr.Sheet, spr.Name)
 	size := def.Origin.Size.Scale(spr.Scale)
 
@@ -280,18 +280,26 @@ func (ei *engineImpl) getSpriteRect(spr sprite.Sprite, at geometry.Point) geomet
 }
 
 // SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
-func (ei *engineImpl) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool {
+func (ei engineImpl) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool {
 	return ei.getSpriteRect(spr, at).IsPointInRect(point)
 }
 
-func (ei *engineImpl) LoadMusic(filename string) error {
+func (ei engineImpl) LoadMusic(filename string) error {
 	return ei.ds.LoadMusic(filename)
 }
 
-func (ei *engineImpl) LoadSound(filename string) error {
+func (ei engineImpl) LoadSound(filename string) error {
 	return ei.ds.LoadSound(filename)
 }
 
-func (ei *engineImpl) LoadTiledMap(filename string) error {
+func (ei engineImpl) LoadTiledMap(filename string) error {
 	return ei.ds.LoadTiledMap(filename)
+}
+
+func (ei engineImpl) GeTiledMapSize(name string) (size geometry.Size, err error) {
+	var def components.TiledMapDef
+	if def, err = ei.ds.GetTiledMapDef(name); err == nil {
+		size = def.Size
+	}
+	return
 }
