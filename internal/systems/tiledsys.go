@@ -94,9 +94,11 @@ func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map
 			return fmt.Errorf("unsupported tiled render order : got %q, want %q", mapDef.Data.RenderOrder, rightDown)
 		}
 
-		tl := len(mapDef.Data.Layers)
-		for ln, l := range mapDef.Data.Layers {
+		tl := int32(len(mapDef.Data.Layers))
+		ld := depth + (tl - 1)
+		for _, l := range mapDef.Data.Layers {
 			if !l.Visible {
+				ld--
 				continue
 			}
 			var xs, xe, xi, ys, ye, yi int
@@ -123,13 +125,16 @@ func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map
 							Sheet: tiledMap.Name,
 							Name:  sprName,
 							Scale: tiledMap.Scale,
+							FlipX: l.Tiles[i].HorizontalFlip,
+							FlipY: l.Tiles[i].VerticalFlip,
 						},
 						pos,
-						effects.Layer{Depth: depth + int32(tl-ln)},
+						effects.Layer{Depth: ld},
 					))
 					i++
 				}
 			}
+			ld--
 		}
 	}
 

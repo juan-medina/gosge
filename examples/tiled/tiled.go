@@ -29,6 +29,7 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/tiled"
 	"github.com/juan-medina/gosge/pkg/components/ui"
 	"github.com/juan-medina/gosge/pkg/engine"
@@ -87,6 +88,22 @@ func loadGame(eng engine.Engine) error {
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
+	wld.Add(entity.New(
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  designResolution.Width,
+				Height: designResolution.Height,
+			},
+			Scale: gameScale.Min,
+		},
+		geometry.Point{},
+		color.Gradient{
+			From:      color.Orange.Blend(color.SkyBlue, 0.50),
+			To:        color.Orange,
+			Direction: color.GradientVertical,
+		},
+	))
+
 	// Get map size
 	var mapSize geometry.Size
 	if mapSize, err = eng.GeTiledMapSize(mapFile); err != nil {
@@ -115,7 +132,7 @@ func loadGame(eng engine.Engine) error {
 	// add the bottom text
 	wld.Add(entity.New(
 		ui.Text{
-			String:     "press <ESC> to close",
+			String:     "move the map with cursors, press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
@@ -130,6 +147,7 @@ func loadGame(eng engine.Engine) error {
 			From: color.White,
 			To:   color.White.Alpha(0),
 		},
+		effects.Layer{Depth: 0},
 	))
 
 	wld.AddSystem(MapMoveSystem())
