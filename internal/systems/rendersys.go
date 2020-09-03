@@ -43,10 +43,6 @@ type renderingSystem struct {
 
 var noTint = color.White
 
-const (
-	deepestLayer = 1000000
-)
-
 func (rs renderingSystem) renderSprite(ent *entity.Entity) error {
 	spr := sprite.Get(ent)
 	pos := geometry.Get.Point(ent)
@@ -178,12 +174,12 @@ func (rs renderingSystem) getSortedByLayers(world *world.World) []*entity.Entity
 		first := entities[i]
 		second := entities[j]
 
-		firstDepth := int32(deepestLayer)
+		firstDepth := int32(render.DefaultLayer)
 		if first.Contains(effects.TYPE.Layer) {
 			firstDepth = effects.Get.Layer(first).Depth
 		}
 
-		secondDepth := int32(deepestLayer)
+		secondDepth := int32(render.DefaultLayer)
 		if second.Contains(effects.TYPE.Layer) {
 			secondDepth = effects.Get.Layer(second).Depth
 		}

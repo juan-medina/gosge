@@ -54,6 +54,9 @@ type Engine interface {
 	//LoadSound preload a sound wave
 	LoadSound(filename string) error
 
+	// LoadTiledMap preload a tiled map
+	LoadTiledMap(filename string) error
+
 	// GetScreenSize returns the current screen size
 	GetScreenSize() geometry.Size
 

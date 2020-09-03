@@ -29,11 +29,43 @@ import (
 	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/lafriks/go-tiled"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 )
+
+// Storage is a storage for our game data
+type Storage interface {
+	// LoadSpriteSheet preloads a sprite.Sprite sheet
+	LoadSpriteSheet(name string) error
+	// LoadSingleSprite preloads a sprite.Sprite in a sheet
+	LoadSingleSprite(sheet string, name string, pivot geometry.Point) error
+	//GetSpriteSize returns the geometry.Size of a given sprite
+	GetSpriteSize(sheet string, name string) (geometry.Size, error)
+	//GetSpriteDef returns the components.SpriteDef for an sprite
+	GetSpriteDef(sheet string, name string) (components.SpriteDef, error)
+	// LoadFont preloads a font
+	LoadFont(name string) error
+	//GetFontDef returns the components.FontDef for a font
+	GetFontDef(name string) (components.FontDef, error)
+	//LoadMusic preload a music stream
+	LoadMusic(name string) error
+	//GetMusicDef returns the components.MusicDef for a music stream
+	GetMusicDef(name string) (components.MusicDef, error)
+	//LoadSound preload a sound wave
+	LoadSound(name string) error
+	//GetSoundDef returns the components.SoundDef for a wave sound
+	GetSoundDef(name string) (components.SoundDef, error)
+	// LoadTiledMap preload a tiled map
+	LoadTiledMap(name string) error
+	//GetTiledMapDef returns the components.TiledMapDef for a tiled map
+	GetTiledMapDef(name string) (components.TiledMapDef, error)
+	//Clear all loaded data
+	Clear()
+}
 
 type spriteSheetData struct {
 	Frames []struct {
@@ -57,12 +89,88 @@ type spriteSheetData struct {
 type spriteSheet map[string]components.SpriteDef
 
 type dataStorage struct {
-	sheets   map[string]spriteSheet
-	textures map[string]components.TextureDef
-	fonts    map[string]components.FontDef
-	musics   map[string]components.MusicDef
-	sounds   map[string]components.SoundDef
-	rdr      render.Render
+	sheets    map[string]spriteSheet
+	textures  map[string]components.TextureDef
+	fonts     map[string]components.FontDef
+	musics    map[string]components.MusicDef
+	sounds    map[string]components.SoundDef
+	tiledMaps map[string]components.TiledMapDef
+	rdr       render.Render
+}
+
+func (ds *dataStorage) LoadTiledMap(name string) (err error) {
+	var tiledMap components.TiledMapDef
+	if _, ok := ds.tiledMaps[name]; !ok {
+		if tiledMap, err = ds.loadTileMap(name); err == nil {
+			ds.tiledMaps[name] = tiledMap
+		}
+	}
+	return
+}
+
+func (ds *dataStorage) GetTiledMapDef(name string) (components.TiledMapDef, error) {
+	if _, ok := ds.tiledMaps[name]; ok {
+		return ds.tiledMaps[name], nil
+	}
+	return components.TiledMapDef{}, fmt.Errorf("can not find tiled map %q", name)
+}
+
+func (ds dataStorage) loadTileMap(name string) (result components.TiledMapDef, err error) {
+	var tiledMap *tiled.Map
+	if tiledMap, err = tiled.LoadFromFile(name); err == nil {
+		result.Data = tiledMap
+		dir := filepath.Dir(name)
+		var texture components.TextureDef
+		for _, ts := range tiledMap.Tilesets {
+			//https://github.com/lafriks/go-tiled/blob/cf1a190e0d74ef79e067f0f632658d7fdbecf83a/render/renderer.go#L84
+			texturePath := path.Join(dir, ts.Image.Source)
+			if texture, err = ds.rdr.LoadTexture(texturePath); err != nil {
+				return
+			}
+			st := make(spriteSheet, 0)
+			ds.sheets[name] = st
+
+			tilesetTileCount := ts.TileCount
+			tilesetColumns := ts.Columns
+			margin := ts.Margin
+			spacing := ts.Spacing
+
+			if tilesetColumns == 0 {
+				tilesetColumns = ts.Image.Width / (ts.TileWidth + spacing)
+			}
+			if tilesetTileCount == 0 {
+				tilesetTileCount = (ts.Image.Height / (ts.TileHeight + spacing)) * tilesetColumns
+			}
+
+			for i := ts.FirstGID; i < ts.FirstGID+uint32(tilesetTileCount); i++ {
+				x := int(i-ts.FirstGID) % tilesetColumns
+				y := int(i-ts.FirstGID) / tilesetColumns
+				xOffset := int(x)*spacing + margin
+				yOffset := int(y)*spacing + margin
+				origin := geometry.Rect{
+					From: geometry.Point{
+						X: float32(x*ts.TileWidth + xOffset),
+						Y: float32(y*ts.TileHeight + yOffset),
+					},
+					Size: geometry.Size{
+						Width:  float32(ts.TileWidth),
+						Height: float32(ts.TileHeight),
+					},
+				}
+
+				sprName := strconv.Itoa(int(i - 1))
+				st[sprName] = components.SpriteDef{
+					Texture: texture,
+					Origin:  origin,
+					Pivot: geometry.Point{
+						X: 0,
+						Y: 0,
+					},
+				}
+			}
+		}
+	}
+	return
 }
 
 func (ds *dataStorage) LoadSound(name string) (err error) {
@@ -114,32 +222,6 @@ func (ds *dataStorage) GetFontDef(name string) (components.FontDef, error) {
 		return ds.fonts[name], nil
 	}
 	return components.FontDef{}, fmt.Errorf("can not find font %q", name)
-}
-
-// Storage is a storage for our game data
-type Storage interface {
-	// LoadSpriteSheet preloads a sprite.Sprite sheet
-	LoadSpriteSheet(name string) error
-	// LoadSingleSprite preloads a sprite.Sprite in a sheet
-	LoadSingleSprite(sheet string, name string, pivot geometry.Point) error
-	//GetSpriteSize returns the geometry.Size of a given sprite
-	GetSpriteSize(sheet string, name string) (geometry.Size, error)
-	//GetSpriteDef returns the components.SpriteDef for an sprite
-	GetSpriteDef(sheet string, name string) (components.SpriteDef, error)
-	// LoadFont preloads a font
-	LoadFont(name string) error
-	//GetFontDef returns the components.FontDef for a font
-	GetFontDef(name string) (components.FontDef, error)
-	//LoadMusic preload a music stream
-	LoadMusic(name string) error
-	//GetMusicDef returns the components.MusicDef for a music stream
-	GetMusicDef(name string) (components.MusicDef, error)
-	//LoadSound preload a sound wave
-	LoadSound(name string) error
-	//GetSoundDef returns the components.SoundDef for a wave sound
-	GetSoundDef(name string) (components.SoundDef, error)
-	//Clear all loaded data
-	Clear()
 }
 
 func (ds *dataStorage) loadTexture(name string) (def components.TextureDef, err error) {
@@ -261,16 +343,18 @@ func (ds *dataStorage) Clear() {
 		ds.rdr.UnloadSound(v)
 	}
 	ds.sounds = make(map[string]components.SoundDef, 0)
+	ds.tiledMaps = make(map[string]components.TiledMapDef, 0)
 }
 
 // New returns a new storage.Storage
 func New(rdr render.Render) Storage {
 	return &dataStorage{
-		sheets:   make(map[string]spriteSheet, 0),
-		textures: make(map[string]components.TextureDef, 0),
-		fonts:    make(map[string]components.FontDef, 0),
-		musics:   make(map[string]components.MusicDef, 0),
-		sounds:   make(map[string]components.SoundDef, 0),
-		rdr:      rdr,
+		sheets:    make(map[string]spriteSheet, 0),
+		textures:  make(map[string]components.TextureDef, 0),
+		fonts:     make(map[string]components.FontDef, 0),
+		musics:    make(map[string]components.MusicDef, 0),
+		sounds:    make(map[string]components.SoundDef, 0),
+		tiledMaps: make(map[string]components.TiledMapDef, 0),
+		rdr:       rdr,
 	}
 }

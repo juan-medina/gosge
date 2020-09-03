@@ -161,8 +161,11 @@ func (ei *engineImpl) prepare() error {
 	// add the music system
 	ei.wld.AddSystemWithPriority(systems.MusicSystem(ei.rdr, ei.ds), highPriority)
 
-	// animation  system will run after game system but before the rendering systems
+	// animation system will run after game system but before the rendering systems
 	ei.wld.AddSystemWithPriority(systems.AnimationSystem(), lowPriority)
+
+	// tiled system will run after game system but before the rendering systems
+	ei.wld.AddSystemWithPriority(systems.TiledSystem(ei.ds), lowPriority)
 
 	// ui system will run after game system but before the effect systems
 	ei.wld.AddSystemWithPriority(systems.UISystem(ei, ei.rdr), lowPriority)
@@ -287,4 +290,8 @@ func (ei *engineImpl) LoadMusic(filename string) error {
 
 func (ei *engineImpl) LoadSound(filename string) error {
 	return ei.ds.LoadSound(filename)
+}
+
+func (ei *engineImpl) LoadTiledMap(filename string) error {
+	return ei.ds.LoadTiledMap(filename)
 }

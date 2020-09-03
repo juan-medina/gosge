@@ -20,42 +20,52 @@
  *  THE SOFTWARE.
  */
 
-package components
+package tiled
 
 import (
+	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/lafriks/go-tiled"
+	"reflect"
 )
 
-// TextureDef defines a texture
-type TextureDef struct {
-	Data interface{}   // Data is the texture data
-	Size geometry.Size // Size is the texture size
+// Map is a tiled.Map
+type Map struct {
+	Name string // Name of our tiled.Map
 }
 
-// SpriteDef defines an sprite.Sprite
-type SpriteDef struct {
-	Texture TextureDef     // Texture is the TextureDef
-	Origin  geometry.Rect  // Origin is where the sprite is on the texture
-	Pivot   geometry.Point // Pivot is the relative pivot 0..1 in each axis
+// MapState is the state for tiled.Map
+type MapState struct {
+	Pos geometry.Point
 }
 
-// FontDef defines a font
-type FontDef struct {
-	Data interface{} // Data is the font data
+type types struct {
+	// Map is the reflect.Type for tiled.Map
+	Map reflect.Type
+	// MapState is the reflect.Type for tiled.MapState
+	MapState reflect.Type
 }
 
-// MusicDef defines a music stream
-type MusicDef struct {
-	Data interface{}
+// TYPE hold the reflect.Type for our tiled components
+var TYPE = types{
+	Map:      reflect.TypeOf(Map{}),
+	MapState: reflect.TypeOf(MapState{}),
 }
 
-// SoundDef defines a sound wave
-type SoundDef struct {
-	Data interface{}
+type gets struct {
+	// Map gets a tiled.Map from a entity.Entity
+	Map func(e *entity.Entity) Map
+	// MapState gets a tiled.MapState from a entity.Entity
+	MapState func(e *entity.Entity) MapState
 }
 
-// TiledMapDef defines a tiled map
-type TiledMapDef struct {
-	Data *tiled.Map
+// Get a geometry component
+var Get = gets{
+	// Map gets a tiled.Map from a entity.Entity
+	Map: func(e *entity.Entity) Map {
+		return e.Get(TYPE.Map).(Map)
+	},
+	// MapState gets a tiled.MapState from a entity.Entity
+	MapState: func(e *entity.Entity) MapState {
+		return e.Get(TYPE.MapState).(MapState)
+	},
 }

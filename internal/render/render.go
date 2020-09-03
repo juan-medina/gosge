@@ -35,6 +35,11 @@ import (
 	"github.com/juan-medina/gosge/pkg/options"
 )
 
+// Render constants
+const (
+	DefaultLayer = 1000000 // DefaultLayer is the default layer depth
+)
+
 //Render is the interface for our rendering system
 type Render interface {
 	// Init the rendering device
