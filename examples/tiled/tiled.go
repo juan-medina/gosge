@@ -24,12 +24,15 @@ package main
 
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/tiled"
 	"github.com/juan-medina/gosge/pkg/components/ui"
 	"github.com/juan-medina/gosge/pkg/engine"
+	"github.com/juan-medina/gosge/pkg/events"
 	"github.com/juan-medina/gosge/pkg/game"
 	"github.com/juan-medina/gosge/pkg/options"
 	"github.com/rs/zerolog/log"
@@ -42,14 +45,23 @@ var opt = options.Options{
 }
 
 const (
-	fontName  = "resources/go_regular.fnt"
-	fontSmall = 60
-	mapFile   = "resources/maps/gameart2d-desert.tmx"
+	fontName     = "resources/go_regular.fnt"
+	fontSmall    = 60
+	mapFile      = "resources/maps/gameart2d-desert.tmx"
+	mapMoveSpeed = 850 // map move speed design resolution pixel / second
 )
 
 var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
+	// mapEnt is our map entity
+	mapEnt *entity.Entity
+
+	// minMapPos is the min position that we could scroll the map
+	minMapPos geometry.Point
+
+	// maxMapPos is the max position that we could scroll the map
+	maxMapPos geometry.Point
 )
 
 func main() {
@@ -57,10 +69,6 @@ func main() {
 		log.Fatal().Err(err).Msg("error running the game")
 	}
 }
-
-var (
-	mapEnt *entity.Entity
-)
 
 func loadGame(eng engine.Engine) error {
 	var err error
@@ -85,16 +93,23 @@ func loadGame(eng engine.Engine) error {
 		return err
 	}
 
+	minMapPos = geometry.Point{
+		X: 0,
+		Y: (designResolution.Height - mapSize.Height) * gameScale.Point.Y,
+	}
+
+	maxMapPos = geometry.Point{
+		X: (mapSize.Width - designResolution.Width) * gameScale.Point.X,
+		Y: 0,
+	}
+
 	// add the map
 	mapEnt = wld.Add(entity.New(
 		tiled.Map{
 			Name:  mapFile,
 			Scale: gameScale.Min,
 		},
-		geometry.Point{
-			X: 0,
-			Y: (designResolution.Height - mapSize.Height) * gameScale.Point.Y,
-		},
+		minMapPos,
 	))
 
 	// add the bottom text
@@ -117,5 +132,48 @@ func loadGame(eng engine.Engine) error {
 		},
 	))
 
+	wld.AddSystem(MapMoveSystem())
+
 	return nil
+}
+
+type mapMoveSystem struct{}
+
+func (ms mapMoveSystem) Update(_ *world.World, _ float32) error {
+	return nil
+}
+
+func (ms mapMoveSystem) Notify(_ *world.World, event interface{}, delta float32) error {
+	switch e := event.(type) {
+	case events.KeyEvent:
+		if e.Status.Down {
+			move := geometry.Point{}
+			switch e.Key {
+			case device.KeyLeft:
+				move.X = -mapMoveSpeed * delta
+			case device.KeyRight:
+				move.X = mapMoveSpeed * delta
+			case device.KeyUp:
+				move.Y = -mapMoveSpeed * delta
+			case device.KeyDown:
+				move.Y = mapMoveSpeed * delta
+			}
+
+			if move.X != 0 || move.Y != 0 {
+				pos := geometry.Get.Point(mapEnt)
+
+				pos.X += move.X
+				pos.Y -= move.Y
+				pos.Clamp(minMapPos, maxMapPos)
+
+				mapEnt.Set(pos)
+			}
+		}
+	}
+	return nil
+}
+
+// MapMoveSystem move the map with the cursor keys
+func MapMoveSystem() world.System {
+	return &mapMoveSystem{}
 }

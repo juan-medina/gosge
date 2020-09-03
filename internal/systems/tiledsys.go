@@ -59,6 +59,19 @@ func (ts tiledSystem) Update(wld *world.World, _ float32) (err error) {
 				pos := geometry.Get.Point(ent)
 				ent.Set(tiled.MapState{Position: pos, Scale: tiledMap.Scale})
 			}
+		} else {
+			state := tiled.Get.MapState(ent)
+			if state.Position.X != pos.X || state.Position.Y != pos.Y || state.Scale != tiledMap.Scale {
+				// if the state need to change
+				diff := geometry.Point{
+					X: state.Position.X - pos.X,
+					Y: state.Position.Y - pos.Y,
+				}
+				ts.updateSprites(wld, tiledMap, diff)
+				state.Position = pos
+				state.Scale = tiledMap.Scale
+				ent.Set(state)
+			}
 		}
 	}
 	return
@@ -121,6 +134,19 @@ func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map
 	}
 
 	return
+}
+
+func (ts tiledSystem) updateSprites(wld *world.World, tiledMap tiled.Map, diff geometry.Point) {
+	for it := wld.Iterator(sprite.TYPE, geometry.TYPE.Point); it.HasNext(); {
+		ent := it.Value()
+		spr := sprite.Get(ent)
+		if spr.Sheet == tiledMap.Name {
+			pos := geometry.Get.Point(ent)
+			pos.X += diff.X
+			pos.Y -= diff.Y
+			ent.Set(pos)
+		}
+	}
 }
 
 // TiledSystem returns a world.System that handle tiled maps

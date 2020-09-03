@@ -61,5 +61,5 @@ type KeyStatus struct {
 
 // Equals return if this device.KeyStatus is equals to other
 func (ks KeyStatus) Equals(other KeyStatus) bool {
-	return ks.Down == other.Down && ks.Pressed == other.Pressed && ks.Released == other.Released
+	return ks.Down == other.Down && ks.Pressed == other.Pressed && ks.Released == other.Released && ks.Up == other.Up
 }

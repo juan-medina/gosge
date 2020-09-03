@@ -87,7 +87,7 @@ func (es *eventSystem) Update(world *world.World, _ float32) error {
 
 	for key := device.FirstKey + 1; key < device.TotalKeys; key++ {
 		status := es.rdr.GetKeyStatus(key)
-		if !status.Equals(es.ks[key]) {
+		if !status.Equals(es.ks[key]) || (status.Down || status.Up) {
 			es.ks[key] = status
 			if err := es.sendKeyEvent(world, key, status); err != nil {
 				return err

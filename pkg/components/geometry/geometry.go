@@ -35,6 +35,25 @@ type Point struct {
 	Y float32 // The y coordinate
 }
 
+// Clamp a geometry.Point to min max value
+func (pos *Point) Clamp(min Point, max Point) {
+	if pos.X < min.X {
+		pos.X = min.X
+	}
+
+	if pos.X > max.X {
+		pos.X = max.X
+	}
+
+	if pos.Y > max.Y {
+		pos.Y = max.Y
+	}
+
+	if pos.Y < min.Y {
+		pos.Y = min.Y
+	}
+}
+
 // Size represent the size of an object
 type Size struct {
 	Width  float32 // Width is vertical length of the size
