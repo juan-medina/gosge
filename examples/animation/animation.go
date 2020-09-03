@@ -115,7 +115,7 @@ func loadGame(eng engine.Engine) error {
 				Scale: gameScale.Min,
 			},
 			geometry.Point{X: -9000}, // we move it out of the screen
-			effects.Layer{Depth: l},
+			effects.Layer{Depth: float32(l)},
 		))
 		// add each layer to the screen
 		wld.Add(entity.New(
@@ -124,8 +124,8 @@ func loadGame(eng engine.Engine) error {
 				Scale: gameScale.Min,
 			},
 			geometry.Point{},
-			effects.Layer{Depth: l}, // each layer is have it own depth
-			attach{ent: attached},   // attach the layer that is attached
+			effects.Layer{Depth: float32(l)}, // each layer is have it own depth
+			attach{ent: attached},            // attach the layer that is attached
 		))
 	}
 

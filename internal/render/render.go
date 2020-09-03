@@ -37,7 +37,7 @@ import (
 
 // Render constants
 const (
-	DefaultLayer = 1000000 // DefaultLayer is the default layer depth
+	DefaultLayer = float32(1000000) // DefaultLayer is the default layer depth
 )
 
 //Render is the interface for our rendering system

@@ -47,7 +47,7 @@ type AlternateColor struct {
 
 // Layer effect is use to render thins in a logical layer
 type Layer struct {
-	Depth int32 // Depth is the screen depth for this effects.Layer
+	Depth float32 // Depth is the screen depth for this effects.Layer
 }
 
 type types struct {

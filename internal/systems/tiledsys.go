@@ -50,7 +50,7 @@ func (ts tiledSystem) Update(wld *world.World, _ float32) (err error) {
 		tiledMap := tiled.Get.Map(ent)
 		pos := geometry.Get.Point(ent)
 		if ent.NotContains(tiled.TYPE.MapState) {
-			depth := int32(render.DefaultLayer)
+			depth := render.DefaultLayer
 			if ent.Contains(effects.TYPE.Layer) {
 				depth = effects.Get.Layer(ent).Depth
 			}
@@ -88,13 +88,13 @@ func (ts *tiledSystem) GetTilePosition(x, y int, def components.TiledMapDef) geo
 	}
 }
 
-func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map, depth int32, mapPos geometry.Point) (err error) {
+func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map, depth float32, mapPos geometry.Point) (err error) {
 	if mapDef, err := ts.ds.GetTiledMapDef(tiledMap.Name); err == nil {
 		if !(mapDef.Data.RenderOrder == "" || mapDef.Data.RenderOrder == rightDown) {
 			return fmt.Errorf("unsupported tiled render order : got %q, want %q", mapDef.Data.RenderOrder, rightDown)
 		}
 
-		tl := int32(len(mapDef.Data.Layers))
+		tl := float32(len(mapDef.Data.Layers))
 		ld := depth + (tl - 1)
 		for _, l := range mapDef.Data.Layers {
 			if !l.Visible {

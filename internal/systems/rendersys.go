@@ -174,12 +174,12 @@ func (rs renderingSystem) getSortedByLayers(world *world.World) []*entity.Entity
 		first := entities[i]
 		second := entities[j]
 
-		firstDepth := int32(render.DefaultLayer)
+		firstDepth := render.DefaultLayer
 		if first.Contains(effects.TYPE.Layer) {
 			firstDepth = effects.Get.Layer(first).Depth
 		}
 
-		secondDepth := int32(render.DefaultLayer)
+		secondDepth := render.DefaultLayer
 		if second.Contains(effects.TYPE.Layer) {
 			secondDepth = effects.Get.Layer(second).Depth
 		}
