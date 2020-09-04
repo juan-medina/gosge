@@ -58,7 +58,7 @@ func loadGame(eng engine.Engine) error {
 	eng.AddGameStage("menu", menuStage)
 	eng.AddGameStage("main", mainStage)
 
-	return eng.World().Notify(events.ChangeGameStage{Stage: "menu"})
+	return eng.World().Signal(events.ChangeGameStage{Stage: "menu"})
 }
 
 // game constants

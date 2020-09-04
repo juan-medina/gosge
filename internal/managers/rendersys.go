@@ -20,7 +20,7 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package managers
 
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
@@ -36,14 +36,14 @@ import (
 	"sort"
 )
 
-type renderingSystem struct {
+type renderingManager struct {
 	rdr render.Render
 	ds  storage.Storage
 }
 
 var noTint = color.White
 
-func (rs renderingSystem) renderSprite(ent *entity.Entity) error {
+func (rdm renderingManager) renderSprite(ent *entity.Entity) error {
 	spr := sprite.Get(ent)
 	pos := geometry.Get.Point(ent)
 
@@ -54,8 +54,8 @@ func (rs renderingSystem) renderSprite(ent *entity.Entity) error {
 		tint = noTint
 	}
 
-	if def, err := rs.ds.GetSpriteDef(spr.Sheet, spr.Name); err == nil {
-		if err := rs.rdr.DrawSprite(def, spr, pos, tint); err != nil {
+	if def, err := rdm.ds.GetSpriteDef(spr.Sheet, spr.Name); err == nil {
+		if err := rdm.rdr.DrawSprite(def, spr, pos, tint); err != nil {
 			return err
 		}
 	} else {
@@ -64,20 +64,20 @@ func (rs renderingSystem) renderSprite(ent *entity.Entity) error {
 	return nil
 }
 
-func (rs renderingSystem) renderShape(ent *entity.Entity) error {
+func (rdm renderingManager) renderShape(ent *entity.Entity) error {
 	pos := geometry.Get.Point(ent)
 	box := shapes.Get.Box(ent)
 	if ent.Contains(color.TYPE.Solid) {
 		clr := color.Get.Solid(ent)
-		rs.rdr.DrawSolidBox(pos, box, clr)
+		rdm.rdr.DrawSolidBox(pos, box, clr)
 	} else if ent.Contains(color.TYPE.Gradient) {
 		gra := color.Get.Gradient(ent)
-		rs.rdr.DrawGradientBox(pos, box, gra)
+		rdm.rdr.DrawGradientBox(pos, box, gra)
 	}
 	return nil
 }
 
-func (rs renderingSystem) renderFlatButton(ent *entity.Entity) error {
+func (rdm renderingManager) renderFlatButton(ent *entity.Entity) error {
 	pos := geometry.Get.Point(ent)
 	box := shapes.Get.Box(ent)
 	fb := ui.Get.FlatButton(ent)
@@ -88,16 +88,16 @@ func (rs renderingSystem) renderFlatButton(ent *entity.Entity) error {
 			Y: pos.Y + fb.Shadow.Height,
 		}
 		sc := color.Gray.Alpha(127)
-		rs.rdr.DrawSolidBox(shadowPos, box, sc)
+		rdm.rdr.DrawSolidBox(shadowPos, box, sc)
 	}
 
 	// draw the box
 	if ent.Contains(color.TYPE.Solid) {
 		clr := color.Get.Solid(ent)
-		rs.rdr.DrawSolidBox(pos, box, clr)
+		rdm.rdr.DrawSolidBox(pos, box, clr)
 	} else if ent.Contains(color.TYPE.Gradient) {
 		gra := color.Get.Gradient(ent)
-		rs.rdr.DrawGradientBox(pos, box, gra)
+		rdm.rdr.DrawGradientBox(pos, box, gra)
 	}
 
 	// if contains a text component
@@ -126,9 +126,9 @@ func (rs renderingSystem) renderFlatButton(ent *entity.Entity) error {
 			colorCmp = gra.From.Inverse()
 		}
 
-		if ftd, err := rs.ds.GetFontDef(textCmp.Font); err == nil {
+		if ftd, err := rdm.ds.GetFontDef(textCmp.Font); err == nil {
 			// draw the text
-			rs.rdr.DrawText(ftd, textCmp, textPos, colorCmp)
+			rdm.rdr.DrawText(ftd, textCmp, textPos, colorCmp)
 		} else {
 			return err
 		}
@@ -137,14 +137,14 @@ func (rs renderingSystem) renderFlatButton(ent *entity.Entity) error {
 	return nil
 }
 
-func (rs renderingSystem) renderText(v *entity.Entity) error {
+func (rdm renderingManager) renderText(v *entity.Entity) error {
 	textCmp := ui.Get.Text(v)
 	posCmp := geometry.Get.Point(v)
 	colorCmp := color.Get.Solid(v)
 
-	if ftd, err := rs.ds.GetFontDef(textCmp.Font); err == nil {
+	if ftd, err := rdm.ds.GetFontDef(textCmp.Font); err == nil {
 		// draw the text
-		rs.rdr.DrawText(ftd, textCmp, posCmp, colorCmp)
+		rdm.rdr.DrawText(ftd, textCmp, posCmp, colorCmp)
 	} else {
 		return err
 	}
@@ -152,18 +152,18 @@ func (rs renderingSystem) renderText(v *entity.Entity) error {
 	return nil
 }
 
-func (rs renderingSystem) isRenderable(ent *entity.Entity) bool {
+func (rdm renderingManager) isRenderable(ent *entity.Entity) bool {
 	return ent.Contains(geometry.TYPE.Point) &&
 		(ent.Contains(sprite.TYPE) || ent.Contains(ui.TYPE.Text) || ent.Contains(shapes.TYPE.Box) ||
 			ent.Contains(ui.TYPE.FlatButton))
 }
 
-func (rs renderingSystem) getSortedByLayers(world *world.World) []*entity.Entity {
+func (rdm renderingManager) getSortedByLayers(world *world.World) []*entity.Entity {
 	entities := make([]*entity.Entity, world.Size())
 	i := 0
-	for it := world.Iterator(); it.HasNext(); {
+	for it := world.Iterator(); it != nil; it = it.Next() {
 		e := it.Value()
-		if rs.isRenderable(e) {
+		if rdm.isRenderable(e) {
 			entities[i] = e
 			i++
 		}
@@ -191,22 +191,22 @@ func (rs renderingSystem) getSortedByLayers(world *world.World) []*entity.Entity
 	return entities
 }
 
-func (rs renderingSystem) Update(world *world.World, _ float32) error {
-	for _, v := range rs.getSortedByLayers(world) {
+func (rdm renderingManager) System(world *world.World, _ float32) error {
+	for _, v := range rdm.getSortedByLayers(world) {
 		if v.Contains(sprite.TYPE) {
-			if err := rs.renderSprite(v); err != nil {
+			if err := rdm.renderSprite(v); err != nil {
 				return err
 			}
 		} else if v.Contains(ui.TYPE.FlatButton) {
-			if err := rs.renderFlatButton(v); err != nil {
+			if err := rdm.renderFlatButton(v); err != nil {
 				return err
 			}
 		} else if v.Contains(shapes.TYPE.Box) {
-			if err := rs.renderShape(v); err != nil {
+			if err := rdm.renderShape(v); err != nil {
 				return err
 			}
 		} else if v.Contains(ui.TYPE.Text, color.TYPE.Solid) {
-			if err := rs.renderText(v); err != nil {
+			if err := rdm.renderText(v); err != nil {
 				return err
 			}
 		}
@@ -214,13 +214,9 @@ func (rs renderingSystem) Update(world *world.World, _ float32) error {
 	return nil
 }
 
-func (rs renderingSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
-	return nil
-}
-
-// RenderingSystem returns a world.System that will handle rendering
-func RenderingSystem(rdr render.Render, ds storage.Storage) world.System {
-	return &renderingSystem{
+// Rendering returns a managers.WithSystem that will handle rendering
+func Rendering(rdr render.Render, ds storage.Storage) WithSystem {
+	return &renderingManager{
 		rdr: rdr,
 		ds:  ds,
 	}

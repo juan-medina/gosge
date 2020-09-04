@@ -61,8 +61,7 @@ type KeyEvent struct {
 
 // PlayMusicEvent is an event to play a music stream
 type PlayMusicEvent struct {
-	Name  string
-	Loops int32
+	Name string
 }
 
 // StopMusicEvent is an event to play a music stream

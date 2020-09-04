@@ -20,5 +20,36 @@
  *  THE SOFTWARE.
  */
 
-// Package systems are the world.System for the engine
-package systems
+package managers
+
+import (
+	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/gosge/internal/render"
+	"github.com/juan-medina/gosge/internal/storage"
+	"github.com/juan-medina/gosge/pkg/events"
+)
+
+type soundManager struct {
+	rdr render.Render
+	ds  storage.Storage
+}
+
+func (sm soundManager) Listener(_ *world.World, event interface{}, _ float32) error {
+	switch e := event.(type) {
+	case events.PlaySoundEvent:
+		if def, err := sm.ds.GetSoundDef(e.Name); err == nil {
+			sm.rdr.PlaySound(def)
+		} else {
+			return err
+		}
+	}
+	return nil
+}
+
+// Sounds returns a managers.WithListener that handle audio waves
+func Sounds(rdr render.Render, ds storage.Storage) WithListener {
+	return &soundManager{
+		rdr: rdr,
+		ds:  ds,
+	}
+}

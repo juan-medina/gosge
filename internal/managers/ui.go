@@ -20,7 +20,7 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package managers
 
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
@@ -40,35 +40,35 @@ const (
 	normalColorDarkenFactor = 0.25
 )
 
-type uiSystem struct {
+type uiManager struct {
 	eng engine.Engine
 	rdr render.Render
 }
 
-func (uis uiSystem) Update(wld *world.World, _ float32) error {
-	uis.flatButtons(wld)
-	uis.spriteButtons(wld)
+func (uim uiManager) System(wld *world.World, _ float32) error {
+	uim.flatButtons(wld)
+	uim.spriteButtons(wld)
 	return nil
 }
 
-func (uis uiSystem) Notify(wld *world.World, event interface{}, _ float32) error {
+func (uim uiManager) Listener(wld *world.World, event interface{}, _ float32) error {
 	switch v := event.(type) {
 	case events.MouseMoveEvent:
-		uis.flatButtonsMouseMove(wld, v)
-		uis.spriteButtonsMouseMove(wld, v)
+		uim.flatButtonsMouseMove(wld, v)
+		uim.spriteButtonsMouseMove(wld, v)
 	case events.MouseUpEvent:
-		if err := uis.flatButtonsMouseUp(wld, v); err != nil {
+		if err := uim.flatButtonsMouseUp(wld, v); err != nil {
 			return err
 		}
-		if err := uis.spriteButtonsMouseUp(wld, v); err != nil {
+		if err := uim.spriteButtonsMouseUp(wld, v); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (uis uiSystem) flatButtons(wld *world.World) {
-	for it := wld.Iterator(ui.TYPE.FlatButton); it.HasNext(); {
+func (uim uiManager) flatButtons(wld *world.World) {
+	for it := wld.Iterator(ui.TYPE.FlatButton); it != nil; it = it.Next() {
 		ent := it.Value()
 		// calculate state if is not done yet
 		if ent.NotContains(ui.TYPE.ButtonHoverColors) {
@@ -90,8 +90,8 @@ func (uis uiSystem) flatButtons(wld *world.World) {
 	}
 }
 
-func (uis uiSystem) flatButtonsMouseMove(wld *world.World, mme events.MouseMoveEvent) {
-	for it := wld.Iterator(ui.TYPE.FlatButton, ui.TYPE.ButtonHoverColors, geometry.TYPE.Point, shapes.TYPE.Box); it.HasNext(); {
+func (uim uiManager) flatButtonsMouseMove(wld *world.World, mme events.MouseMoveEvent) {
+	for it := wld.Iterator(ui.TYPE.FlatButton, ui.TYPE.ButtonHoverColors, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		bcl := ui.Get.ButtonHoverColors(ent)
 		pos := geometry.Get.Point(ent)
@@ -116,8 +116,8 @@ func (uis uiSystem) flatButtonsMouseMove(wld *world.World, mme events.MouseMoveE
 	}
 }
 
-func (uis uiSystem) flatButtonsMouseUp(wld *world.World, mue events.MouseUpEvent) error {
-	for it := wld.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.Box); it.HasNext(); {
+func (uim uiManager) flatButtonsMouseUp(wld *world.World, mue events.MouseUpEvent) error {
+	for it := wld.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		btn := ui.Get.FlatButton(ent)
 
@@ -125,14 +125,14 @@ func (uis uiSystem) flatButtonsMouseUp(wld *world.World, mue events.MouseUpEvent
 		box := shapes.Get.Box(ent)
 
 		if box.Contains(pos, mue.Point) {
-			return wld.Notify(btn.Event)
+			return wld.Signal(btn.Event)
 		}
 	}
 	return nil
 }
 
-func (uis uiSystem) spriteButtons(wld *world.World) {
-	for it := wld.Iterator(ui.TYPE.SpriteButton); it.HasNext(); {
+func (uim uiManager) spriteButtons(wld *world.World) {
+	for it := wld.Iterator(ui.TYPE.SpriteButton); it != nil; it = it.Next() {
 		ent := it.Value()
 		sb := ui.Get.SpriteButton(ent)
 		// add sprite if we have not one yet
@@ -147,18 +147,18 @@ func (uis uiSystem) spriteButtons(wld *world.World) {
 			spr := sprite.Get(ent)
 			// if the sprite button has change
 			if !(spr.Name == sb.Normal || spr.Name == sb.Hover) {
-				uis.refreshButtonOnPoint(ent, uis.rdr.GetMousePoint())
+				uim.refreshButtonOnPoint(ent, uim.rdr.GetMousePoint())
 			}
 		}
 	}
 }
 
-func (uis uiSystem) refreshButtonOnPoint(ent *entity.Entity, pnt geometry.Point) {
+func (uim uiManager) refreshButtonOnPoint(ent *entity.Entity, pnt geometry.Point) {
 	spr := sprite.Get(ent)
 	pos := geometry.Get.Point(ent)
 	sbn := ui.Get.SpriteButton(ent)
 
-	if uis.eng.SpriteAtContains(spr, pos, pnt) {
+	if uim.eng.SpriteAtContains(spr, pos, pnt) {
 		spr.Name = sbn.Hover
 	} else {
 		spr.Name = sbn.Normal
@@ -166,33 +166,33 @@ func (uis uiSystem) refreshButtonOnPoint(ent *entity.Entity, pnt geometry.Point)
 	ent.Set(spr)
 }
 
-func (uis uiSystem) spriteButtonsMouseMove(wld *world.World, mme events.MouseMoveEvent) {
-	for it := wld.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it.HasNext(); {
+func (uim uiManager) spriteButtonsMouseMove(wld *world.World, mme events.MouseMoveEvent) {
+	for it := wld.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
-		uis.refreshButtonOnPoint(ent, mme.Point)
+		uim.refreshButtonOnPoint(ent, mme.Point)
 	}
 }
 
-func (uis uiSystem) spriteButtonsMouseUp(wld *world.World, mue events.MouseUpEvent) error {
-	for it := wld.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it.HasNext(); {
+func (uim uiManager) spriteButtonsMouseUp(wld *world.World, mue events.MouseUpEvent) error {
+	for it := wld.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
 		spr := sprite.Get(ent)
 		pos := geometry.Get.Point(ent)
 		sbn := ui.Get.SpriteButton(ent)
 
-		if uis.eng.SpriteAtContains(spr, pos, mue.Point) {
+		if uim.eng.SpriteAtContains(spr, pos, mue.Point) {
 			if sbn.Sound != "" {
-				if err := wld.Notify(events.PlaySoundEvent{Name: sbn.Sound}); err != nil {
+				if err := wld.Signal(events.PlaySoundEvent{Name: sbn.Sound}); err != nil {
 					return err
 				}
 			}
-			return wld.Notify(sbn.Event)
+			return wld.Signal(sbn.Event)
 		}
 	}
 	return nil
 }
 
-// UISystem returns a world.System that handle ui components
-func UISystem(eng engine.Engine, rdr render.Render) world.System {
-	return &uiSystem{eng: eng, rdr: rdr}
+// UI returns a managers.WithSystemAndListener that handle ui components
+func UI(eng engine.Engine, rdr render.Render) WithSystemAndListener {
+	return &uiManager{eng: eng, rdr: rdr}
 }

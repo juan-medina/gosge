@@ -20,7 +20,7 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package managers
 
 import (
 	"github.com/juan-medina/goecs/pkg/entity"
@@ -31,19 +31,19 @@ import (
 	"github.com/juan-medina/gosge/pkg/events"
 )
 
-type musicSystem struct {
+type musicManager struct {
 	rdr render.Render
 	ds  storage.Storage
 }
 
-func (m musicSystem) Update(wld *world.World, _ float32) error {
-	for it := wld.Iterator(audio.TYPE.Music, audio.TYPE.MusicState); it.HasNext(); {
+func (mm musicManager) System(wld *world.World, _ float32) error {
+	for it := wld.Iterator(audio.TYPE.Music, audio.TYPE.MusicState); it != nil; it = it.Next() {
 		ent := it.Value()
 		//music := audio.Get.Music(ent)
 		state := audio.Get.MusicState(ent)
 
-		if def, err := m.ds.GetMusicDef(state.Name); err == nil {
-			m.rdr.UpdateMusic(def)
+		if def, err := mm.ds.GetMusicDef(state.Name); err == nil {
+			mm.rdr.UpdateMusic(def)
 		} else {
 			return err
 		}
@@ -51,8 +51,8 @@ func (m musicSystem) Update(wld *world.World, _ float32) error {
 	return nil
 }
 
-func (m musicSystem) findMusicEnt(wld *world.World, name string) *entity.Entity {
-	for it := wld.Iterator(audio.TYPE.MusicState); it.HasNext(); {
+func (mm musicManager) findMusicEnt(wld *world.World, name string) *entity.Entity {
+	for it := wld.Iterator(audio.TYPE.MusicState); it != nil; it = it.Next() {
 		ent := it.Value()
 		state := audio.Get.MusicState(ent)
 		if state.Name == name {
@@ -62,28 +62,27 @@ func (m musicSystem) findMusicEnt(wld *world.World, name string) *entity.Entity 
 	return nil
 }
 
-func (m musicSystem) Notify(wld *world.World, event interface{}, _ float32) error {
+func (mm musicManager) Listener(wld *world.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
 	case events.PlayMusicEvent:
-		return m.playMusicEvent(wld, e)
+		return mm.playMusicEvent(wld, e)
 	case events.StopMusicEvent:
-		return m.stopMusicEvent(wld, e)
+		return mm.stopMusicEvent(wld, e)
 	case events.PauseMusicEvent:
-		return m.pauseMusicEvent(wld, e)
+		return mm.pauseMusicEvent(wld, e)
 	case events.ResumeMusicEvent:
-		return m.resumeMusicEvent(wld, e)
+		return mm.resumeMusicEvent(wld, e)
 	}
 	return nil
 }
 
-func (m musicSystem) playMusicEvent(wld *world.World, pme events.PlayMusicEvent) error {
-	if def, err := m.ds.GetMusicDef(pme.Name); err == nil {
+func (mm musicManager) playMusicEvent(wld *world.World, pme events.PlayMusicEvent) error {
+	if def, err := mm.ds.GetMusicDef(pme.Name); err == nil {
 		var ent *entity.Entity
-		if ent = m.findMusicEnt(wld, pme.Name); ent == nil {
+		if ent = mm.findMusicEnt(wld, pme.Name); ent == nil {
 			ent = wld.Add(entity.New(
 				audio.Music{
-					Name:  pme.Name,
-					Loops: pme.Loops,
+					Name: pme.Name,
 				},
 				audio.MusicState{
 					Name:         pme.Name,
@@ -96,8 +95,8 @@ func (m musicSystem) playMusicEvent(wld *world.World, pme events.PlayMusicEvent)
 			old := state.PlayingState
 			state.PlayingState = audio.StatePlaying
 			ent.Set(state)
-			m.rdr.PlayMusic(def, pme.Loops)
-			return m.sendMusicStateChangeEvent(wld, pme.Name, old, state.PlayingState)
+			mm.rdr.PlayMusic(def)
+			return mm.sendMusicStateChangeEvent(wld, pme.Name, old, state.PlayingState)
 		}
 	} else {
 		return err
@@ -105,16 +104,16 @@ func (m musicSystem) playMusicEvent(wld *world.World, pme events.PlayMusicEvent)
 	return nil
 }
 
-func (m musicSystem) stopMusicEvent(wld *world.World, sme events.StopMusicEvent) error {
-	if def, err := m.ds.GetMusicDef(sme.Name); err == nil {
-		if ent := m.findMusicEnt(wld, sme.Name); ent != nil {
+func (mm musicManager) stopMusicEvent(wld *world.World, sme events.StopMusicEvent) error {
+	if def, err := mm.ds.GetMusicDef(sme.Name); err == nil {
+		if ent := mm.findMusicEnt(wld, sme.Name); ent != nil {
 			state := audio.Get.MusicState(ent)
 			if state.PlayingState == audio.StatePlaying || state.PlayingState == audio.StatePaused {
 				old := state.PlayingState
 				state.PlayingState = audio.StateStopped
 				ent.Set(state)
-				m.rdr.StopMusic(def)
-				return m.sendMusicStateChangeEvent(wld, sme.Name, old, state.PlayingState)
+				mm.rdr.StopMusic(def)
+				return mm.sendMusicStateChangeEvent(wld, sme.Name, old, state.PlayingState)
 			}
 		}
 	} else {
@@ -123,16 +122,16 @@ func (m musicSystem) stopMusicEvent(wld *world.World, sme events.StopMusicEvent)
 	return nil
 }
 
-func (m musicSystem) pauseMusicEvent(wld *world.World, pme events.PauseMusicEvent) error {
-	if def, err := m.ds.GetMusicDef(pme.Name); err == nil {
-		if ent := m.findMusicEnt(wld, pme.Name); ent != nil {
+func (mm musicManager) pauseMusicEvent(wld *world.World, pme events.PauseMusicEvent) error {
+	if def, err := mm.ds.GetMusicDef(pme.Name); err == nil {
+		if ent := mm.findMusicEnt(wld, pme.Name); ent != nil {
 			state := audio.Get.MusicState(ent)
 			if state.PlayingState == audio.StatePlaying {
 				old := state.PlayingState
 				state.PlayingState = audio.StatePaused
 				ent.Set(state)
-				m.rdr.PauseMusic(def)
-				return m.sendMusicStateChangeEvent(wld, pme.Name, old, state.PlayingState)
+				mm.rdr.PauseMusic(def)
+				return mm.sendMusicStateChangeEvent(wld, pme.Name, old, state.PlayingState)
 			}
 		}
 	} else {
@@ -141,16 +140,16 @@ func (m musicSystem) pauseMusicEvent(wld *world.World, pme events.PauseMusicEven
 	return nil
 }
 
-func (m musicSystem) resumeMusicEvent(wld *world.World, rme events.ResumeMusicEvent) error {
-	if def, err := m.ds.GetMusicDef(rme.Name); err == nil {
-		if ent := m.findMusicEnt(wld, rme.Name); ent != nil {
+func (mm musicManager) resumeMusicEvent(wld *world.World, rme events.ResumeMusicEvent) error {
+	if def, err := mm.ds.GetMusicDef(rme.Name); err == nil {
+		if ent := mm.findMusicEnt(wld, rme.Name); ent != nil {
 			state := audio.Get.MusicState(ent)
 			if state.PlayingState == audio.StatePaused {
 				old := state.PlayingState
 				state.PlayingState = audio.StatePlaying
 				ent.Set(state)
-				m.rdr.ResumeMusic(def)
-				return m.sendMusicStateChangeEvent(wld, rme.Name, old, state.PlayingState)
+				mm.rdr.ResumeMusic(def)
+				return mm.sendMusicStateChangeEvent(wld, rme.Name, old, state.PlayingState)
 			}
 		}
 	} else {
@@ -159,17 +158,17 @@ func (m musicSystem) resumeMusicEvent(wld *world.World, rme events.ResumeMusicEv
 	return nil
 }
 
-func (m musicSystem) sendMusicStateChangeEvent(wld *world.World, name string, old audio.MusicPlayingState, new audio.MusicPlayingState) error {
-	return wld.Notify(events.MusicStateChangeEvent{
+func (mm musicManager) sendMusicStateChangeEvent(wld *world.World, name string, old audio.MusicPlayingState, new audio.MusicPlayingState) error {
+	return wld.Signal(events.MusicStateChangeEvent{
 		Name: name,
 		Old:  old,
 		New:  new,
 	})
 }
 
-// MusicSystem returns a world.System that handle music stream
-func MusicSystem(rdr render.Render, ds storage.Storage) world.System {
-	return &musicSystem{
+// Music returns a managers.WithSystemAndListener that handle music stream
+func Music(rdr render.Render, ds storage.Storage) WithSystemAndListener {
+	return &musicManager{
 		rdr: rdr,
 		ds:  ds,
 	}

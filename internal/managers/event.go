@@ -1,4 +1,4 @@
-package systems
+package managers
 
 import (
 	"github.com/juan-medina/goecs/pkg/world"
@@ -30,7 +30,7 @@ import (
  *  THE SOFTWARE.
  */
 
-type eventSystem struct {
+type eventManager struct {
 	mme events.MouseMoveEvent
 	rdr render.Render
 	ks  []device.KeyStatus
@@ -42,54 +42,50 @@ var (
 	}
 )
 
-func (es eventSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
-	return nil
+func (em eventManager) sendGameClose(wld *world.World) error {
+	return wld.Signal(events.GameCloseEvent{})
 }
 
-func (es eventSystem) sendGameClose(wld *world.World) error {
-	return wld.Notify(events.GameCloseEvent{})
+func (em eventManager) sendMouseMove(wld *world.World) error {
+	return wld.Signal(em.mme)
 }
 
-func (es eventSystem) sendMouseMove(wld *world.World) error {
-	return wld.Notify(es.mme)
+func (em eventManager) sendMouseRelease(wld *world.World, button device.MouseButton) error {
+	return wld.Signal(events.MouseUpEvent{Point: em.mme.Point, MouseButton: button})
 }
 
-func (es eventSystem) sendMouseRelease(wld *world.World, button device.MouseButton) error {
-	return wld.Notify(events.MouseUpEvent{Point: es.mme.Point, MouseButton: button})
+func (em eventManager) sendKeyEvent(wld *world.World, key device.Key, status device.KeyStatus) error {
+	return wld.Signal(events.KeyEvent{Key: key, Status: status})
 }
 
-func (es eventSystem) sendKeyEvent(wld *world.World, key device.Key, status device.KeyStatus) error {
-	return wld.Notify(events.KeyEvent{Key: key, Status: status})
-}
-
-func (es *eventSystem) Update(world *world.World, _ float32) error {
-	if es.rdr.ShouldClose() {
-		if err := es.sendGameClose(world); err != nil {
+func (em *eventManager) System(world *world.World, _ float32) error {
+	if em.rdr.ShouldClose() {
+		if err := em.sendGameClose(world); err != nil {
 			return err
 		}
 	}
 
-	mp := es.rdr.GetMousePoint()
-	if es.mme.Point != mp {
-		es.mme.Point = mp
-		if err := es.sendMouseMove(world); err != nil {
+	mp := em.rdr.GetMousePoint()
+	if em.mme.Point != mp {
+		em.mme.Point = mp
+		if err := em.sendMouseMove(world); err != nil {
 			return err
 		}
 	}
 
 	for _, v := range mouseButtonsTocCheck {
-		if es.rdr.IsMouseRelease(v) {
-			if err := es.sendMouseRelease(world, v); err != nil {
+		if em.rdr.IsMouseRelease(v) {
+			if err := em.sendMouseRelease(world, v); err != nil {
 				return err
 			}
 		}
 	}
 
 	for key := device.FirstKey + 1; key < device.TotalKeys; key++ {
-		status := es.rdr.GetKeyStatus(key)
-		if !status.Equals(es.ks[key]) || (status.Down || status.Up) {
-			es.ks[key] = status
-			if err := es.sendKeyEvent(world, key, status); err != nil {
+		status := em.rdr.GetKeyStatus(key)
+		if !status.Equals(em.ks[key]) || (status.Down) {
+			em.ks[key] = status
+			if err := em.sendKeyEvent(world, key, status); err != nil {
 				return err
 			}
 		}
@@ -98,9 +94,9 @@ func (es *eventSystem) Update(world *world.World, _ float32) error {
 	return nil
 }
 
-// EventSystem returns a world.System that will handle events
-func EventSystem(rdr render.Render) world.System {
-	return &eventSystem{
+// Events returns a managers.WithSystem that will handle signals
+func Events(rdr render.Render) WithSystem {
+	return &eventManager{
 		rdr: rdr,
 		mme: events.MouseMoveEvent{
 			Point: geometry.Point{

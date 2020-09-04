@@ -69,6 +69,8 @@ var (
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
 	// robot is our robot sprite
 	robot *entity.Entity
+	// gameScale is our game scale
+	gameScale geometry.Scale
 )
 
 func main() {
@@ -79,7 +81,7 @@ func main() {
 
 func loadGame(eng engine.Engine) error {
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
-	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
+	gameScale = eng.GetScreenSize().CalculateScale(designResolution)
 
 	// pre-load font
 	if err := eng.LoadFont(fontName); err != nil {
@@ -183,7 +185,10 @@ func loadGame(eng engine.Engine) error {
 	))
 
 	// system that move our robot and the layers
-	wld.AddSystem(RobotMoveSystem(gameScale))
+	wld.AddSystem(robotMoveSystem)
+
+	// listen to keys
+	wld.Listen(keysListener)
 
 	return nil
 }
@@ -196,19 +201,14 @@ type attach struct {
 // the reflect type of the attach struct
 var attachType = reflect.TypeOf(attach{})
 
-// our movement system
-type robotMoveSystem struct {
-	gameScale geometry.Scale
-}
-
 // on update
-func (rms *robotMoveSystem) Update(wld *world.World, delta float32) error {
+func robotMoveSystem(wld *world.World, delta float32) error {
 	// get the animation from our robot
 	anim := animation.Get.Animation(robot)
 	// if its running
 	if anim.Current == runAnim {
 		// get from the ECS all the entities that have a layer a position and an attachment
-		for it := wld.Iterator(effects.TYPE.Layer, geometry.TYPE.Point, attachType); it.HasNext(); {
+		for it := wld.Iterator(effects.TYPE.Layer, geometry.TYPE.Point, attachType); it != nil; it = it.Next() {
 			// get the entity
 			ent := it.Value()
 
@@ -223,10 +223,10 @@ func (rms *robotMoveSystem) Update(wld *world.World, delta float32) error {
 			}
 
 			// what is the width of this layer is
-			layerWidth := designResolution.Width * rms.gameScale.Point.X
+			layerWidth := designResolution.Width * gameScale.Point.X
 
 			// moving according the direction we are facing
-			pos.X -= delta * 150 * float32(8-ly.Depth) * direction
+			pos.X -= delta * 150 * (8 - ly.Depth) * direction
 
 			// check if we need to wrap since we are completely off-screen
 			if pos.X < -layerWidth {
@@ -255,7 +255,10 @@ func (rms *robotMoveSystem) Update(wld *world.World, delta float32) error {
 }
 
 // notified on events
-func (rms robotMoveSystem) Notify(_ *world.World, e interface{}, _ float32) error {
+func keysListener(_ *world.World, e interface{}, _ float32) error {
+	if e == nil {
+		log.Trace().Interface("signal", e).Msg("got event")
+	}
 	switch v := e.(type) {
 	// is a key event
 	case events.KeyEvent:
@@ -283,11 +286,4 @@ func (rms robotMoveSystem) Notify(_ *world.World, e interface{}, _ float32) erro
 		}
 	}
 	return nil
-}
-
-// RobotMoveSystem creates a system to move our robot
-func RobotMoveSystem(gameScale geometry.Scale) world.System {
-	return &robotMoveSystem{
-		gameScale: gameScale,
-	}
 }

@@ -73,6 +73,7 @@ const (
 var (
 	playButton *entity.Entity // the play button entity
 	gopher     *entity.Entity // the gopher sprite entity
+	geng       engine.Engine  // the game engine
 )
 
 var (
@@ -87,6 +88,7 @@ func main() {
 }
 
 func loadGame(eng engine.Engine) error {
+	geng = eng
 	var err error
 	// Preload font
 	if err = eng.LoadFont(fontName); err != nil {
@@ -155,8 +157,7 @@ func loadGame(eng engine.Engine) error {
 			Scale:  gameScale.Min * spriteScale,
 			Sound:  clickSound,
 			Event: events.PlayMusicEvent{ // on click send a event to play the music
-				Name:  musicFile,
-				Loops: audio.LoopForever,
+				Name: musicFile,
 			},
 		},
 		geometry.Point{
@@ -216,18 +217,14 @@ func loadGame(eng engine.Engine) error {
 		},
 	))
 
-	// add the system that will handle the UI
-	wld.AddSystem(UISystem(eng))
+	// add the listener for mouse clicks
+	wld.Listen(mouseListener)
+	// add the listener to update the ui when music status change
+	wld.Listen(musicStateListener)
 	return err
 }
 
-// System for our game ui
-type uiSystem struct {
-	eng engine.Engine
-}
-
-// notify a new event
-func (us uiSystem) Notify(wld *world.World, event interface{}, _ float32) error {
+func mouseListener(wld *world.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
 	// check if we get a mouse up
 	case events.MouseUpEvent:
@@ -235,7 +232,7 @@ func (us uiSystem) Notify(wld *world.World, event interface{}, _ float32) error 
 		pos := geometry.Get.Point(gopher)
 		spr := sprite.Get(gopher)
 		// if we click on the gopher
-		if us.eng.SpriteAtContains(spr, pos, e.Point) {
+		if geng.SpriteAtContains(spr, pos, e.Point) {
 			// make the gopher move faster
 			anim := animation.Get.Animation(gopher)
 			// if we are dancing, dance faster
@@ -244,8 +241,14 @@ func (us uiSystem) Notify(wld *world.World, event interface{}, _ float32) error 
 			}
 			gopher.Set(anim)
 			// play the gopher sound
-			return wld.Notify(events.PlaySoundEvent{Name: gopherSound})
+			return wld.Signal(events.PlaySoundEvent{Name: gopherSound})
 		}
+	}
+	return nil
+}
+
+func musicStateListener(_ *world.World, event interface{}, _ float32) error {
+	switch e := event.(type) {
 	// if is the music state has change
 	case events.MusicStateChangeEvent:
 		// get the play button ui.SpriteButton
@@ -268,8 +271,7 @@ func (us uiSystem) Notify(wld *world.World, event interface{}, _ float32) error 
 			sb.Normal = playButtonNormalSprite
 			sb.Hover = playButtonHoverSprite
 			sb.Event = events.PlayMusicEvent{ // on click send a event to play the music
-				Name:  e.Name,
-				Loops: audio.LoopForever,
+				Name: e.Name,
 			}
 			anim.Current = idleAnim
 			anim.Speed = 1.0
@@ -291,15 +293,4 @@ func (us uiSystem) Notify(wld *world.World, event interface{}, _ float32) error 
 		gopher.Set(anim)
 	}
 	return nil
-}
-
-func (us uiSystem) Update(_ *world.World, _ float32) error {
-	return nil
-}
-
-// UISystem create our example UI world.System
-func UISystem(eng engine.Engine) world.System {
-	return &uiSystem{
-		eng: eng,
-	}
 }

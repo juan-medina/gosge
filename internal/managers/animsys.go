@@ -20,7 +20,7 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package managers
 
 import (
 	"fmt"
@@ -29,10 +29,10 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 )
 
-type animationSystem struct{}
+type animationManager struct{}
 
-func (as *animationSystem) Update(world *world.World, delta float32) error {
-	for it := world.Iterator(animation.TYPE.Animation); it.HasNext(); {
+func (animationManager) System(world *world.World, delta float32) error {
+	for it := world.Iterator(animation.TYPE.Animation); it != nil; it = it.Next() {
 		ent := it.Value()
 
 		anim := animation.Get.Animation(ent)
@@ -63,7 +63,7 @@ func (as *animationSystem) Update(world *world.World, delta float32) error {
 		}
 	}
 
-	for it := world.Iterator(animation.TYPE.Sequence, animation.TYPE.Animation, animation.TYPE.State); it.HasNext(); {
+	for it := world.Iterator(animation.TYPE.Sequence, animation.TYPE.Animation, animation.TYPE.State); it != nil; it = it.Next() {
 		ent := it.Value()
 
 		seq := animation.Get.Sequence(ent)
@@ -97,11 +97,7 @@ func (as *animationSystem) Update(world *world.World, delta float32) error {
 	return nil
 }
 
-func (as animationSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
-	return nil
-}
-
-// AnimationSystem creates a animation world.System
-func AnimationSystem() world.System {
-	return &animationSystem{}
+// AnimationManager returns a managers.WithSystem for handling animations
+func AnimationManager() WithSystem {
+	return &animationManager{}
 }

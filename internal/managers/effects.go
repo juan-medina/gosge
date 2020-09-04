@@ -20,7 +20,7 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package managers
 
 import (
 	"github.com/juan-medina/goecs/pkg/world"
@@ -28,10 +28,13 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/effects"
 )
 
-type alternateColorSystem struct{}
+type effectManager struct{}
 
-func (rcs alternateColorSystem) Update(world *world.World, delta float32) error {
-	for it := world.Iterator(effects.TYPE.AlternateColor); it.HasNext(); {
+func (e effectManager) System(wld *world.World, delta float32) error {
+	return e.alternateColorSystem(wld, delta)
+}
+func (e effectManager) alternateColorSystem(world *world.World, delta float32) error {
+	for it := world.Iterator(effects.TYPE.AlternateColor); it != nil; it = it.Next() {
 		ent := it.Value()
 		ac := effects.Get.AlternateColor(ent)
 
@@ -79,11 +82,7 @@ func (rcs alternateColorSystem) Update(world *world.World, delta float32) error 
 	return nil
 }
 
-func (rcs alternateColorSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
-	return nil
-}
-
-// AlternateColorSystem returns a world.System that handle effects.AlternateColor
-func AlternateColorSystem() world.System {
-	return &alternateColorSystem{}
+// Effects is manager.WithSystem that handle effects
+func Effects() WithSystem {
+	return &effectManager{}
 }

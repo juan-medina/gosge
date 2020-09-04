@@ -150,18 +150,12 @@ func loadGame(eng engine.Engine) error {
 		effects.Layer{Depth: 0},
 	))
 
-	wld.AddSystem(MapMoveSystem())
+	wld.Listen(keyListener)
 
 	return nil
 }
 
-type mapMoveSystem struct{}
-
-func (ms mapMoveSystem) Update(_ *world.World, _ float32) error {
-	return nil
-}
-
-func (ms mapMoveSystem) Notify(_ *world.World, event interface{}, delta float32) error {
+func keyListener(_ *world.World, event interface{}, delta float32) error {
 	switch e := event.(type) {
 	case events.KeyEvent:
 		if e.Status.Down {
@@ -189,9 +183,4 @@ func (ms mapMoveSystem) Notify(_ *world.World, event interface{}, delta float32)
 		}
 	}
 	return nil
-}
-
-// MapMoveSystem move the map with the cursor keys
-func MapMoveSystem() world.System {
-	return &mapMoveSystem{}
 }

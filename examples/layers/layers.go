@@ -152,7 +152,7 @@ func load(eng engine.Engine) error {
 	addItems(itemsToAdd, wld, gameScale)
 
 	// at the layout system
-	wld.AddSystem(&swapLayersOnTimeSystem{})
+	wld.AddSystem(swapLayersOnTimeSystem)
 	return nil
 }
 
@@ -230,42 +230,36 @@ func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 	}
 }
 
-// swapLayersOnTimeSystem will change the groups layers base on time
-type swapLayersOnTimeSystem struct {
-	time float32
-}
+var (
+	time float32 // time to change layers
+)
 
 // Update the system checking when need to swap layers
-func (sls *swapLayersOnTimeSystem) Update(w *world.World, delta float32) error {
+func swapLayersOnTimeSystem(w *world.World, delta float32) error {
 	// increase time
-	sls.time += delta
+	time += delta
 
 	// if we need to change
-	if sls.time > timeToChange {
+	if time > timeToChange {
 		// reset time
-		sls.time = 0
+		time = 0
 		// swap layers
-		if err := sls.swapLayers(w, 1, 2); err != nil {
+		if err := swapLayers(w, 1, 2); err != nil {
 			return err
 		}
 	}
 
 	// update the ui
-	if err := sls.updateUI(w); err != nil {
+	if err := updateUI(w); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// Notify is trigger on events
-func (sls *swapLayersOnTimeSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
-	return nil
-}
-
 // swapLayers swap the layers of two groups
-func (sls *swapLayersOnTimeSystem) swapLayers(w *world.World, old, new int) error {
-	for it := w.Iterator(effects.TYPE.Layer); it.HasNext(); {
+func swapLayers(w *world.World, old, new int) error {
+	for it := w.Iterator(effects.TYPE.Layer); it != nil; it = it.Next() {
 		ent := it.Value()
 		ly := effects.Get.Layer(ent)
 		if ly.Depth == groups[old].layer.Depth {
@@ -284,7 +278,7 @@ func (sls *swapLayersOnTimeSystem) swapLayers(w *world.World, old, new int) erro
 }
 
 // updateUI update the ui telling what group is top and when is going to change
-func (sls *swapLayersOnTimeSystem) updateUI(_ *world.World) error {
+func updateUI(_ *world.World) error {
 	var top = 0
 	for i := 0; i < 3; i++ {
 		if groups[i].layer.Depth == topLayer.Depth {
@@ -294,7 +288,7 @@ func (sls *swapLayersOnTimeSystem) updateUI(_ *world.World) error {
 	}
 
 	txt := ui.Get.Text(uiText)
-	txt.String = fmt.Sprintf("top layer %s, change in %02.02f", groups[top].name, timeToChange-sls.time)
+	txt.String = fmt.Sprintf("top layer %s, change in %02.02f", groups[top].name, timeToChange-time)
 	uiText.Set(txt)
 
 	return nil

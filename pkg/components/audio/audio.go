@@ -28,15 +28,9 @@ import (
 	"reflect"
 )
 
-//goland:noinspection GoUnusedConst
-const (
-	LoopForever = -1 // LoopForever indicates to loop the audio forever
-)
-
 // Music represent an music stream
 type Music struct {
-	Name  string // Name is the filename for our music stream
-	Loops int32  // Loops is the number of loops, we could use audio.LoopForever
+	Name string // Name is the filename for our music stream
 }
 
 // MusicPlayingState represent the playing state for a music stream

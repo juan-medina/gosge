@@ -50,9 +50,8 @@ func (rr RenderImpl) UnloadMusic(musicDef components.MusicDef) {
 }
 
 // PlayMusic plays the given components.MusicDef
-func (rr RenderImpl) PlayMusic(musicDef components.MusicDef, loops int32) {
+func (rr RenderImpl) PlayMusic(musicDef components.MusicDef) {
 	rlMusic := musicDef.Data.(rl.Music)
-	rl.SetMusicLoopCount(rlMusic, loops)
 	rl.PlayMusicStream(rlMusic)
 }
 

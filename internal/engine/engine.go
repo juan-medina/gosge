@@ -27,9 +27,9 @@ import (
 	"fmt"
 	"github.com/juan-medina/goecs/pkg/world"
 	"github.com/juan-medina/gosge/internal/components"
+	"github.com/juan-medina/gosge/internal/managers"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/internal/storage"
-	"github.com/juan-medina/gosge/internal/systems"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
@@ -93,11 +93,7 @@ func (ei *engineImpl) World() *world.World {
 	return ei.wld
 }
 
-func (ei *engineImpl) Update(_ *world.World, _ float32) error {
-	return nil
-}
-
-func (ei *engineImpl) Notify(_ *world.World, event interface{}, _ float32) error {
+func (ei *engineImpl) Listener(_ *world.World, event interface{}, _ float32) error {
 	switch v := event.(type) {
 	case events.GameCloseEvent:
 		ei.status = statusEnding
@@ -147,34 +143,48 @@ func (ei *engineImpl) drawLoading() {
 	ei.rdr.SetBackgroundColor(clr)
 }
 
+func (ei *engineImpl) register(mng managers.Manager, priority int32) {
+	switch m := mng.(type) {
+	case managers.WithSystemAndListener:
+		ei.wld.AddSystemWithPriority(m.System, priority)
+		ei.wld.ListenWithPriority(m.Listener, priority)
+	case managers.WithSystem:
+		ei.wld.AddSystemWithPriority(m.System, priority)
+	case managers.WithListener:
+		ei.wld.ListenWithPriority(m.Listener, priority)
+	default:
+		panic("can not register manager")
+	}
+}
+
 func (ei *engineImpl) prepare() error {
 	ei.drawLoading()
 	err := ei.init(ei)
 
-	// main systems will update before the game systems
-	ei.wld.AddSystemWithPriority(ei, highPriority)
-	ei.wld.AddSystemWithPriority(systems.EventSystem(ei.rdr), highPriority)
+	// main managers will update before the game managers
+	ei.register(ei, highPriority)
+	ei.register(managers.Events(ei.rdr), highPriority)
 
-	// add the sound system
-	ei.wld.AddSystemWithPriority(systems.SoundSystem(ei.rdr, ei.ds), highPriority)
+	// add the sound manager
+	ei.register(managers.Sounds(ei.rdr, ei.ds), highPriority)
 
-	// add the music system
-	ei.wld.AddSystemWithPriority(systems.MusicSystem(ei.rdr, ei.ds), highPriority)
+	// add the music manager
+	ei.register(managers.Music(ei.rdr, ei.ds), highPriority)
 
-	// animation system will run after game system but before the rendering systems
-	ei.wld.AddSystemWithPriority(systems.AnimationSystem(), lowPriority)
+	// animation system will run after game systems but before the rendering managers
+	ei.register(managers.AnimationManager(), lowPriority)
 
-	// tiled system will run after game system but before the rendering systems
-	ei.wld.AddSystemWithPriority(systems.TiledSystem(ei.ds), lowPriority)
+	// tiled manager will run after game systems but before the rendering managers
+	ei.register(managers.TiledMaps(ei.ds), lowPriority)
 
-	// ui system will run after game system but before the effect systems
-	ei.wld.AddSystemWithPriority(systems.UISystem(ei, ei.rdr), lowPriority)
+	// ui manager will run after game system but before the effect managers
+	ei.register(managers.UI(ei, ei.rdr), lowPriority)
 
-	// effect system will run after game system but before the rendering systems
-	ei.wld.AddSystemWithPriority(systems.AlternateColorSystem(), lowPriority)
+	// effects manager will run after game system but before the rendering managers
+	ei.register(managers.Effects(), lowPriority)
 
-	// rendering system will run last
-	ei.wld.AddSystemWithPriority(systems.RenderingSystem(ei.rdr, ei.ds), lastPriority)
+	// rendering manager will run last
+	ei.register(managers.Rendering(ei.rdr, ei.ds), lastPriority)
 	ei.status = statusRunning
 
 	return err

@@ -56,6 +56,8 @@ var (
 
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
+
+	dizzy = float32(0)
 )
 
 // game constants
@@ -224,9 +226,11 @@ func loadGame(eng engine.Engine) error {
 	))
 
 	// add our look at mouse system
-	gw.AddSystem(&lookAtMouseSystem{})
+	gw.Listen(mouseMoveListener)
+	// add the system that decrease how dizzy we are
+	gw.AddSystem(decreaseDizzySystem)
 	// add our dizzy bar system
-	gw.AddSystem(&dizzyBarSystem{})
+	gw.AddSystem(updateDizzyBarSystem)
 
 	return nil
 }
@@ -243,29 +247,24 @@ func getLookAtMouse(e *entity.Entity) lookAtMouse {
 	return e.Get(types.lookAtMouse).(lookAtMouse)
 }
 
-// system that make entities to look at the mouse
-type lookAtMouseSystem struct{}
-
-func (lam lookAtMouseSystem) Update(_ *world.World, _ float32) error {
-	return nil
-}
-
-func (lam *lookAtMouseSystem) Notify(gw *world.World, event interface{}, _ float32) error {
+func mouseMoveListener(gw *world.World, event interface{}, delta float32) error {
 	switch ev := event.(type) {
 	// if we move the mouse
 	case events.MouseMoveEvent:
 		// get the entities that look at the mouse
-		for it := gw.Iterator(types.lookAtMouse); it.HasNext(); {
+		for it := gw.Iterator(types.lookAtMouse); it != nil; it = it.Next() {
 			v := it.Value()
 			la := getLookAtMouse(v)
 			// make this entity to look at the mouse
-			lam.lookAt(v, la, ev.Point)
+			lookAt(v, la, ev.Point)
 		}
+		// increase how dizzy we are
+		dizzy = float32(math.Min(float64(dizzy+(delta*dizzyGainRate)), 2.5))
 	}
 	return nil
 }
 
-func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse geometry.Point) {
+func lookAt(ent *entity.Entity, la lookAtMouse, mouse geometry.Point) {
 	pos := geometry.Get.Point(la.pivot)
 
 	dx := mouse.X - pos.X
@@ -284,17 +283,15 @@ func (lam lookAtMouseSystem) lookAt(ent *entity.Entity, la lookAtMouse, mouse ge
 	ent.Set(np)
 }
 
-type dizzyBarSystem struct {
-	dizzy    float32
-	lasMouse geometry.Point
+func decreaseDizzySystem(_ *world.World, delta float32) error {
+	// in each frame we reduce how dizzy we are
+	dizzy = float32(math.Max(float64(dizzy-(delta/dizzyReduceRate)), 0))
+	return nil
 }
 
-func (dbs *dizzyBarSystem) Update(_ *world.World, delta float32) error {
-	// in each frame we reduce how dizzy we are
-	dbs.dizzy = float32(math.Max(float64(dbs.dizzy-(delta/dizzyReduceRate)), 0))
-
+func updateDizzyBarSystem(_ *world.World, _ float32) error {
 	// calculate how dizzy we are in 0..1
-	percent := 1 - (dbs.dizzy / maxDizzy)
+	percent := 1 - (dizzy / maxDizzy)
 
 	// get the Point of the regular dizzy bar
 	dizzyBarPoint := geometry.Get.Point(dizzyBar)
@@ -318,13 +315,5 @@ func (dbs *dizzyBarSystem) Update(_ *world.World, delta float32) error {
 	leftExterior.Set(clr)
 	rightExterior.Set(clr)
 
-	return nil
-}
-
-func (dbs *dizzyBarSystem) Notify(_ *world.World, event interface{}, delta float32) error {
-	switch event.(type) {
-	case events.MouseMoveEvent:
-		dbs.dizzy = float32(math.Min(float64(dbs.dizzy+(delta*dizzyGainRate)), 2.5))
-	}
 	return nil
 }

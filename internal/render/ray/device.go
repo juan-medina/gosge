@@ -56,6 +56,7 @@ func (rr *RenderImpl) Init(opt options.Options) {
 
 	w := rl.GetMonitorWidth(opt.Monitor)
 	h := rl.GetMonitorHeight(opt.Monitor)
+	rl.SetConfigFlags(rl.FlagVsyncHint)
 	rl.InitWindow(int32(w), int32(h), opt.Title)
 
 	if opt.Icon != "" {

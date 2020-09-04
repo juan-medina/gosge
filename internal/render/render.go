@@ -83,7 +83,7 @@ type Render interface {
 	// UnloadMusic giving it file from memory
 	UnloadMusic(musicDef components.MusicDef)
 	// PlayMusic plays the given components.MusicDef
-	PlayMusic(musicDef components.MusicDef, loops int32)
+	PlayMusic(musicDef components.MusicDef)
 	// PauseMusic pauses the given components.MusicDef
 	PauseMusic(musicDef components.MusicDef)
 	// StopMusic stop the given components.MusicDef

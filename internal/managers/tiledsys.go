@@ -20,7 +20,7 @@
  *  THE SOFTWARE.
  */
 
-package systems
+package managers
 
 import (
 	"fmt"
@@ -36,7 +36,7 @@ import (
 	"strconv"
 )
 
-type tiledSystem struct {
+type tiledManager struct {
 	ds storage.Storage
 }
 
@@ -44,8 +44,8 @@ const (
 	rightDown = "right-down"
 )
 
-func (ts tiledSystem) Update(wld *world.World, _ float32) (err error) {
-	for it := wld.Iterator(tiled.TYPE.Map, geometry.TYPE.Point); it.HasNext(); {
+func (tm tiledManager) System(wld *world.World, _ float32) (err error) {
+	for it := wld.Iterator(tiled.TYPE.Map, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
 		tiledMap := tiled.Get.Map(ent)
 		pos := geometry.Get.Point(ent)
@@ -55,7 +55,7 @@ func (ts tiledSystem) Update(wld *world.World, _ float32) (err error) {
 				depth = effects.Get.Layer(ent).Depth
 			}
 
-			if err = ts.addSpriteFromTiledMap(wld, tiledMap, depth, pos); err == nil {
+			if err = tm.addSpriteFromTiledMap(wld, tiledMap, depth, pos); err == nil {
 				pos := geometry.Get.Point(ent)
 				ent.Set(tiled.MapState{Position: pos, Scale: tiledMap.Scale})
 			}
@@ -67,7 +67,7 @@ func (ts tiledSystem) Update(wld *world.World, _ float32) (err error) {
 					X: state.Position.X - pos.X,
 					Y: state.Position.Y - pos.Y,
 				}
-				ts.updateSprites(wld, tiledMap, diff)
+				tm.updateSprites(wld, tiledMap, diff)
 				state.Position = pos
 				state.Scale = tiledMap.Scale
 				ent.Set(state)
@@ -77,19 +77,15 @@ func (ts tiledSystem) Update(wld *world.World, _ float32) (err error) {
 	return
 }
 
-func (ts tiledSystem) Notify(_ *world.World, _ interface{}, _ float32) error {
-	return nil
-}
-
-func (ts *tiledSystem) GetTilePosition(x, y int, def components.TiledMapDef) geometry.Point {
+func (tm *tiledManager) GetTilePosition(x, y int, def components.TiledMapDef) geometry.Point {
 	return geometry.Point{
 		X: float32(x * def.Data.TileWidth),
 		Y: float32(y * def.Data.TileHeight),
 	}
 }
 
-func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map, depth float32, mapPos geometry.Point) (err error) {
-	if mapDef, err := ts.ds.GetTiledMapDef(tiledMap.Name); err == nil {
+func (tm tiledManager) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map, depth float32, mapPos geometry.Point) (err error) {
+	if mapDef, err := tm.ds.GetTiledMapDef(tiledMap.Name); err == nil {
 		if !(mapDef.Data.RenderOrder == "" || mapDef.Data.RenderOrder == rightDown) {
 			return fmt.Errorf("unsupported tiled render order : got %q, want %q", mapDef.Data.RenderOrder, rightDown)
 		}
@@ -117,7 +113,7 @@ func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map
 						continue
 					}
 					sprName := strconv.Itoa(int(l.Tiles[i].ID))
-					pos := ts.GetTilePosition(x, y, mapDef)
+					pos := tm.GetTilePosition(x, y, mapDef)
 					pos.X = (pos.X * tiledMap.Scale) + mapPos.X
 					pos.Y = (pos.Y * tiledMap.Scale) + mapPos.Y
 					wld.Add(entity.New(
@@ -141,8 +137,8 @@ func (ts tiledSystem) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map
 	return
 }
 
-func (ts tiledSystem) updateSprites(wld *world.World, tiledMap tiled.Map, diff geometry.Point) {
-	for it := wld.Iterator(sprite.TYPE, geometry.TYPE.Point); it.HasNext(); {
+func (tm tiledManager) updateSprites(wld *world.World, tiledMap tiled.Map, diff geometry.Point) {
+	for it := wld.Iterator(sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
 		spr := sprite.Get(ent)
 		if spr.Sheet == tiledMap.Name {
@@ -154,9 +150,9 @@ func (ts tiledSystem) updateSprites(wld *world.World, tiledMap tiled.Map, diff g
 	}
 }
 
-// TiledSystem returns a world.System that handle tiled maps
-func TiledSystem(ds storage.Storage) world.System {
-	return tiledSystem{
+// TiledMaps returns a managers.WithSystem that handle tiled maps
+func TiledMaps(ds storage.Storage) WithSystem {
+	return tiledManager{
 		ds: ds,
 	}
 }
