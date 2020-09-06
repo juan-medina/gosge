@@ -36,38 +36,6 @@ import (
 	"strconv"
 )
 
-// StorageManager is a storage for our game data
-type StorageManager interface {
-	// LoadSpriteSheet preloads a sprite.Sprite sheet
-	LoadSpriteSheet(name string) error
-	// LoadSingleSprite preloads a sprite.Sprite in a sheet
-	LoadSingleSprite(sheet string, name string, pivot geometry.Point) error
-	//GetSpriteSize returns the geometry.Size of a given sprite
-	GetSpriteSize(sheet string, name string) (geometry.Size, error)
-	//GetSpriteDef returns the components.SpriteDef for an sprite
-	GetSpriteDef(sheet string, name string) (components.SpriteDef, error)
-	// LoadFont preloads a font
-	LoadFont(name string) error
-	//GetFontDef returns the components.FontDef for a font
-	GetFontDef(name string) (components.FontDef, error)
-	//LoadMusic preload a music stream
-	LoadMusic(name string) error
-	//GetMusicDef returns the components.MusicDef for a music stream
-	GetMusicDef(name string) (components.MusicDef, error)
-	//LoadSound preload a sound wave
-	LoadSound(name string) error
-	//GetSoundDef returns the components.SoundDef for a wave sound
-	GetSoundDef(name string) (components.SoundDef, error)
-	// LoadTiledMap preload a tiled map
-	LoadTiledMap(name string) error
-	//GetTiledMapDef returns the components.TiledMapDef for a tiled map
-	GetTiledMapDef(name string) (components.TiledMapDef, error)
-	//Clear all loaded data
-	Clear()
-	// SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
-	SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool
-}
-
 type spriteSheetData struct {
 	Frames []struct {
 		Name  string `json:"filename"`
@@ -89,7 +57,8 @@ type spriteSheetData struct {
 
 type spriteSheet map[string]components.SpriteDef
 
-type storageManager struct {
+// StorageManager allows to store assets for our engine
+type StorageManager struct {
 	sheets    map[string]spriteSheet
 	textures  map[string]components.TextureDef
 	fonts     map[string]components.FontDef
@@ -99,7 +68,8 @@ type storageManager struct {
 	dm        DeviceManager
 }
 
-func (sm *storageManager) LoadTiledMap(name string) (err error) {
+// LoadTiledMap preload a tiled map
+func (sm *StorageManager) LoadTiledMap(name string) (err error) {
 	var tiledMap components.TiledMapDef
 	if _, ok := sm.tiledMaps[name]; !ok {
 		if tiledMap, err = sm.loadTileMap(name); err == nil {
@@ -109,14 +79,15 @@ func (sm *storageManager) LoadTiledMap(name string) (err error) {
 	return
 }
 
-func (sm *storageManager) GetTiledMapDef(name string) (components.TiledMapDef, error) {
+//GetTiledMapDef returns the components.TiledMapDef for a tiled map
+func (sm *StorageManager) GetTiledMapDef(name string) (components.TiledMapDef, error) {
 	if _, ok := sm.tiledMaps[name]; ok {
 		return sm.tiledMaps[name], nil
 	}
 	return components.TiledMapDef{}, fmt.Errorf("can not find tiled map %q", name)
 }
 
-func (sm storageManager) loadTileMap(name string) (result components.TiledMapDef, err error) {
+func (sm StorageManager) loadTileMap(name string) (result components.TiledMapDef, err error) {
 	var tiledMap *tiled.Map
 	if tiledMap, err = tiled.LoadFromFile(name); err == nil {
 
@@ -157,8 +128,8 @@ func (sm storageManager) loadTileMap(name string) (result components.TiledMapDef
 			for i := ts.FirstGID; i < ts.FirstGID+uint32(tilesetTileCount); i++ {
 				x := int(i-ts.FirstGID) % tilesetColumns
 				y := int(i-ts.FirstGID) / tilesetColumns
-				xOffset := int(x)*spacing + margin
-				yOffset := int(y)*spacing + margin
+				xOffset := x*spacing + margin
+				yOffset := y*spacing + margin
 				origin := geometry.Rect{
 					From: geometry.Point{
 						X: float32(x*ts.TileWidth + xOffset),
@@ -185,7 +156,8 @@ func (sm storageManager) loadTileMap(name string) (result components.TiledMapDef
 	return
 }
 
-func (sm *storageManager) LoadSound(name string) (err error) {
+//LoadSound preload a sound wave
+func (sm *StorageManager) LoadSound(name string) (err error) {
 	var sound components.SoundDef
 	if _, ok := sm.sounds[name]; !ok {
 		if sound, err = sm.dm.LoadSound(name); err == nil {
@@ -195,21 +167,24 @@ func (sm *storageManager) LoadSound(name string) (err error) {
 	return err
 }
 
-func (sm *storageManager) GetSoundDef(name string) (components.SoundDef, error) {
+//GetSoundDef returns the components.SoundDef for a wave sound
+func (sm *StorageManager) GetSoundDef(name string) (components.SoundDef, error) {
 	if _, ok := sm.sounds[name]; ok {
 		return sm.sounds[name], nil
 	}
 	return components.SoundDef{}, fmt.Errorf("can not find sound %q", name)
 }
 
-func (sm *storageManager) GetMusicDef(name string) (components.MusicDef, error) {
+//GetMusicDef returns the components.MusicDef for a music stream
+func (sm *StorageManager) GetMusicDef(name string) (components.MusicDef, error) {
 	if _, ok := sm.musics[name]; ok {
 		return sm.musics[name], nil
 	}
 	return components.MusicDef{}, fmt.Errorf("can not find music %q", name)
 }
 
-func (sm *storageManager) LoadMusic(name string) (err error) {
+//LoadMusic preload a music stream
+func (sm *StorageManager) LoadMusic(name string) (err error) {
 	var music components.MusicDef
 	if _, ok := sm.musics[name]; !ok {
 		if music, err = sm.dm.LoadMusic(name); err == nil {
@@ -219,7 +194,8 @@ func (sm *storageManager) LoadMusic(name string) (err error) {
 	return err
 }
 
-func (sm *storageManager) LoadFont(name string) (err error) {
+// LoadFont preloads a font
+func (sm *StorageManager) LoadFont(name string) (err error) {
 	var font components.FontDef
 	if _, ok := sm.fonts[name]; !ok {
 		if font, err = sm.dm.LoadFont(name); err == nil {
@@ -229,14 +205,15 @@ func (sm *storageManager) LoadFont(name string) (err error) {
 	return
 }
 
-func (sm *storageManager) GetFontDef(name string) (components.FontDef, error) {
+//GetFontDef returns the components.FontDef for a font
+func (sm *StorageManager) GetFontDef(name string) (components.FontDef, error) {
 	if _, ok := sm.fonts[name]; ok {
 		return sm.fonts[name], nil
 	}
 	return components.FontDef{}, fmt.Errorf("can not find font %q", name)
 }
 
-func (sm *storageManager) loadTexture(name string) (def components.TextureDef, err error) {
+func (sm *StorageManager) loadTexture(name string) (def components.TextureDef, err error) {
 	if _, ok := sm.textures[name]; !ok {
 		if texture, err := sm.dm.LoadTexture(name); err == nil {
 			sm.textures[name] = texture
@@ -247,7 +224,7 @@ func (sm *storageManager) loadTexture(name string) (def components.TextureDef, e
 	return sm.textures[name], nil
 }
 
-func (sm *storageManager) handleSheet(data spriteSheetData, name string) (err error) {
+func (sm *StorageManager) handleSheet(data spriteSheetData, name string) (err error) {
 	var texture components.TextureDef
 	st := make(spriteSheet, 0)
 	sm.sheets[name] = st
@@ -278,7 +255,8 @@ func (sm *storageManager) handleSheet(data spriteSheetData, name string) (err er
 	return
 }
 
-func (sm *storageManager) LoadSpriteSheet(name string) (err error) {
+// LoadSpriteSheet preloads a sprite.Sprite sheet
+func (sm *StorageManager) LoadSpriteSheet(name string) (err error) {
 	data := spriteSheetData{}
 	var jsonFile *os.File
 	if jsonFile, err = os.Open(name); err == nil {
@@ -294,7 +272,8 @@ func (sm *storageManager) LoadSpriteSheet(name string) (err error) {
 	return
 }
 
-func (sm *storageManager) LoadSingleSprite(sheet string, name string, pivot geometry.Point) error {
+// LoadSingleSprite preloads a sprite.Sprite in a sheet
+func (sm *StorageManager) LoadSingleSprite(sheet string, name string, pivot geometry.Point) error {
 	if texture, err := sm.loadTexture(name); err == nil {
 		if _, ok := sm.sheets[sheet]; !ok {
 			st := make(spriteSheet, 0)
@@ -317,7 +296,8 @@ func (sm *storageManager) LoadSingleSprite(sheet string, name string, pivot geom
 	return nil
 }
 
-func (sm storageManager) GetSpriteDef(sheet string, name string) (components.SpriteDef, error) {
+//GetSpriteDef returns the components.SpriteDef for an sprite
+func (sm StorageManager) GetSpriteDef(sheet string, name string) (components.SpriteDef, error) {
 	if sh, ok := sm.sheets[sheet]; ok {
 		if def, ok := sh[name]; ok {
 			return def, nil
@@ -327,13 +307,15 @@ func (sm storageManager) GetSpriteDef(sheet string, name string) (components.Spr
 	return components.SpriteDef{}, fmt.Errorf("can not find sprite sheet %q", sheet)
 }
 
-func (sm storageManager) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
+//GetSpriteSize returns the geometry.Size of a given sprite
+func (sm StorageManager) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
 	def, err := sm.GetSpriteDef(sheet, name)
 	//goland:noinspection GoNilness
 	return def.Origin.Size, err
 }
 
-func (sm *storageManager) Clear() {
+//Clear all loaded data
+func (sm *StorageManager) Clear() {
 	sm.sheets = make(map[string]spriteSheet, 0)
 
 	for _, v := range sm.textures {
@@ -359,7 +341,7 @@ func (sm *storageManager) Clear() {
 }
 
 // getSpriteRect return a geometry.Rect for a given sprite.Sprite at a geometry.Point
-func (sm storageManager) getSpriteRect(spr sprite.Sprite, at geometry.Point) geometry.Rect {
+func (sm StorageManager) getSpriteRect(spr sprite.Sprite, at geometry.Point) geometry.Rect {
 	def, _ := sm.GetSpriteDef(spr.Sheet, spr.Name)
 	size := def.Origin.Size.Scale(spr.Scale)
 
@@ -373,13 +355,13 @@ func (sm storageManager) getSpriteRect(spr sprite.Sprite, at geometry.Point) geo
 }
 
 // SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
-func (sm storageManager) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool {
+func (sm StorageManager) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool {
 	return sm.getSpriteRect(spr, at).IsPointInRect(point)
 }
 
-// Storage returns a new storage.StorageManager
-func Storage(dm DeviceManager) StorageManager {
-	return &storageManager{
+// Storage returns a new managers.StorageManager
+func Storage(dm DeviceManager) *StorageManager {
+	return &StorageManager{
 		sheets:    make(map[string]spriteSheet, 0),
 		textures:  make(map[string]components.TextureDef, 0),
 		fonts:     make(map[string]components.FontDef, 0),
