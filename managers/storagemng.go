@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"github.com/juan-medina/gosge/components"
 	"github.com/juan-medina/gosge/components/geometry"
-	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/lafriks/go-tiled"
 	"io/ioutil"
 	"os"
@@ -338,25 +337,6 @@ func (sm *StorageManager) Clear() {
 	}
 	sm.sounds = make(map[string]components.SoundDef, 0)
 	sm.tiledMaps = make(map[string]components.TiledMapDef, 0)
-}
-
-// getSpriteRect return a geometry.Rect for a given sprite.Sprite at a geometry.Point
-func (sm StorageManager) getSpriteRect(spr sprite.Sprite, at geometry.Point) geometry.Rect {
-	def, _ := sm.GetSpriteDef(spr.Sheet, spr.Name)
-	size := def.Origin.Size.Scale(spr.Scale)
-
-	return geometry.Rect{
-		From: geometry.Point{
-			X: at.X - (size.Width * def.Pivot.X),
-			Y: at.Y - (size.Height * def.Pivot.Y),
-		},
-		Size: size,
-	}
-}
-
-// SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
-func (sm StorageManager) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool {
-	return sm.getSpriteRect(spr, at).IsPointInRect(point)
 }
 
 // Storage returns a new managers.StorageManager

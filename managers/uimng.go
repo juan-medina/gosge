@@ -39,7 +39,7 @@ const (
 
 type uiManager struct {
 	dm DeviceManager
-	sm *StorageManager
+	cm *CollisionManager
 }
 
 func (uim uiManager) System(world *goecs.World, _ float32) error {
@@ -155,7 +155,7 @@ func (uim uiManager) refreshButtonOnPoint(ent *goecs.Entity, pnt geometry.Point)
 	pos := geometry.Get.Point(ent)
 	sbn := ui.Get.SpriteButton(ent)
 
-	if uim.sm.SpriteAtContains(spr, pos, pnt) {
+	if uim.cm.SpriteAtContains(spr, pos, pnt) {
 		spr.Name = sbn.Hover
 	} else {
 		spr.Name = sbn.Normal
@@ -177,7 +177,7 @@ func (uim uiManager) spriteButtonsMouseUp(world *goecs.World, mue events.MouseUp
 		pos := geometry.Get.Point(ent)
 		sbn := ui.Get.SpriteButton(ent)
 
-		if uim.sm.SpriteAtContains(spr, pos, mue.Point) {
+		if uim.cm.SpriteAtContains(spr, pos, mue.Point) {
 			if sbn.Sound != "" {
 				if err := world.Signal(events.PlaySoundEvent{Name: sbn.Sound}); err != nil {
 					return err
@@ -190,6 +190,6 @@ func (uim uiManager) spriteButtonsMouseUp(world *goecs.World, mue events.MouseUp
 }
 
 // UI returns a managers.WithSystemAndListener that handle ui components
-func UI(dm DeviceManager, sm *StorageManager) WithSystemAndListener {
-	return &uiManager{dm: dm, sm: sm}
+func UI(dm DeviceManager, cm *CollisionManager) WithSystemAndListener {
+	return &uiManager{dm: dm, cm: cm}
 }

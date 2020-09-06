@@ -63,6 +63,7 @@ type Engine struct {
 	frameTime float32
 	sm        *managers.StorageManager
 	dm        managers.DeviceManager
+	cm        *managers.CollisionManager
 	stages    map[string]InitFunc
 }
 
@@ -164,7 +165,7 @@ func (e *Engine) prepare() error {
 	e.register(managers.TiledMaps(e.sm), lowPriority)
 
 	// ui manager will run after game system but before the effect managers
-	e.register(managers.UI(e.dm, e.sm), lowPriority)
+	e.register(managers.UI(e.dm, e.cm), lowPriority)
 
 	// effects manager will run after game system but before the rendering managers
 	e.register(managers.Effects(), lowPriority)
@@ -268,7 +269,7 @@ func (e Engine) LoadSprite(filename string, pivot geometry.Point) error {
 
 // SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
 func (e Engine) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool {
-	return e.sm.SpriteAtContains(spr, at, point)
+	return e.cm.SpriteAtContains(spr, at, point)
 }
 
 // LoadMusic preloads a music stream
@@ -298,12 +299,15 @@ func (e Engine) GeTiledMapSize(name string) (size geometry.Size, err error) {
 // New return a Engine
 func New(opt options.Options, init InitFunc) *Engine {
 	dm := managers.Device()
+	sm := managers.Storage(dm)
+	cm := managers.Collisions(sm)
 	return &Engine{
 		opt:    opt,
 		world:  goecs.Default(),
 		status: statusInitializing,
 		init:   init,
-		sm:     managers.Storage(dm),
+		sm:     sm,
+		cm:     cm,
 		dm:     dm,
 		stages: make(map[string]InitFunc),
 	}
