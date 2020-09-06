@@ -25,12 +25,12 @@ package ray
 import (
 	"fmt"
 	"github.com/gen2brain/raylib-go/raylib"
+	"github.com/juan-medina/gosge/components"
 	"github.com/juan-medina/gosge/components/color"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/shapes"
 	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/components/ui"
-	"github.com/juan-medina/gosge/internal/components"
 )
 
 func (dmi *DeviceManagerImpl) color2RayColor(color color.Solid) rl.Color {

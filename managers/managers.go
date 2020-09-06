@@ -20,21 +20,37 @@
  *  THE SOFTWARE.
  */
 
-//Package ray the implementation of render.Render for raylib
-package ray
+// Package managers contains the managers for the engine
+package managers
 
 import (
-	"github.com/juan-medina/gosge/options"
+	"github.com/juan-medina/goecs"
 )
 
-//DeviceManagerImpl is our managers.DeviceManager based on raylib
-type DeviceManagerImpl struct {
-	saveOpts options.Options
+// DeviceManager constants
+const (
+	DefaultLayer = float32(1000000) // DefaultLayer is the default layer depth
+)
+
+// Manager can have world.System or world.Listener
+type Manager interface{}
+
+// WithSystem have a world.System
+type WithSystem interface {
+	// System is a world.System
+	System(world *goecs.World, delta float32) error
 }
 
-// New create a new render.Render base on raylib
-func New() *DeviceManagerImpl {
-	return &DeviceManagerImpl{
-		saveOpts: options.Options{},
-	}
+// WithListener have a world.Listener
+type WithListener interface {
+	// Listener is a world.Listener
+	Listener(world *goecs.World, signal interface{}, delta float32) error
+}
+
+// WithSystemAndListener have a world.System and a world.Listener
+type WithSystemAndListener interface {
+	// System is a world.System
+	System(world *goecs.World, delta float32) error
+	// Listener is a world.Listener
+	Listener(world *goecs.World, signal interface{}, delta float32) error
 }

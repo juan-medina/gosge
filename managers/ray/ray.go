@@ -20,5 +20,21 @@
  *  THE SOFTWARE.
  */
 
-// Package internal are the internal packages
-package internal
+//Package ray is the managers.Device implementation using raylib
+package ray
+
+import (
+	"github.com/juan-medina/gosge/options"
+)
+
+//DeviceManagerImpl is our managers.DeviceManager based on raylib
+type DeviceManagerImpl struct {
+	saveOpts options.Options
+}
+
+// New create a new render.Render base on raylib
+func New() *DeviceManagerImpl {
+	return &DeviceManagerImpl{
+		saveOpts: options.Options{},
+	}
+}

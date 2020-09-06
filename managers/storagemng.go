@@ -25,9 +25,9 @@ package managers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/juan-medina/gosge/components"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/sprite"
-	"github.com/juan-medina/gosge/internal/components"
 	"github.com/lafriks/go-tiled"
 	"io/ioutil"
 	"os"

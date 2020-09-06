@@ -20,13 +20,12 @@ Internally uses the go [port](https://github.com/gen2brain/raylib-go) of [raylib
 package main
 
 import (
-    "github.com/juan-medina/goecs"
-    "github.com/juan-medina/gosge"
-    "github.com/juan-medina/gosge/components/color"
-    "github.com/juan-medina/gosge/components/geometry"
-    "github.com/juan-medina/gosge/components/text"
-    "github.com/juan-medina/gosge/options"
-    "log"
+	"github.com/juan-medina/gosge"
+	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/ui"
+	"github.com/juan-medina/gosge/options"
+	"log"
 )
 
 // game options
@@ -34,9 +33,10 @@ var opt = options.Options{
 	Title:      "Hello Game",
 	BackGround: color.Black,
 }
+
 const (
-	fontName  = "resources/go_regular.fnt"
-	fontSize  = 100
+	fontName = "resources/go_regular.fnt"
+	fontSize = 100
 )
 
 var (
@@ -44,13 +44,14 @@ var (
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
 )
 
+// Simple Usage
 func main() {
-	if err := game.Run(opt, loadGame); err != nil {
+	if err := gosge.Run(opt, loadGame); err != nil {
 		log.Fatalf("error running the game: %v", err)
 	}
 }
 
-func loadGame(eng *engine.Engine) error {
+func loadGame(eng *gosge.Engine) error {
 	// Preload font
 	if err := eng.LoadFont(fontName); err != nil {
 		return err
@@ -64,10 +65,10 @@ func loadGame(eng *engine.Engine) error {
 
 	// add the centered text
 	world.AddEntity(
-		text.Text{
+		ui.Text{
 			String:     "Hello World",
-			HAlignment: text.CenterHAlignment,
-			VAlignment: text.MiddleVAlignment,
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.MiddleVAlignment,
 			Font:       fontName,
 			Size:       fontSize * gameScale.Min,
 		},

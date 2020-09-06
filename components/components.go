@@ -22,3 +22,45 @@
 
 // Package components contains the components already defined
 package components
+
+import (
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/lafriks/go-tiled"
+)
+
+// TextureDef defines a texture
+type TextureDef struct {
+	Data interface{}   // Data is the texture data
+	Size geometry.Size // Size is the texture size
+}
+
+// SpriteDef defines an sprite.Sprite
+type SpriteDef struct {
+	Texture TextureDef     // Texture is the TextureDef
+	Origin  geometry.Rect  // Origin is where the sprite is on the texture
+	Pivot   geometry.Point // Pivot is the relative pivot 0..1 in each axis
+}
+
+// FontDef defines a font
+type FontDef struct {
+	Data interface{} // Data is the font data
+}
+
+// MusicDef defines a music stream
+type MusicDef struct {
+	Data interface{}
+}
+
+// SoundDef defines a sound wave
+type SoundDef struct {
+	Data interface{}
+}
+
+// TiledMapDef defines a tiled map
+type TiledMapDef struct {
+	Data     *tiled.Map    // Data is the internal map data
+	Cols     int32         // Cols is the number of cols in the map
+	Rows     int32         // Rows is the number of rows in the map
+	Size     geometry.Size // Size is the map size in pixels
+	TileSize geometry.Size // TileSize is the size per each tile in pixels
+}

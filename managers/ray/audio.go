@@ -25,7 +25,7 @@ package ray
 import (
 	"fmt"
 	"github.com/gen2brain/raylib-go/raylib"
-	"github.com/juan-medina/gosge/internal/components"
+	"github.com/juan-medina/gosge/components"
 	"os"
 )
 

@@ -20,6 +20,7 @@
  *  THE SOFTWARE.
  */
 
+// Package tiled has the components for adding tiled maps to our game
 package tiled
 
 import (

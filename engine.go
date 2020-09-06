@@ -25,12 +25,12 @@ package gosge
 import (
 	"fmt"
 	"github.com/juan-medina/goecs"
+	"github.com/juan-medina/gosge/components"
 	"github.com/juan-medina/gosge/components/color"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/events"
-	"github.com/juan-medina/gosge/internal/components"
-	"github.com/juan-medina/gosge/internal/managers"
+	"github.com/juan-medina/gosge/managers"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
 )

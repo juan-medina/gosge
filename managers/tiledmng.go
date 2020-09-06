@@ -25,11 +25,11 @@ package managers
 import (
 	"fmt"
 	"github.com/juan-medina/goecs"
+	"github.com/juan-medina/gosge/components"
 	"github.com/juan-medina/gosge/components/effects"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/components/tiled"
-	"github.com/juan-medina/gosge/internal/components"
 	"strconv"
 )
 

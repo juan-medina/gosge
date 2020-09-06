@@ -23,14 +23,14 @@
 package managers
 
 import (
+	"github.com/juan-medina/gosge/components"
 	"github.com/juan-medina/gosge/components/color"
 	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/shapes"
 	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/components/ui"
-	"github.com/juan-medina/gosge/internal/components"
-	"github.com/juan-medina/gosge/internal/managers/ray"
+	"github.com/juan-medina/gosge/managers/ray"
 	"github.com/juan-medina/gosge/options"
 )
 
