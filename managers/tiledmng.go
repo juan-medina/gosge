@@ -34,7 +34,7 @@ import (
 )
 
 type tiledManager struct {
-	sm StorageManager
+	sm *StorageManager
 }
 
 const (
@@ -147,7 +147,7 @@ func (tm tiledManager) updateSprites(world *goecs.World, tiledMap tiled.Map, dif
 }
 
 // TiledMaps returns a managers.WithSystem that handle tiled maps
-func TiledMaps(sm StorageManager) WithSystem {
+func TiledMaps(sm *StorageManager) WithSystem {
 	return tiledManager{
 		sm: sm,
 	}

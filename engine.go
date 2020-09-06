@@ -61,7 +61,7 @@ type Engine struct {
 	status    engineStatus
 	init      InitFunc
 	frameTime float32
-	sm        managers.StorageManager
+	sm        *managers.StorageManager
 	dm        managers.DeviceManager
 	stages    map[string]InitFunc
 }

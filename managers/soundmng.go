@@ -29,7 +29,7 @@ import (
 
 type soundManager struct {
 	dm DeviceManager
-	sm StorageManager
+	sm *StorageManager
 }
 
 func (sm soundManager) Listener(_ *goecs.World, event interface{}, _ float32) error {
@@ -45,7 +45,7 @@ func (sm soundManager) Listener(_ *goecs.World, event interface{}, _ float32) er
 }
 
 // Sounds returns a managers.WithListener that handle audio waves
-func Sounds(dm DeviceManager, sm StorageManager) WithListener {
+func Sounds(dm DeviceManager, sm *StorageManager) WithListener {
 	return &soundManager{
 		dm: dm,
 		sm: sm,

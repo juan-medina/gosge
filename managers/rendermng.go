@@ -34,7 +34,7 @@ import (
 
 type renderingManager struct {
 	dm DeviceManager
-	sm StorageManager
+	sm *StorageManager
 }
 
 var noTint = color.White
@@ -208,7 +208,7 @@ func (rdm renderingManager) System(world *goecs.World, _ float32) error {
 }
 
 // Rendering returns a managers.WithSystem that will handle rendering
-func Rendering(dm DeviceManager, sm StorageManager) WithSystem {
+func Rendering(dm DeviceManager, sm *StorageManager) WithSystem {
 	return &renderingManager{
 		dm: dm,
 		sm: sm,

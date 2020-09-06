@@ -30,7 +30,7 @@ import (
 
 type musicManager struct {
 	dm DeviceManager
-	sm StorageManager
+	sm *StorageManager
 }
 
 func (mm musicManager) System(world *goecs.World, _ float32) error {
@@ -164,7 +164,7 @@ func (mm musicManager) sendMusicStateChangeEvent(world *goecs.World, name string
 }
 
 // Music returns a managers.WithSystemAndListener that handle music stream
-func Music(dm DeviceManager, sm StorageManager) WithSystemAndListener {
+func Music(dm DeviceManager, sm *StorageManager) WithSystemAndListener {
 	return &musicManager{
 		dm: dm,
 		sm: sm,

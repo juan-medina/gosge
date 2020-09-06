@@ -39,7 +39,7 @@ const (
 
 type uiManager struct {
 	dm DeviceManager
-	sm StorageManager
+	sm *StorageManager
 }
 
 func (uim uiManager) System(world *goecs.World, _ float32) error {
@@ -190,6 +190,6 @@ func (uim uiManager) spriteButtonsMouseUp(world *goecs.World, mue events.MouseUp
 }
 
 // UI returns a managers.WithSystemAndListener that handle ui components
-func UI(dm DeviceManager, sm StorageManager) WithSystemAndListener {
+func UI(dm DeviceManager, sm *StorageManager) WithSystemAndListener {
 	return &uiManager{dm: dm, sm: sm}
 }
