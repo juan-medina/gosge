@@ -89,8 +89,7 @@ func (tm tiledManager) addSpriteFromTiledMap(world *goecs.World, tiledMap tiled.
 			return fmt.Errorf("unsupported tiled render order : got %q, want %q", mapDef.Data.RenderOrder, rightDown)
 		}
 
-		tl := float32(len(mapDef.Data.Layers))
-		ld := depth + (tl - 1)
+		ld := depth
 		for _, l := range mapDef.Data.Layers {
 			if !l.Visible {
 				ld--
