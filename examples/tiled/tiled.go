@@ -23,6 +23,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge"
 	"github.com/juan-medina/gosge/components/color"
@@ -30,6 +31,7 @@ import (
 	"github.com/juan-medina/gosge/components/effects"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/shapes"
+	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/components/tiled"
 	"github.com/juan-medina/gosge/components/ui"
 	"github.com/juan-medina/gosge/events"
@@ -38,9 +40,10 @@ import (
 )
 
 var opt = options.Options{
-	Title:      "Hello Game",
+	Title:      "Tiled Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
+	Windowed:   true,
 }
 
 const (
@@ -61,6 +64,12 @@ var (
 
 	// maxMapPos is the max position that we could scroll the map
 	maxMapPos geometry.Point
+
+	// gen is a reference to the gosge.Engine
+	gen *gosge.Engine
+
+	// topText is the text on top of the screen
+	topText *goecs.Entity
 )
 
 func main() {
@@ -81,7 +90,11 @@ func loadGame(eng *gosge.Engine) error {
 		return err
 	}
 
+	// Get the world
 	world := eng.World()
+
+	// save the engine reference
+	gen = eng
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
@@ -127,6 +140,28 @@ func loadGame(eng *gosge.Engine) error {
 		minMapPos,
 	)
 
+	var textSize geometry.Size
+	if textSize, err = eng.MeasureText(fontName, "some text", fontSmall); err != nil {
+		return err
+	}
+
+	// add the top text
+	topText = world.AddEntity(
+		ui.Text{
+			String:     "Click a tile with a name property",
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.TopVAlignment,
+			Font:       fontName,
+			Size:       fontSmall * gameScale.Min,
+		},
+		geometry.Point{
+			X: designResolution.Width / 2 * gameScale.Point.X,
+			Y: textSize.Height,
+		},
+		color.Gopher,
+		effects.Layer{Depth: 0},
+	)
+
 	// add the bottom text
 	world.AddEntity(
 		ui.Text{
@@ -149,7 +184,28 @@ func loadGame(eng *gosge.Engine) error {
 	)
 
 	world.AddListener(keyListener)
+	world.AddListener(mouseListener)
 
+	return nil
+}
+
+func mouseListener(world *goecs.World, event interface{}, _ float32) error {
+	switch e := event.(type) {
+	case events.MouseUpEvent:
+		for it := world.Iterator(tiled.TYPE.Properties, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
+			ent := it.Value()
+			properties := tiled.Get.Properties(ent)
+			spr := sprite.Get(ent)
+			pos := geometry.Get.Point(ent)
+			if gen.SpriteAtContains(spr, pos, e.Point) {
+				if v, ok := properties.Values["name"]; ok {
+					text := ui.Get.Text(topText)
+					text.String = fmt.Sprintf("Tiled clicked has name %q", v)
+					topText.Set(text)
+				}
+			}
+		}
+	}
 	return nil
 }
 

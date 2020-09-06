@@ -41,17 +41,25 @@ type MapState struct {
 	Scale    float32        // Scale is the map scale
 }
 
+// Properties contains the properties for a title
+type Properties struct {
+	Values map[string]string
+}
+
 type types struct {
 	// Map is the reflect.Type for tiled.Map
 	Map reflect.Type
 	// MapState is the reflect.Type for tiled.MapState
 	MapState reflect.Type
+	// Properties is the reflect.Type for tiled.Properties
+	Properties reflect.Type
 }
 
 // TYPE hold the reflect.Type for our tiled components
 var TYPE = types{
-	Map:      reflect.TypeOf(Map{}),
-	MapState: reflect.TypeOf(MapState{}),
+	Map:        reflect.TypeOf(Map{}),
+	MapState:   reflect.TypeOf(MapState{}),
+	Properties: reflect.TypeOf(Properties{}),
 }
 
 type gets struct {
@@ -59,6 +67,8 @@ type gets struct {
 	Map func(e *goecs.Entity) Map
 	// MapState gets a tiled.MapState from a goecs.Entity
 	MapState func(e *goecs.Entity) MapState
+	// Properties gets a tiled.Properties from a goecs.Entity
+	Properties func(e *goecs.Entity) Properties
 }
 
 // Get a geometry component
@@ -70,5 +80,9 @@ var Get = gets{
 	// MapState gets a tiled.MapState from a goecs.Entity
 	MapState: func(e *goecs.Entity) MapState {
 		return e.Get(TYPE.MapState).(MapState)
+	},
+	// Values gets a tiled.Values from a goecs.Entity
+	Properties: func(e *goecs.Entity) Properties {
+		return e.Get(TYPE.Properties).(Properties)
 	},
 }

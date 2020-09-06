@@ -81,6 +81,23 @@ func (tm *tiledManager) GetTilePosition(x, y int, def components.TiledMapDef) ge
 	}
 }
 
+func (tm tiledManager) getTiledProperties(id uint32, mapDef components.TiledMapDef) (result map[string]string) {
+	result = make(map[string]string, 0)
+
+	for _, ts := range mapDef.Data.Tilesets {
+		for _, t := range ts.Tiles {
+			if t.ID == id {
+				for _, p := range t.Properties {
+					result[p.Name] = p.Value
+				}
+				return
+			}
+		}
+	}
+
+	return
+}
+
 func (tm tiledManager) addSpriteFromTiledMap(world *goecs.World, tiledMap tiled.Map, depth float32, mapPos geometry.Point) (err error) {
 	if mapDef, err := tm.sm.GetTiledMapDef(tiledMap.Name); err == nil {
 		if !(mapDef.Data.RenderOrder == "" || mapDef.Data.RenderOrder == rightDown) {
@@ -102,16 +119,19 @@ func (tm tiledManager) addSpriteFromTiledMap(world *goecs.World, tiledMap tiled.
 			yi = 1
 
 			i := 0
+			var id uint32
 			for y := ys; y*yi < ye; y = y + yi {
 				for x := xs; x*xi < xe; x = x + xi {
 					if l.Tiles[i].IsNil() {
 						i++
 						continue
 					}
-					sprName := strconv.Itoa(int(l.Tiles[i].ID))
+					id = l.Tiles[i].ID
+					sprName := strconv.Itoa(int(id))
 					pos := tm.GetTilePosition(x, y, mapDef)
 					pos.X = (pos.X * tiledMap.Scale) + mapPos.X
 					pos.Y = (pos.Y * tiledMap.Scale) + mapPos.Y
+
 					world.AddEntity(
 						sprite.Sprite{
 							Sheet: tiledMap.Name,
@@ -120,6 +140,7 @@ func (tm tiledManager) addSpriteFromTiledMap(world *goecs.World, tiledMap tiled.
 							FlipX: l.Tiles[i].HorizontalFlip,
 							FlipY: l.Tiles[i].VerticalFlip,
 						},
+						tiled.Properties{Values: tm.getTiledProperties(id, mapDef)},
 						pos,
 						effects.Layer{Depth: ld},
 					)
