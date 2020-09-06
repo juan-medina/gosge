@@ -2,8 +2,8 @@
 Go Simple Game Engine using an [ECS](https://github.com/juan-medina/goecs)
 
 [![License: Apache2](https://img.shields.io/badge/license-Apache%202-blue.svg)](/LICENSE)
-[![go version](https://img.shields.io/github/v/tag/juan-medina/gosge?label=version)](https://pkg.go.dev/mod/github.com/juan-medina/gosge)
-[![godoc](https://godoc.org/github.com/juan-medina/gosge?status.svg)](https://pkg.go.dev/mod/github.com/juan-medina/gosge)
+[![go version](https://img.shields.io/github/v/tag/juan-medina/gosge?label=version)](https://pkg.go.dev/mod/github.com/juan-medina/gosge?tab=versions)
+[![godoc](https://godoc.org/github.com/juan-medina/gosge?status.svg)](https://pkg.go.dev/github.com/juan-medina/gosge?tab=doc)
 [![Build Status](https://travis-ci.com/juan-medina/gosge.svg?branch=main)](https://travis-ci.com/juan-medina/gosge)
 [![conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant%202.0-purple.svg?style=flat-square)](https://www.contributor-covenant.org/version/2/0/code_of_conduct/)
 
