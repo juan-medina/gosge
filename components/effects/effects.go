@@ -25,7 +25,7 @@ package effects
 
 import (
 	"github.com/juan-medina/goecs"
-	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/gosge/components/color"
 	"reflect"
 )
 

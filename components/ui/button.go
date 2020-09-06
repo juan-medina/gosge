@@ -23,8 +23,8 @@
 package ui
 
 import (
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/geometry"
 )
 
 // ButtonColor represent the colors of the button

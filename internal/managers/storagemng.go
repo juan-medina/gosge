@@ -20,15 +20,14 @@
  *  THE SOFTWARE.
  */
 
-// Package storage x
-package storage
+package managers
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/internal/components"
-	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/lafriks/go-tiled"
 	"io/ioutil"
 	"os"
@@ -37,8 +36,8 @@ import (
 	"strconv"
 )
 
-// Storage is a storage for our game data
-type Storage interface {
+// StorageManager is a storage for our game data
+type StorageManager interface {
 	// LoadSpriteSheet preloads a sprite.Sprite sheet
 	LoadSpriteSheet(name string) error
 	// LoadSingleSprite preloads a sprite.Sprite in a sheet
@@ -65,6 +64,8 @@ type Storage interface {
 	GetTiledMapDef(name string) (components.TiledMapDef, error)
 	//Clear all loaded data
 	Clear()
+	// SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
+	SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool
 }
 
 type spriteSheetData struct {
@@ -88,34 +89,34 @@ type spriteSheetData struct {
 
 type spriteSheet map[string]components.SpriteDef
 
-type dataStorage struct {
+type storageManager struct {
 	sheets    map[string]spriteSheet
 	textures  map[string]components.TextureDef
 	fonts     map[string]components.FontDef
 	musics    map[string]components.MusicDef
 	sounds    map[string]components.SoundDef
 	tiledMaps map[string]components.TiledMapDef
-	rdr       render.Render
+	dm        DeviceManager
 }
 
-func (ds *dataStorage) LoadTiledMap(name string) (err error) {
+func (sm *storageManager) LoadTiledMap(name string) (err error) {
 	var tiledMap components.TiledMapDef
-	if _, ok := ds.tiledMaps[name]; !ok {
-		if tiledMap, err = ds.loadTileMap(name); err == nil {
-			ds.tiledMaps[name] = tiledMap
+	if _, ok := sm.tiledMaps[name]; !ok {
+		if tiledMap, err = sm.loadTileMap(name); err == nil {
+			sm.tiledMaps[name] = tiledMap
 		}
 	}
 	return
 }
 
-func (ds *dataStorage) GetTiledMapDef(name string) (components.TiledMapDef, error) {
-	if _, ok := ds.tiledMaps[name]; ok {
-		return ds.tiledMaps[name], nil
+func (sm *storageManager) GetTiledMapDef(name string) (components.TiledMapDef, error) {
+	if _, ok := sm.tiledMaps[name]; ok {
+		return sm.tiledMaps[name], nil
 	}
 	return components.TiledMapDef{}, fmt.Errorf("can not find tiled map %q", name)
 }
 
-func (ds dataStorage) loadTileMap(name string) (result components.TiledMapDef, err error) {
+func (sm storageManager) loadTileMap(name string) (result components.TiledMapDef, err error) {
 	var tiledMap *tiled.Map
 	if tiledMap, err = tiled.LoadFromFile(name); err == nil {
 
@@ -135,11 +136,11 @@ func (ds dataStorage) loadTileMap(name string) (result components.TiledMapDef, e
 		var texture components.TextureDef
 		for _, ts := range tiledMap.Tilesets {
 			texturePath := path.Join(dir, ts.Image.Source)
-			if texture, err = ds.rdr.LoadTexture(texturePath); err != nil {
+			if texture, err = sm.dm.LoadTexture(texturePath); err != nil {
 				return
 			}
 			st := make(spriteSheet, 0)
-			ds.sheets[name] = st
+			sm.sheets[name] = st
 
 			tilesetTileCount := ts.TileCount
 			tilesetColumns := ts.Columns
@@ -184,75 +185,75 @@ func (ds dataStorage) loadTileMap(name string) (result components.TiledMapDef, e
 	return
 }
 
-func (ds *dataStorage) LoadSound(name string) (err error) {
+func (sm *storageManager) LoadSound(name string) (err error) {
 	var sound components.SoundDef
-	if _, ok := ds.sounds[name]; !ok {
-		if sound, err = ds.rdr.LoadSound(name); err == nil {
-			ds.sounds[name] = sound
+	if _, ok := sm.sounds[name]; !ok {
+		if sound, err = sm.dm.LoadSound(name); err == nil {
+			sm.sounds[name] = sound
 		}
 	}
 	return err
 }
 
-func (ds *dataStorage) GetSoundDef(name string) (components.SoundDef, error) {
-	if _, ok := ds.sounds[name]; ok {
-		return ds.sounds[name], nil
+func (sm *storageManager) GetSoundDef(name string) (components.SoundDef, error) {
+	if _, ok := sm.sounds[name]; ok {
+		return sm.sounds[name], nil
 	}
 	return components.SoundDef{}, fmt.Errorf("can not find sound %q", name)
 }
 
-func (ds *dataStorage) GetMusicDef(name string) (components.MusicDef, error) {
-	if _, ok := ds.musics[name]; ok {
-		return ds.musics[name], nil
+func (sm *storageManager) GetMusicDef(name string) (components.MusicDef, error) {
+	if _, ok := sm.musics[name]; ok {
+		return sm.musics[name], nil
 	}
 	return components.MusicDef{}, fmt.Errorf("can not find music %q", name)
 }
 
-func (ds *dataStorage) LoadMusic(name string) (err error) {
+func (sm *storageManager) LoadMusic(name string) (err error) {
 	var music components.MusicDef
-	if _, ok := ds.musics[name]; !ok {
-		if music, err = ds.rdr.LoadMusic(name); err == nil {
-			ds.musics[name] = music
+	if _, ok := sm.musics[name]; !ok {
+		if music, err = sm.dm.LoadMusic(name); err == nil {
+			sm.musics[name] = music
 		}
 	}
 	return err
 }
 
-func (ds *dataStorage) LoadFont(name string) (err error) {
+func (sm *storageManager) LoadFont(name string) (err error) {
 	var font components.FontDef
-	if _, ok := ds.fonts[name]; !ok {
-		if font, err = ds.rdr.LoadFont(name); err == nil {
-			ds.fonts[name] = font
+	if _, ok := sm.fonts[name]; !ok {
+		if font, err = sm.dm.LoadFont(name); err == nil {
+			sm.fonts[name] = font
 		}
 	}
 	return
 }
 
-func (ds *dataStorage) GetFontDef(name string) (components.FontDef, error) {
-	if _, ok := ds.fonts[name]; ok {
-		return ds.fonts[name], nil
+func (sm *storageManager) GetFontDef(name string) (components.FontDef, error) {
+	if _, ok := sm.fonts[name]; ok {
+		return sm.fonts[name], nil
 	}
 	return components.FontDef{}, fmt.Errorf("can not find font %q", name)
 }
 
-func (ds *dataStorage) loadTexture(name string) (def components.TextureDef, err error) {
-	if _, ok := ds.textures[name]; !ok {
-		if texture, err := ds.rdr.LoadTexture(name); err == nil {
-			ds.textures[name] = texture
+func (sm *storageManager) loadTexture(name string) (def components.TextureDef, err error) {
+	if _, ok := sm.textures[name]; !ok {
+		if texture, err := sm.dm.LoadTexture(name); err == nil {
+			sm.textures[name] = texture
 		} else {
 			return texture, err
 		}
 	}
-	return ds.textures[name], nil
+	return sm.textures[name], nil
 }
 
-func (ds *dataStorage) handleSheet(data spriteSheetData, name string) (err error) {
+func (sm *storageManager) handleSheet(data spriteSheetData, name string) (err error) {
 	var texture components.TextureDef
 	st := make(spriteSheet, 0)
-	ds.sheets[name] = st
+	sm.sheets[name] = st
 	dir := filepath.Dir(name)
 	texturePath := path.Join(dir, data.Meta.Image)
-	if texture, err = ds.rdr.LoadTexture(texturePath); err == nil {
+	if texture, err = sm.dm.LoadTexture(texturePath); err == nil {
 		for _, spr := range data.Frames {
 			st[spr.Name] = components.SpriteDef{
 				Texture: texture,
@@ -277,7 +278,7 @@ func (ds *dataStorage) handleSheet(data spriteSheetData, name string) (err error
 	return
 }
 
-func (ds *dataStorage) LoadSpriteSheet(name string) (err error) {
+func (sm *storageManager) LoadSpriteSheet(name string) (err error) {
 	data := spriteSheetData{}
 	var jsonFile *os.File
 	if jsonFile, err = os.Open(name); err == nil {
@@ -286,20 +287,20 @@ func (ds *dataStorage) LoadSpriteSheet(name string) (err error) {
 		var bytes []byte
 		if bytes, err = ioutil.ReadAll(jsonFile); err == nil {
 			if err = json.Unmarshal(bytes, &data); err == nil {
-				return ds.handleSheet(data, name)
+				return sm.handleSheet(data, name)
 			}
 		}
 	}
 	return
 }
 
-func (ds *dataStorage) LoadSingleSprite(sheet string, name string, pivot geometry.Point) error {
-	if texture, err := ds.loadTexture(name); err == nil {
-		if _, ok := ds.sheets[sheet]; !ok {
+func (sm *storageManager) LoadSingleSprite(sheet string, name string, pivot geometry.Point) error {
+	if texture, err := sm.loadTexture(name); err == nil {
+		if _, ok := sm.sheets[sheet]; !ok {
 			st := make(spriteSheet, 0)
-			ds.sheets[sheet] = st
+			sm.sheets[sheet] = st
 		}
-		ds.sheets[sheet][name] = components.SpriteDef{
+		sm.sheets[sheet][name] = components.SpriteDef{
 			Texture: texture,
 			Origin: geometry.Rect{
 				From: geometry.Point{
@@ -316,8 +317,8 @@ func (ds *dataStorage) LoadSingleSprite(sheet string, name string, pivot geometr
 	return nil
 }
 
-func (ds dataStorage) GetSpriteDef(sheet string, name string) (components.SpriteDef, error) {
-	if sh, ok := ds.sheets[sheet]; ok {
+func (sm storageManager) GetSpriteDef(sheet string, name string) (components.SpriteDef, error) {
+	if sh, ok := sm.sheets[sheet]; ok {
 		if def, ok := sh[name]; ok {
 			return def, nil
 		}
@@ -326,46 +327,65 @@ func (ds dataStorage) GetSpriteDef(sheet string, name string) (components.Sprite
 	return components.SpriteDef{}, fmt.Errorf("can not find sprite sheet %q", sheet)
 }
 
-func (ds dataStorage) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
-	def, err := ds.GetSpriteDef(sheet, name)
+func (sm storageManager) GetSpriteSize(sheet string, name string) (geometry.Size, error) {
+	def, err := sm.GetSpriteDef(sheet, name)
 	//goland:noinspection GoNilness
 	return def.Origin.Size, err
 }
 
-func (ds *dataStorage) Clear() {
-	ds.sheets = make(map[string]spriteSheet, 0)
+func (sm *storageManager) Clear() {
+	sm.sheets = make(map[string]spriteSheet, 0)
 
-	for _, v := range ds.textures {
-		ds.rdr.UnloadTexture(v)
+	for _, v := range sm.textures {
+		sm.dm.UnloadTexture(v)
 	}
-	ds.textures = make(map[string]components.TextureDef, 0)
+	sm.textures = make(map[string]components.TextureDef, 0)
 
-	for _, v := range ds.fonts {
-		ds.rdr.UnloadFont(v)
+	for _, v := range sm.fonts {
+		sm.dm.UnloadFont(v)
 	}
-	ds.fonts = make(map[string]components.FontDef, 0)
+	sm.fonts = make(map[string]components.FontDef, 0)
 
-	for _, v := range ds.musics {
-		ds.rdr.UnloadMusic(v)
+	for _, v := range sm.musics {
+		sm.dm.UnloadMusic(v)
 	}
-	ds.musics = make(map[string]components.MusicDef, 0)
+	sm.musics = make(map[string]components.MusicDef, 0)
 
-	for _, v := range ds.sounds {
-		ds.rdr.UnloadSound(v)
+	for _, v := range sm.sounds {
+		sm.dm.UnloadSound(v)
 	}
-	ds.sounds = make(map[string]components.SoundDef, 0)
-	ds.tiledMaps = make(map[string]components.TiledMapDef, 0)
+	sm.sounds = make(map[string]components.SoundDef, 0)
+	sm.tiledMaps = make(map[string]components.TiledMapDef, 0)
 }
 
-// New returns a new storage.Storage
-func New(rdr render.Render) Storage {
-	return &dataStorage{
+// getSpriteRect return a geometry.Rect for a given sprite.Sprite at a geometry.Point
+func (sm storageManager) getSpriteRect(spr sprite.Sprite, at geometry.Point) geometry.Rect {
+	def, _ := sm.GetSpriteDef(spr.Sheet, spr.Name)
+	size := def.Origin.Size.Scale(spr.Scale)
+
+	return geometry.Rect{
+		From: geometry.Point{
+			X: at.X - (size.Width * def.Pivot.X),
+			Y: at.Y - (size.Height * def.Pivot.Y),
+		},
+		Size: size,
+	}
+}
+
+// SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
+func (sm storageManager) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool {
+	return sm.getSpriteRect(spr, at).IsPointInRect(point)
+}
+
+// Storage returns a new storage.StorageManager
+func Storage(dm DeviceManager) StorageManager {
+	return &storageManager{
 		sheets:    make(map[string]spriteSheet, 0),
 		textures:  make(map[string]components.TextureDef, 0),
 		fonts:     make(map[string]components.FontDef, 0),
 		musics:    make(map[string]components.MusicDef, 0),
 		sounds:    make(map[string]components.SoundDef, 0),
 		tiledMaps: make(map[string]components.TiledMapDef, 0),
-		rdr:       rdr,
+		dm:        dm,
 	}
 }

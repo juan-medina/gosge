@@ -20,18 +20,51 @@
  *  THE SOFTWARE.
  */
 
-// Package options contains our game Options
-package options
+//Package shapes contains various drawable shapes
+package shapes
 
 import (
-	"github.com/juan-medina/gosge/pkg/components/color"
+	"github.com/juan-medina/goecs"
+	"github.com/juan-medina/gosge/components/geometry"
+	"reflect"
 )
 
-// Options are our game options
-type Options struct {
-	Title      string      // Title is the game title
-	BackGround color.Solid // BackGround is the background color.Color
-	Monitor    int         // Monitor is the monitor that we will use
-	Icon       string      // Icon is a path for a PNG containing the application icon
-	Windowed   bool        // Windowed will indicate if we want the game on a window
+//Box is a rectangular shape that we could draw in a geometry.Point with a color.Solid or color.Gradient
+type Box struct {
+	Size  geometry.Size // The box size
+	Scale float32       // The box scale
+}
+
+// Contains return if a box at a geometry.Point contains a point
+func (b Box) Contains(at geometry.Point, point geometry.Point) bool {
+	return geometry.Rect{
+		From: at,
+		Size: geometry.Size{
+			Width:  b.Size.Width * b.Scale,
+			Height: b.Size.Height * b.Scale,
+		},
+	}.IsPointInRect(point)
+}
+
+type types struct {
+	// Box is the reflect.Type for shapes.Box
+	Box reflect.Type
+}
+
+// TYPE hold the reflect.Type for our shapes components
+var TYPE = types{
+	Box: reflect.TypeOf(Box{}),
+}
+
+type gets struct {
+	// Box gets a shapes.Box from a goecs.Entity
+	Box func(e *goecs.Entity) Box
+}
+
+// Get a geometry component
+var Get = gets{
+	// Box gets a shapes.Box from a goecs.Entity
+	Box: func(e *goecs.Entity) Box {
+		return e.Get(TYPE.Box).(Box)
+	},
 }

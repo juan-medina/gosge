@@ -24,19 +24,17 @@ package managers
 
 import (
 	"github.com/juan-medina/goecs"
-	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/internal/storage"
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/effects"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/shapes"
-	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/ui"
+	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/effects"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/shapes"
+	"github.com/juan-medina/gosge/components/sprite"
+	"github.com/juan-medina/gosge/components/ui"
 )
 
 type renderingManager struct {
-	rdr render.Render
-	ds  storage.Storage
+	dm DeviceManager
+	sm StorageManager
 }
 
 var noTint = color.White
@@ -52,8 +50,8 @@ func (rdm renderingManager) renderSprite(ent *goecs.Entity) error {
 		tint = noTint
 	}
 
-	if def, err := rdm.ds.GetSpriteDef(spr.Sheet, spr.Name); err == nil {
-		if err := rdm.rdr.DrawSprite(def, spr, pos, tint); err != nil {
+	if def, err := rdm.sm.GetSpriteDef(spr.Sheet, spr.Name); err == nil {
+		if err := rdm.dm.DrawSprite(def, spr, pos, tint); err != nil {
 			return err
 		}
 	} else {
@@ -67,10 +65,10 @@ func (rdm renderingManager) renderShape(ent *goecs.Entity) error {
 	box := shapes.Get.Box(ent)
 	if ent.Contains(color.TYPE.Solid) {
 		clr := color.Get.Solid(ent)
-		rdm.rdr.DrawSolidBox(pos, box, clr)
+		rdm.dm.DrawSolidBox(pos, box, clr)
 	} else if ent.Contains(color.TYPE.Gradient) {
 		gra := color.Get.Gradient(ent)
-		rdm.rdr.DrawGradientBox(pos, box, gra)
+		rdm.dm.DrawGradientBox(pos, box, gra)
 	}
 	return nil
 }
@@ -86,16 +84,16 @@ func (rdm renderingManager) renderFlatButton(ent *goecs.Entity) error {
 			Y: pos.Y + fb.Shadow.Height,
 		}
 		sc := color.Gray.Alpha(127)
-		rdm.rdr.DrawSolidBox(shadowPos, box, sc)
+		rdm.dm.DrawSolidBox(shadowPos, box, sc)
 	}
 
 	// draw the box
 	if ent.Contains(color.TYPE.Solid) {
 		clr := color.Get.Solid(ent)
-		rdm.rdr.DrawSolidBox(pos, box, clr)
+		rdm.dm.DrawSolidBox(pos, box, clr)
 	} else if ent.Contains(color.TYPE.Gradient) {
 		gra := color.Get.Gradient(ent)
-		rdm.rdr.DrawGradientBox(pos, box, gra)
+		rdm.dm.DrawGradientBox(pos, box, gra)
 	}
 
 	// if contains a text component
@@ -124,9 +122,9 @@ func (rdm renderingManager) renderFlatButton(ent *goecs.Entity) error {
 			colorCmp = gra.From.Inverse()
 		}
 
-		if ftd, err := rdm.ds.GetFontDef(textCmp.Font); err == nil {
+		if ftd, err := rdm.sm.GetFontDef(textCmp.Font); err == nil {
 			// draw the text
-			rdm.rdr.DrawText(ftd, textCmp, textPos, colorCmp)
+			rdm.dm.DrawText(ftd, textCmp, textPos, colorCmp)
 		} else {
 			return err
 		}
@@ -140,9 +138,9 @@ func (rdm renderingManager) renderText(v *goecs.Entity) error {
 	posCmp := geometry.Get.Point(v)
 	colorCmp := color.Get.Solid(v)
 
-	if ftd, err := rdm.ds.GetFontDef(textCmp.Font); err == nil {
+	if ftd, err := rdm.sm.GetFontDef(textCmp.Font); err == nil {
 		// draw the text
-		rdm.rdr.DrawText(ftd, textCmp, posCmp, colorCmp)
+		rdm.dm.DrawText(ftd, textCmp, posCmp, colorCmp)
 	} else {
 		return err
 	}
@@ -162,12 +160,12 @@ func (rdm renderingManager) sortRenderable(first, second *goecs.Entity) bool {
 	} else if !rdm.isRenderable(second) {
 		return true
 	} else {
-		firstDepth := render.DefaultLayer
+		firstDepth := DefaultLayer
 		if first.Contains(effects.TYPE.Layer) {
 			firstDepth = effects.Get.Layer(first).Depth
 		}
 
-		secondDepth := render.DefaultLayer
+		secondDepth := DefaultLayer
 		if second.Contains(effects.TYPE.Layer) {
 			secondDepth = effects.Get.Layer(second).Depth
 		}
@@ -210,9 +208,9 @@ func (rdm renderingManager) System(world *goecs.World, _ float32) error {
 }
 
 // Rendering returns a managers.WithSystem that will handle rendering
-func Rendering(rdr render.Render, ds storage.Storage) WithSystem {
+func Rendering(dm DeviceManager, sm StorageManager) WithSystem {
 	return &renderingManager{
-		rdr: rdr,
-		ds:  ds,
+		dm: dm,
+		sm: sm,
 	}
 }

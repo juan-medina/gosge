@@ -2,10 +2,9 @@ package managers
 
 import (
 	"github.com/juan-medina/goecs"
-	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/pkg/components/device"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/events"
+	"github.com/juan-medina/gosge/components/device"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/events"
 )
 
 /*
@@ -32,7 +31,7 @@ import (
 
 type eventManager struct {
 	mme events.MouseMoveEvent
-	rdr render.Render
+	dm  DeviceManager
 	ks  []device.KeyStatus
 }
 
@@ -59,13 +58,13 @@ func (em eventManager) sendKeyEvent(world *goecs.World, key device.Key, status d
 }
 
 func (em *eventManager) System(world *goecs.World, _ float32) error {
-	if em.rdr.ShouldClose() {
+	if em.dm.ShouldClose() {
 		if err := em.sendGameClose(world); err != nil {
 			return err
 		}
 	}
 
-	mp := em.rdr.GetMousePoint()
+	mp := em.dm.GetMousePoint()
 	if em.mme.Point != mp {
 		em.mme.Point = mp
 		if err := em.sendMouseMove(world); err != nil {
@@ -74,7 +73,7 @@ func (em *eventManager) System(world *goecs.World, _ float32) error {
 	}
 
 	for _, v := range mouseButtonsTocCheck {
-		if em.rdr.IsMouseRelease(v) {
+		if em.dm.IsMouseRelease(v) {
 			if err := em.sendMouseRelease(world, v); err != nil {
 				return err
 			}
@@ -82,7 +81,7 @@ func (em *eventManager) System(world *goecs.World, _ float32) error {
 	}
 
 	for key := device.FirstKey + 1; key < device.TotalKeys; key++ {
-		status := em.rdr.GetKeyStatus(key)
+		status := em.dm.GetKeyStatus(key)
 		if !status.Equals(em.ks[key]) || (status.Down) {
 			em.ks[key] = status
 			if err := em.sendKeyEvent(world, key, status); err != nil {
@@ -95,9 +94,9 @@ func (em *eventManager) System(world *goecs.World, _ float32) error {
 }
 
 // Events returns a managers.WithSystem that will handle signals
-func Events(rdr render.Render) WithSystem {
+func Events(dm DeviceManager) WithSystem {
 	return &eventManager{
-		rdr: rdr,
+		dm: dm,
 		mme: events.MouseMoveEvent{
 			Point: geometry.Point{
 				X: -1,

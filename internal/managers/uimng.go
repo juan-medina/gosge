@@ -24,14 +24,12 @@ package managers
 
 import (
 	"github.com/juan-medina/goecs"
-	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/shapes"
-	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/ui"
-	"github.com/juan-medina/gosge/pkg/engine"
-	"github.com/juan-medina/gosge/pkg/events"
+	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/shapes"
+	"github.com/juan-medina/gosge/components/sprite"
+	"github.com/juan-medina/gosge/components/ui"
+	"github.com/juan-medina/gosge/events"
 )
 
 const (
@@ -40,8 +38,8 @@ const (
 )
 
 type uiManager struct {
-	eng engine.Engine
-	rdr render.Render
+	dm DeviceManager
+	sm StorageManager
 }
 
 func (uim uiManager) System(world *goecs.World, _ float32) error {
@@ -146,7 +144,7 @@ func (uim uiManager) spriteButtons(world *goecs.World) {
 			spr := sprite.Get(ent)
 			// if the sprite button has change
 			if !(spr.Name == sb.Normal || spr.Name == sb.Hover) {
-				uim.refreshButtonOnPoint(ent, uim.rdr.GetMousePoint())
+				uim.refreshButtonOnPoint(ent, uim.dm.GetMousePoint())
 			}
 		}
 	}
@@ -157,7 +155,7 @@ func (uim uiManager) refreshButtonOnPoint(ent *goecs.Entity, pnt geometry.Point)
 	pos := geometry.Get.Point(ent)
 	sbn := ui.Get.SpriteButton(ent)
 
-	if uim.eng.SpriteAtContains(spr, pos, pnt) {
+	if uim.sm.SpriteAtContains(spr, pos, pnt) {
 		spr.Name = sbn.Hover
 	} else {
 		spr.Name = sbn.Normal
@@ -179,7 +177,7 @@ func (uim uiManager) spriteButtonsMouseUp(world *goecs.World, mue events.MouseUp
 		pos := geometry.Get.Point(ent)
 		sbn := ui.Get.SpriteButton(ent)
 
-		if uim.eng.SpriteAtContains(spr, pos, mue.Point) {
+		if uim.sm.SpriteAtContains(spr, pos, mue.Point) {
 			if sbn.Sound != "" {
 				if err := world.Signal(events.PlaySoundEvent{Name: sbn.Sound}); err != nil {
 					return err
@@ -192,6 +190,6 @@ func (uim uiManager) spriteButtonsMouseUp(world *goecs.World, mue events.MouseUp
 }
 
 // UI returns a managers.WithSystemAndListener that handle ui components
-func UI(eng engine.Engine, rdr render.Render) WithSystemAndListener {
-	return &uiManager{eng: eng, rdr: rdr}
+func UI(dm DeviceManager, sm StorageManager) WithSystemAndListener {
+	return &uiManager{dm: dm, sm: sm}
 }

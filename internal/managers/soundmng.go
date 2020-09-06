@@ -24,21 +24,19 @@ package managers
 
 import (
 	"github.com/juan-medina/goecs"
-	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/internal/storage"
-	"github.com/juan-medina/gosge/pkg/events"
+	"github.com/juan-medina/gosge/events"
 )
 
 type soundManager struct {
-	rdr render.Render
-	ds  storage.Storage
+	dm DeviceManager
+	sm StorageManager
 }
 
 func (sm soundManager) Listener(_ *goecs.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
 	case events.PlaySoundEvent:
-		if def, err := sm.ds.GetSoundDef(e.Name); err == nil {
-			sm.rdr.PlaySound(def)
+		if def, err := sm.sm.GetSoundDef(e.Name); err == nil {
+			sm.dm.PlaySound(def)
 		} else {
 			return err
 		}
@@ -47,9 +45,9 @@ func (sm soundManager) Listener(_ *goecs.World, event interface{}, _ float32) er
 }
 
 // Sounds returns a managers.WithListener that handle audio waves
-func Sounds(rdr render.Render, ds storage.Storage) WithListener {
+func Sounds(dm DeviceManager, sm StorageManager) WithListener {
 	return &soundManager{
-		rdr: rdr,
-		ds:  ds,
+		dm: dm,
+		sm: sm,
 	}
 }

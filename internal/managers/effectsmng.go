@@ -24,8 +24,8 @@ package managers
 
 import (
 	"github.com/juan-medina/goecs"
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/effects"
+	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/effects"
 )
 
 type effectManager struct{}

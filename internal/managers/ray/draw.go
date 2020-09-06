@@ -25,15 +25,15 @@ package ray
 import (
 	"fmt"
 	"github.com/gen2brain/raylib-go/raylib"
+	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/shapes"
+	"github.com/juan-medina/gosge/components/sprite"
+	"github.com/juan-medina/gosge/components/ui"
 	"github.com/juan-medina/gosge/internal/components"
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/shapes"
-	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/ui"
 )
 
-func (rr *RenderImpl) color2RayColor(color color.Solid) rl.Color {
+func (dmi *DeviceManagerImpl) color2RayColor(color color.Solid) rl.Color {
 	return rl.NewColor(color.R, color.G, color.B, color.A)
 }
 
@@ -43,7 +43,7 @@ var (
 )
 
 // LoadTexture giving it file name into VRAM
-func (rr RenderImpl) LoadTexture(fileName string) (components.TextureDef, error) {
+func (dmi DeviceManagerImpl) LoadTexture(fileName string) (components.TextureDef, error) {
 	if t := rl.LoadTexture(fileName); t.ID != 0 {
 		return components.TextureDef{Data: t, Size: geometry.Size{Width: float32(t.Width), Height: float32(t.Height)}}, nil
 	}
@@ -51,7 +51,7 @@ func (rr RenderImpl) LoadTexture(fileName string) (components.TextureDef, error)
 }
 
 // LoadFont giving it file name into VRAM
-func (rr RenderImpl) LoadFont(fileName string) (components.FontDef, error) {
+func (dmi DeviceManagerImpl) LoadFont(fileName string) (components.FontDef, error) {
 	if f := rl.LoadFont(fileName); f.Texture.ID != 0 {
 		return components.FontDef{Data: f}, nil
 	}
@@ -59,17 +59,17 @@ func (rr RenderImpl) LoadFont(fileName string) (components.FontDef, error) {
 }
 
 // UnloadFont from VRAM
-func (rr RenderImpl) UnloadFont(textureDef components.FontDef) {
+func (dmi DeviceManagerImpl) UnloadFont(textureDef components.FontDef) {
 	rl.UnloadFont(textureDef.Data.(rl.Font))
 }
 
 // UnloadTexture from VRAM
-func (rr RenderImpl) UnloadTexture(textureDef components.TextureDef) {
+func (dmi DeviceManagerImpl) UnloadTexture(textureDef components.TextureDef) {
 	rl.UnloadTexture(textureDef.Data.(rl.Texture2D))
 }
 
 // DrawText will draw a text.Text in the given geometry.Point with the correspondent color.Color
-func (rr RenderImpl) DrawText(ftd components.FontDef, txt ui.Text, pos geometry.Point, color color.Solid) {
+func (dmi DeviceManagerImpl) DrawText(ftd components.FontDef, txt ui.Text, pos geometry.Point, color color.Solid) {
 	font := ftd.Data.(rl.Font)
 
 	vec := rl.Vector2{
@@ -102,11 +102,11 @@ func (rr RenderImpl) DrawText(ftd components.FontDef, txt ui.Text, pos geometry.
 		vec.Y += av.Y
 	}
 
-	rl.DrawTextEx(font, txt.String, vec, txt.Size, 0, rr.color2RayColor(color))
+	rl.DrawTextEx(font, txt.String, vec, txt.Size, 0, dmi.color2RayColor(color))
 }
 
 // DrawSprite draws a sprite.Sprite in the given geometry.Point with the tint color.Color
-func (rr RenderImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Point, tint color.Solid) error {
+func (dmi DeviceManagerImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Point, tint color.Solid) error {
 	scale := sprite.Scale
 	px := def.Origin.Size.Width * def.Pivot.X
 	py := def.Origin.Size.Height * def.Pivot.Y
@@ -123,7 +123,7 @@ func (rr RenderImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, 
 		sourceFlip.Height *= -1
 	}
 
-	rc := rr.color2RayColor(tint)
+	rc := dmi.color2RayColor(tint)
 	rotation := sprite.Rotation
 	sourceRec := rl.Rectangle{
 		X:      def.Origin.From.X,
@@ -145,7 +145,7 @@ func (rr RenderImpl) DrawSprite(def components.SpriteDef, sprite sprite.Sprite, 
 }
 
 // DrawSolidBox draws a solid box with an color.Solid and a scale
-func (rr RenderImpl) DrawSolidBox(pos geometry.Point, box shapes.Box, solid color.Solid) {
+func (dmi DeviceManagerImpl) DrawSolidBox(pos geometry.Point, box shapes.Box, solid color.Solid) {
 	rec := rl.Rectangle{
 		X:      pos.X,
 		Y:      pos.Y,
@@ -153,17 +153,17 @@ func (rr RenderImpl) DrawSolidBox(pos geometry.Point, box shapes.Box, solid colo
 		Height: box.Size.Height * box.Scale,
 	}
 
-	rl.DrawRectangleRec(rec, rr.color2RayColor(solid))
+	rl.DrawRectangleRec(rec, dmi.color2RayColor(solid))
 }
 
 // DrawGradientBox draws a solid box with an color.Solid and a scale
-func (rr RenderImpl) DrawGradientBox(pos geometry.Point, box shapes.Box, gradient color.Gradient) {
+func (dmi DeviceManagerImpl) DrawGradientBox(pos geometry.Point, box shapes.Box, gradient color.Gradient) {
 	x := int32(pos.X)
 	y := int32(pos.Y)
 	w := int32(box.Size.Width * box.Scale)
 	h := int32(box.Size.Height * box.Scale)
-	c1 := rr.color2RayColor(gradient.From)
-	c2 := rr.color2RayColor(gradient.To)
+	c1 := dmi.color2RayColor(gradient.From)
+	c2 := dmi.color2RayColor(gradient.To)
 
 	if gradient.Direction == color.GradientHorizontal {
 		rl.DrawRectangleGradientH(x, y, w, h, c1, c2)
@@ -173,12 +173,12 @@ func (rr RenderImpl) DrawGradientBox(pos geometry.Point, box shapes.Box, gradien
 }
 
 // SetBackgroundColor changes the current background color.Solid
-func (rr *RenderImpl) SetBackgroundColor(color color.Solid) {
-	rr.saveOpts.BackGround = color
+func (dmi *DeviceManagerImpl) SetBackgroundColor(color color.Solid) {
+	dmi.saveOpts.BackGround = color
 }
 
 // MeasureText return the geometry.Size of a string with a defined size and spacing
-func (rr *RenderImpl) MeasureText(fnt components.FontDef, str string, size float32) geometry.Size {
+func (dmi *DeviceManagerImpl) MeasureText(fnt components.FontDef, str string, size float32) geometry.Size {
 	fray := fnt.Data.(rl.Font)
 	av := rl.MeasureTextEx(fray, str, size, 0)
 	return geometry.Size{

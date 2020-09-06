@@ -24,9 +24,9 @@
 package events
 
 import (
-	"github.com/juan-medina/gosge/pkg/components/audio"
-	"github.com/juan-medina/gosge/pkg/components/device"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/components/audio"
+	"github.com/juan-medina/gosge/components/device"
+	"github.com/juan-medina/gosge/components/geometry"
 )
 
 // GameCloseEvent is an event that indicates that game need to close

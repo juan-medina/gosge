@@ -24,8 +24,8 @@ package ray
 
 import (
 	"github.com/gen2brain/raylib-go/raylib"
-	"github.com/juan-medina/gosge/pkg/components/device"
-	"github.com/juan-medina/gosge/pkg/options"
+	"github.com/juan-medina/gosge/components/device"
+	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
 	"os"
 	"runtime"
@@ -33,8 +33,8 @@ import (
 )
 
 // Init the rendering device
-func (rr *RenderImpl) Init(opt options.Options) {
-	rr.saveOpts = opt
+func (dmi *DeviceManagerImpl) Init(opt options.Options) {
+	dmi.saveOpts = opt
 	rl.SetTraceLogCallback(func(logType int, str string) {
 		switch logType {
 		case rl.LogDebug:
@@ -79,25 +79,25 @@ func (rr *RenderImpl) Init(opt options.Options) {
 }
 
 // End the rendering device
-func (rr RenderImpl) End() {
-	rr.StopAllSounds()
+func (dmi DeviceManagerImpl) End() {
+	dmi.StopAllSounds()
 	rl.CloseAudioDevice()
 	rl.CloseWindow()
 }
 
 // BeginFrame for rendering
-func (rr RenderImpl) BeginFrame() {
+func (dmi DeviceManagerImpl) BeginFrame() {
 	rl.BeginDrawing()
-	rl.ClearBackground(rr.color2RayColor(rr.saveOpts.BackGround))
+	rl.ClearBackground(dmi.color2RayColor(dmi.saveOpts.BackGround))
 }
 
 // EndFrame for rendering
-func (rr RenderImpl) EndFrame() {
+func (dmi DeviceManagerImpl) EndFrame() {
 	rl.EndDrawing()
 }
 
 // ShouldClose returns if th engine should close
-func (rr RenderImpl) ShouldClose() bool {
+func (dmi DeviceManagerImpl) ShouldClose() bool {
 	return rl.WindowShouldClose()
 }
 
@@ -114,7 +114,7 @@ var engineKeyToRayKey = map[device.Key]int32{
 }
 
 // GetKeyStatus returns the device.KeyStatus for a given device.Key
-func (rr RenderImpl) GetKeyStatus(key device.Key) device.KeyStatus {
+func (dmi DeviceManagerImpl) GetKeyStatus(key device.Key) device.KeyStatus {
 	status := device.KeyStatus{}
 
 	if v, ok := engineKeyToRayKey[key]; ok {

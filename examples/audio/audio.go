@@ -24,17 +24,16 @@ package main
 
 import (
 	"github.com/juan-medina/goecs"
-	"github.com/juan-medina/gosge/pkg/components/animation"
-	"github.com/juan-medina/gosge/pkg/components/audio"
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/effects"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/ui"
-	"github.com/juan-medina/gosge/pkg/engine"
-	"github.com/juan-medina/gosge/pkg/events"
-	"github.com/juan-medina/gosge/pkg/game"
-	"github.com/juan-medina/gosge/pkg/options"
+	"github.com/juan-medina/gosge"
+	"github.com/juan-medina/gosge/components/animation"
+	"github.com/juan-medina/gosge/components/audio"
+	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/effects"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/sprite"
+	"github.com/juan-medina/gosge/components/ui"
+	"github.com/juan-medina/gosge/events"
+	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
 )
 
@@ -72,7 +71,7 @@ const (
 var (
 	playButton *goecs.Entity // the play button entity
 	gopher     *goecs.Entity // the gopher sprite entity
-	geng       engine.Engine // the game engine
+	geng       *gosge.Engine // the game engine
 )
 
 var (
@@ -81,12 +80,12 @@ var (
 )
 
 func main() {
-	if err := game.Run(opt, loadGame); err != nil {
+	if err := gosge.Run(opt, loadGame); err != nil {
 		log.Fatal().Err(err).Msg("error running the game")
 	}
 }
 
-func loadGame(eng engine.Engine) error {
+func loadGame(eng *gosge.Engine) error {
 	geng = eng
 	var err error
 	// Preload font

@@ -20,21 +20,11 @@
  *  THE SOFTWARE.
  */
 
-//Package ray the implementation of render.Render for raylib
 package ray
 
-import (
-	"github.com/juan-medina/gosge/pkg/options"
-)
+import "github.com/gen2brain/raylib-go/raylib"
 
-//RenderImpl is our render.Render based on raylib
-type RenderImpl struct {
-	saveOpts options.Options
-}
-
-// New create a new render.Render base on raylib
-func New() *RenderImpl {
-	return &RenderImpl{
-		saveOpts: options.Options{},
-	}
+// GetFrameTime returns the time from the delta time for current frame
+func (dmi DeviceManagerImpl) GetFrameTime() float32 {
+	return rl.GetFrameTime()
 }

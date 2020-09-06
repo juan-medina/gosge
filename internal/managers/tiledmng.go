@@ -25,18 +25,16 @@ package managers
 import (
 	"fmt"
 	"github.com/juan-medina/goecs"
+	"github.com/juan-medina/gosge/components/effects"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/sprite"
+	"github.com/juan-medina/gosge/components/tiled"
 	"github.com/juan-medina/gosge/internal/components"
-	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/internal/storage"
-	"github.com/juan-medina/gosge/pkg/components/effects"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/tiled"
 	"strconv"
 )
 
 type tiledManager struct {
-	ds storage.Storage
+	sm StorageManager
 }
 
 const (
@@ -49,7 +47,7 @@ func (tm tiledManager) System(world *goecs.World, _ float32) (err error) {
 		tiledMap := tiled.Get.Map(ent)
 		pos := geometry.Get.Point(ent)
 		if ent.NotContains(tiled.TYPE.MapState) {
-			depth := render.DefaultLayer
+			depth := DefaultLayer
 			if ent.Contains(effects.TYPE.Layer) {
 				depth = effects.Get.Layer(ent).Depth
 			}
@@ -84,7 +82,7 @@ func (tm *tiledManager) GetTilePosition(x, y int, def components.TiledMapDef) ge
 }
 
 func (tm tiledManager) addSpriteFromTiledMap(world *goecs.World, tiledMap tiled.Map, depth float32, mapPos geometry.Point) (err error) {
-	if mapDef, err := tm.ds.GetTiledMapDef(tiledMap.Name); err == nil {
+	if mapDef, err := tm.sm.GetTiledMapDef(tiledMap.Name); err == nil {
 		if !(mapDef.Data.RenderOrder == "" || mapDef.Data.RenderOrder == rightDown) {
 			return fmt.Errorf("unsupported tiled render order : got %q, want %q", mapDef.Data.RenderOrder, rightDown)
 		}
@@ -149,8 +147,8 @@ func (tm tiledManager) updateSprites(world *goecs.World, tiledMap tiled.Map, dif
 }
 
 // TiledMaps returns a managers.WithSystem that handle tiled maps
-func TiledMaps(ds storage.Storage) WithSystem {
+func TiledMaps(sm StorageManager) WithSystem {
 	return tiledManager{
-		ds: ds,
+		sm: sm,
 	}
 }

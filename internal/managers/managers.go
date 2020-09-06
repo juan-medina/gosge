@@ -27,6 +27,11 @@ import (
 	"github.com/juan-medina/goecs"
 )
 
+// DeviceManager constants
+const (
+	DefaultLayer = float32(1000000) // DefaultLayer is the default layer depth
+)
+
 // Manager can have world.System or world.Listener
 type Manager interface{}
 

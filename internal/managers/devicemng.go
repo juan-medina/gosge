@@ -20,28 +20,22 @@
  *  THE SOFTWARE.
  */
 
-// Package render device rendering implementation
-package render
+package managers
 
 import (
+	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/device"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/shapes"
+	"github.com/juan-medina/gosge/components/sprite"
+	"github.com/juan-medina/gosge/components/ui"
 	"github.com/juan-medina/gosge/internal/components"
-	"github.com/juan-medina/gosge/internal/render/ray"
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/device"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/shapes"
-	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/ui"
-	"github.com/juan-medina/gosge/pkg/options"
+	"github.com/juan-medina/gosge/internal/managers/ray"
+	"github.com/juan-medina/gosge/options"
 )
 
-// Render constants
-const (
-	DefaultLayer = float32(1000000) // DefaultLayer is the default layer depth
-)
-
-//Render is the interface for our rendering system
-type Render interface {
+//DeviceManager is the interface for our device manager
+type DeviceManager interface {
 	// Init the rendering device
 	Init(opt options.Options)
 	// End the rendering device
@@ -116,7 +110,7 @@ type Render interface {
 	MeasureText(fnt components.FontDef, str string, size float32) geometry.Size
 }
 
-// New return the Render system
-func New() Render {
+// Device return the DeviceManager
+func Device() DeviceManager {
 	return ray.New()
 }

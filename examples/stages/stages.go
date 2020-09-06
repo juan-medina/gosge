@@ -23,16 +23,15 @@
 package main
 
 import (
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/effects"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/shapes"
-	"github.com/juan-medina/gosge/pkg/components/sprite"
-	"github.com/juan-medina/gosge/pkg/components/ui"
-	"github.com/juan-medina/gosge/pkg/engine"
-	"github.com/juan-medina/gosge/pkg/events"
-	"github.com/juan-medina/gosge/pkg/game"
-	"github.com/juan-medina/gosge/pkg/options"
+	"github.com/juan-medina/gosge"
+	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/effects"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/shapes"
+	"github.com/juan-medina/gosge/components/sprite"
+	"github.com/juan-medina/gosge/components/ui"
+	"github.com/juan-medina/gosge/events"
+	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
 )
 
@@ -48,12 +47,12 @@ var (
 )
 
 func main() {
-	if err := game.Run(opt, loadGame); err != nil {
+	if err := gosge.Run(opt, loadGame); err != nil {
 		log.Fatal().Err(err).Msg("error running the game")
 	}
 }
 
-func loadGame(eng engine.Engine) error {
+func loadGame(eng *gosge.Engine) error {
 	eng.AddGameStage("menu", menuStage)
 	eng.AddGameStage("main", mainStage)
 
@@ -76,7 +75,7 @@ const (
 	buttonExitHoverSprite  = "button_exit_hover.png"    // exit button sprite hover state
 )
 
-func mainStage(eng engine.Engine) error {
+func mainStage(eng *gosge.Engine) error {
 	var err error
 
 	// Preload font
@@ -160,7 +159,7 @@ func mainStage(eng engine.Engine) error {
 	return nil
 }
 
-func menuStage(eng engine.Engine) error {
+func menuStage(eng *gosge.Engine) error {
 	// Preload font
 	if err := eng.LoadFont(fontName); err != nil {
 		return err

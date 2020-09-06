@@ -20,21 +20,18 @@
  *  THE SOFTWARE.
  */
 
-// Package game handling the creation of a game
-package game
+// Package options contains our game Options
+package options
 
 import (
-	engineImp "github.com/juan-medina/gosge/internal/engine"
-	"github.com/juan-medina/gosge/pkg/engine"
-	"github.com/juan-medina/gosge/pkg/options"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"os"
+	"github.com/juan-medina/gosge/components/color"
 )
 
-// Run the game given the game options.Options and the loading engine.InitFunc
-func Run(opt options.Options, init engine.InitFunc) error {
-	writer := zerolog.ConsoleWriter{Out: os.Stdout}
-	log.Logger = log.Output(writer).Level(zerolog.TraceLevel)
-	return engineImp.New(opt, init).Run()
+// Options are our game options
+type Options struct {
+	Title      string      // Title is the game title
+	BackGround color.Solid // BackGround is the background color.Color
+	Monitor    int         // Monitor is the monitor that we will use
+	Icon       string      // Icon is a path for a PNG containing the application icon
+	Windowed   bool        // Windowed will indicate if we want the game on a window
 }

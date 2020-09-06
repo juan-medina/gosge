@@ -30,7 +30,7 @@ import (
 )
 
 // LoadMusic giving it file name into memory
-func (rr RenderImpl) LoadMusic(fileName string) (components.MusicDef, error) {
+func (dmi DeviceManagerImpl) LoadMusic(fileName string) (components.MusicDef, error) {
 	var file *os.File
 	var err error
 
@@ -45,38 +45,38 @@ func (rr RenderImpl) LoadMusic(fileName string) (components.MusicDef, error) {
 }
 
 // UnloadMusic giving it file from memory
-func (rr RenderImpl) UnloadMusic(musicDef components.MusicDef) {
+func (dmi DeviceManagerImpl) UnloadMusic(musicDef components.MusicDef) {
 	rl.UnloadMusicStream(musicDef.Data.(rl.Music))
 }
 
 // PlayMusic plays the given components.MusicDef
-func (rr RenderImpl) PlayMusic(musicDef components.MusicDef) {
+func (dmi DeviceManagerImpl) PlayMusic(musicDef components.MusicDef) {
 	rlMusic := musicDef.Data.(rl.Music)
 	rl.PlayMusicStream(rlMusic)
 }
 
 // PauseMusic pauses the given components.MusicDef
-func (rr RenderImpl) PauseMusic(musicDef components.MusicDef) {
+func (dmi DeviceManagerImpl) PauseMusic(musicDef components.MusicDef) {
 	rl.PauseMusicStream(musicDef.Data.(rl.Music))
 }
 
 // StopMusic stop the given components.MusicDef
-func (rr RenderImpl) StopMusic(musicDef components.MusicDef) {
+func (dmi DeviceManagerImpl) StopMusic(musicDef components.MusicDef) {
 	rl.StopMusicStream(musicDef.Data.(rl.Music))
 }
 
 // ResumeMusic resumes the given components.MusicDef
-func (rr RenderImpl) ResumeMusic(musicDef components.MusicDef) {
+func (dmi DeviceManagerImpl) ResumeMusic(musicDef components.MusicDef) {
 	rl.ResumeMusicStream(musicDef.Data.(rl.Music))
 }
 
 // UpdateMusic update the stream of the given components.MusicDef
-func (rr RenderImpl) UpdateMusic(musicDef components.MusicDef) {
+func (dmi DeviceManagerImpl) UpdateMusic(musicDef components.MusicDef) {
 	rl.UpdateMusicStream(musicDef.Data.(rl.Music))
 }
 
 // LoadSound giving it file name into memory
-func (rr *RenderImpl) LoadSound(fileName string) (components.SoundDef, error) {
+func (dmi *DeviceManagerImpl) LoadSound(fileName string) (components.SoundDef, error) {
 	var file *os.File
 	var err error
 
@@ -91,16 +91,16 @@ func (rr *RenderImpl) LoadSound(fileName string) (components.SoundDef, error) {
 }
 
 // UnloadSound giving it file from memory
-func (rr *RenderImpl) UnloadSound(soundDef components.SoundDef) {
+func (dmi *DeviceManagerImpl) UnloadSound(soundDef components.SoundDef) {
 	rl.UnloadSound(soundDef.Data.(rl.Sound))
 }
 
 // PlaySound plays the given components.SoundDef
-func (rr *RenderImpl) PlaySound(soundDef components.SoundDef) {
+func (dmi *DeviceManagerImpl) PlaySound(soundDef components.SoundDef) {
 	rl.PlaySoundMulti(soundDef.Data.(rl.Sound))
 }
 
 // StopAllSounds currently playing
-func (rr *RenderImpl) StopAllSounds() {
+func (dmi *DeviceManagerImpl) StopAllSounds() {
 	rl.StopSoundMulti()
 }

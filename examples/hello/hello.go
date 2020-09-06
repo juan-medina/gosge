@@ -23,13 +23,12 @@
 package main
 
 import (
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/effects"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/ui"
-	"github.com/juan-medina/gosge/pkg/engine"
-	"github.com/juan-medina/gosge/pkg/game"
-	"github.com/juan-medina/gosge/pkg/options"
+	"github.com/juan-medina/gosge"
+	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/effects"
+	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/ui"
+	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
 )
 
@@ -51,12 +50,12 @@ var (
 )
 
 func main() {
-	if err := game.Run(opt, loadGame); err != nil {
+	if err := gosge.Run(opt, loadGame); err != nil {
 		log.Fatal().Err(err).Msg("error running the game")
 	}
 }
 
-func loadGame(eng engine.Engine) error {
+func loadGame(eng *gosge.Engine) error {
 
 	// Preload font
 	if err := eng.LoadFont(fontName); err != nil {

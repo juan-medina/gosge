@@ -20,11 +20,21 @@
  *  THE SOFTWARE.
  */
 
+//Package ray the implementation of render.Render for raylib
 package ray
 
-import "github.com/gen2brain/raylib-go/raylib"
+import (
+	"github.com/juan-medina/gosge/options"
+)
 
-// GetFrameTime returns the time from the delta time for current frame
-func (rr RenderImpl) GetFrameTime() float32 {
-	return rl.GetFrameTime()
+//DeviceManagerImpl is our managers.DeviceManager based on raylib
+type DeviceManagerImpl struct {
+	saveOpts options.Options
+}
+
+// New create a new render.Render base on raylib
+func New() *DeviceManagerImpl {
+	return &DeviceManagerImpl{
+		saveOpts: options.Options{},
+	}
 }

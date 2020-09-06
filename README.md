@@ -20,14 +20,13 @@ Internally uses the go [port](https://github.com/gen2brain/raylib-go) of [raylib
 package main
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
-	"github.com/juan-medina/gosge/pkg/components/color"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
-	"github.com/juan-medina/gosge/pkg/components/text"
-	"github.com/juan-medina/gosge/pkg/engine"
-	"github.com/juan-medina/gosge/pkg/game"
-	"github.com/juan-medina/gosge/pkg/options"
-	"log"
+    "github.com/juan-medina/goecs"
+    "github.com/juan-medina/gosge"
+    "github.com/juan-medina/gosge/components/color"
+    "github.com/juan-medina/gosge/components/geometry"
+    "github.com/juan-medina/gosge/components/text"
+    "github.com/juan-medina/gosge/options"
+    "log"
 )
 
 // game options
@@ -51,7 +50,7 @@ func main() {
 	}
 }
 
-func loadGame(eng engine.Engine) error {
+func loadGame(eng *engine.Engine) error {
 	// Preload font
 	if err := eng.LoadFont(fontName); err != nil {
 		return err

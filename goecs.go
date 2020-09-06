@@ -20,5 +20,22 @@
  *  THE SOFTWARE.
  */
 
-// Package pkg holds the public API for gosge
-package pkg
+// Package gosge is a opinionated 2D only game engine that use an ECS
+//
+// gosge uses https://github.com/juan-medina/goecs) and https://github.com/gen2brain/raylib-go, the go port of
+// https://www.raylib.com/ for rendering and device manager
+package gosge
+
+import (
+	"github.com/juan-medina/gosge/options"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"os"
+)
+
+// Run the game given the game options.Options and the loading InitFunc
+func Run(opt options.Options, init InitFunc) error {
+	writer := zerolog.ConsoleWriter{Out: os.Stdout}
+	log.Logger = log.Output(writer).Level(zerolog.TraceLevel)
+	return New(opt, init).Run()
+}

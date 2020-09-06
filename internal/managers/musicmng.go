@@ -24,15 +24,13 @@ package managers
 
 import (
 	"github.com/juan-medina/goecs"
-	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/internal/storage"
-	"github.com/juan-medina/gosge/pkg/components/audio"
-	"github.com/juan-medina/gosge/pkg/events"
+	"github.com/juan-medina/gosge/components/audio"
+	"github.com/juan-medina/gosge/events"
 )
 
 type musicManager struct {
-	rdr render.Render
-	ds  storage.Storage
+	dm DeviceManager
+	sm StorageManager
 }
 
 func (mm musicManager) System(world *goecs.World, _ float32) error {
@@ -41,8 +39,8 @@ func (mm musicManager) System(world *goecs.World, _ float32) error {
 		//music := audio.Get.Music(ent)
 		state := audio.Get.MusicState(ent)
 
-		if def, err := mm.ds.GetMusicDef(state.Name); err == nil {
-			mm.rdr.UpdateMusic(def)
+		if def, err := mm.sm.GetMusicDef(state.Name); err == nil {
+			mm.dm.UpdateMusic(def)
 		} else {
 			return err
 		}
@@ -76,7 +74,7 @@ func (mm musicManager) Listener(world *goecs.World, event interface{}, _ float32
 }
 
 func (mm musicManager) playMusicEvent(world *goecs.World, pme events.PlayMusicEvent) error {
-	if def, err := mm.ds.GetMusicDef(pme.Name); err == nil {
+	if def, err := mm.sm.GetMusicDef(pme.Name); err == nil {
 		var ent *goecs.Entity
 		if ent = mm.findMusicEnt(world, pme.Name); ent == nil {
 			ent = world.AddEntity(
@@ -94,7 +92,7 @@ func (mm musicManager) playMusicEvent(world *goecs.World, pme events.PlayMusicEv
 			old := state.PlayingState
 			state.PlayingState = audio.StatePlaying
 			ent.Set(state)
-			mm.rdr.PlayMusic(def)
+			mm.dm.PlayMusic(def)
 			return mm.sendMusicStateChangeEvent(world, pme.Name, old, state.PlayingState)
 		}
 	} else {
@@ -104,14 +102,14 @@ func (mm musicManager) playMusicEvent(world *goecs.World, pme events.PlayMusicEv
 }
 
 func (mm musicManager) stopMusicEvent(world *goecs.World, sme events.StopMusicEvent) error {
-	if def, err := mm.ds.GetMusicDef(sme.Name); err == nil {
+	if def, err := mm.sm.GetMusicDef(sme.Name); err == nil {
 		if ent := mm.findMusicEnt(world, sme.Name); ent != nil {
 			state := audio.Get.MusicState(ent)
 			if state.PlayingState == audio.StatePlaying || state.PlayingState == audio.StatePaused {
 				old := state.PlayingState
 				state.PlayingState = audio.StateStopped
 				ent.Set(state)
-				mm.rdr.StopMusic(def)
+				mm.dm.StopMusic(def)
 				return mm.sendMusicStateChangeEvent(world, sme.Name, old, state.PlayingState)
 			}
 		}
@@ -122,14 +120,14 @@ func (mm musicManager) stopMusicEvent(world *goecs.World, sme events.StopMusicEv
 }
 
 func (mm musicManager) pauseMusicEvent(world *goecs.World, pme events.PauseMusicEvent) error {
-	if def, err := mm.ds.GetMusicDef(pme.Name); err == nil {
+	if def, err := mm.sm.GetMusicDef(pme.Name); err == nil {
 		if ent := mm.findMusicEnt(world, pme.Name); ent != nil {
 			state := audio.Get.MusicState(ent)
 			if state.PlayingState == audio.StatePlaying {
 				old := state.PlayingState
 				state.PlayingState = audio.StatePaused
 				ent.Set(state)
-				mm.rdr.PauseMusic(def)
+				mm.dm.PauseMusic(def)
 				return mm.sendMusicStateChangeEvent(world, pme.Name, old, state.PlayingState)
 			}
 		}
@@ -140,14 +138,14 @@ func (mm musicManager) pauseMusicEvent(world *goecs.World, pme events.PauseMusic
 }
 
 func (mm musicManager) resumeMusicEvent(world *goecs.World, rme events.ResumeMusicEvent) error {
-	if def, err := mm.ds.GetMusicDef(rme.Name); err == nil {
+	if def, err := mm.sm.GetMusicDef(rme.Name); err == nil {
 		if ent := mm.findMusicEnt(world, rme.Name); ent != nil {
 			state := audio.Get.MusicState(ent)
 			if state.PlayingState == audio.StatePaused {
 				old := state.PlayingState
 				state.PlayingState = audio.StatePlaying
 				ent.Set(state)
-				mm.rdr.ResumeMusic(def)
+				mm.dm.ResumeMusic(def)
 				return mm.sendMusicStateChangeEvent(world, rme.Name, old, state.PlayingState)
 			}
 		}
@@ -166,9 +164,9 @@ func (mm musicManager) sendMusicStateChangeEvent(world *goecs.World, name string
 }
 
 // Music returns a managers.WithSystemAndListener that handle music stream
-func Music(rdr render.Render, ds storage.Storage) WithSystemAndListener {
+func Music(dm DeviceManager, sm StorageManager) WithSystemAndListener {
 	return &musicManager{
-		rdr: rdr,
-		ds:  ds,
+		dm: dm,
+		sm: sm,
 	}
 }

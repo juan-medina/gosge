@@ -23,7 +23,7 @@
 package components
 
 import (
-	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/lafriks/go-tiled"
 )
 

@@ -25,8 +25,8 @@ package managers
 import (
 	"fmt"
 	"github.com/juan-medina/goecs"
-	"github.com/juan-medina/gosge/pkg/components/animation"
-	"github.com/juan-medina/gosge/pkg/components/sprite"
+	"github.com/juan-medina/gosge/components/animation"
+	"github.com/juan-medina/gosge/components/sprite"
 )
 
 type animationManager struct{}
@@ -97,7 +97,7 @@ func (animationManager) System(world *goecs.World, delta float32) error {
 	return nil
 }
 
-// AnimationManager returns a managers.WithSystem for handling animations
-func AnimationManager() WithSystem {
+// Animation returns a managers.WithSystem for handling animations
+func Animation() WithSystem {
 	return &animationManager{}
 }

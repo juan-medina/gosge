@@ -24,22 +24,22 @@ package ray
 
 import (
 	"github.com/gen2brain/raylib-go/raylib"
-	"github.com/juan-medina/gosge/pkg/components/device"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/components/device"
+	"github.com/juan-medina/gosge/components/geometry"
 )
 
 // GetScreenSize get the current screen size
-func (rr RenderImpl) GetScreenSize() geometry.Size {
+func (dmi DeviceManagerImpl) GetScreenSize() geometry.Size {
 	return geometry.Size{Width: float32(rl.GetScreenWidth()), Height: float32(rl.GetScreenHeight())}
 }
 
 // GetMousePoint returns the current Point of the mouse
-func (rr RenderImpl) GetMousePoint() geometry.Point {
+func (dmi DeviceManagerImpl) GetMousePoint() geometry.Point {
 	pos := rl.GetMousePosition()
 	return geometry.Point{X: pos.X, Y: pos.Y}
 }
 
 // IsMouseRelease check if the given MouseButton has been release
-func (rr RenderImpl) IsMouseRelease(button device.MouseButton) bool {
+func (dmi DeviceManagerImpl) IsMouseRelease(button device.MouseButton) bool {
 	return rl.IsMouseButtonReleased(int32(button))
 }

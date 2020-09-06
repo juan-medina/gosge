@@ -20,51 +20,54 @@
  *  THE SOFTWARE.
  */
 
-//Package shapes contains various drawable shapes
-package shapes
+package tiled
 
 import (
 	"github.com/juan-medina/goecs"
-	"github.com/juan-medina/gosge/pkg/components/geometry"
+	"github.com/juan-medina/gosge/components/geometry"
 	"reflect"
 )
 
-//Box is a rectangular shape that we could draw in a geometry.Point with a color.Solid or color.Gradient
-type Box struct {
-	Size  geometry.Size // The box size
-	Scale float32       // The box scale
+// Map is a tiled.Map
+type Map struct {
+	Name  string  // Name of our tiled.Map
+	Scale float32 // Scale is the map scale
 }
 
-// Contains return if a box at a geometry.Point contains a point
-func (b Box) Contains(at geometry.Point, point geometry.Point) bool {
-	return geometry.Rect{
-		From: at,
-		Size: geometry.Size{
-			Width:  b.Size.Width * b.Scale,
-			Height: b.Size.Height * b.Scale,
-		},
-	}.IsPointInRect(point)
+// MapState is the state for tiled.Map
+type MapState struct {
+	Position geometry.Point // Position is the map position
+	Scale    float32        // Scale is the map scale
 }
 
 type types struct {
-	// Box is the reflect.Type for shapes.Box
-	Box reflect.Type
+	// Map is the reflect.Type for tiled.Map
+	Map reflect.Type
+	// MapState is the reflect.Type for tiled.MapState
+	MapState reflect.Type
 }
 
-// TYPE hold the reflect.Type for our shapes components
+// TYPE hold the reflect.Type for our tiled components
 var TYPE = types{
-	Box: reflect.TypeOf(Box{}),
+	Map:      reflect.TypeOf(Map{}),
+	MapState: reflect.TypeOf(MapState{}),
 }
 
 type gets struct {
-	// Box gets a shapes.Box from a goecs.Entity
-	Box func(e *goecs.Entity) Box
+	// Map gets a tiled.Map from a goecs.Entity
+	Map func(e *goecs.Entity) Map
+	// MapState gets a tiled.MapState from a goecs.Entity
+	MapState func(e *goecs.Entity) MapState
 }
 
 // Get a geometry component
 var Get = gets{
-	// Box gets a shapes.Box from a goecs.Entity
-	Box: func(e *goecs.Entity) Box {
-		return e.Get(TYPE.Box).(Box)
+	// Map gets a tiled.Map from a goecs.Entity
+	Map: func(e *goecs.Entity) Map {
+		return e.Get(TYPE.Map).(Map)
+	},
+	// MapState gets a tiled.MapState from a goecs.Entity
+	MapState: func(e *goecs.Entity) MapState {
+		return e.Get(TYPE.MapState).(MapState)
 	},
 }
