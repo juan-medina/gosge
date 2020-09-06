@@ -23,8 +23,7 @@
 package managers
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/internal/storage"
 	"github.com/juan-medina/gosge/pkg/components/color"
@@ -43,7 +42,7 @@ type renderingManager struct {
 
 var noTint = color.White
 
-func (rdm renderingManager) renderSprite(ent *entity.Entity) error {
+func (rdm renderingManager) renderSprite(ent *goecs.Entity) error {
 	spr := sprite.Get(ent)
 	pos := geometry.Get.Point(ent)
 
@@ -64,7 +63,7 @@ func (rdm renderingManager) renderSprite(ent *entity.Entity) error {
 	return nil
 }
 
-func (rdm renderingManager) renderShape(ent *entity.Entity) error {
+func (rdm renderingManager) renderShape(ent *goecs.Entity) error {
 	pos := geometry.Get.Point(ent)
 	box := shapes.Get.Box(ent)
 	if ent.Contains(color.TYPE.Solid) {
@@ -77,7 +76,7 @@ func (rdm renderingManager) renderShape(ent *entity.Entity) error {
 	return nil
 }
 
-func (rdm renderingManager) renderFlatButton(ent *entity.Entity) error {
+func (rdm renderingManager) renderFlatButton(ent *goecs.Entity) error {
 	pos := geometry.Get.Point(ent)
 	box := shapes.Get.Box(ent)
 	fb := ui.Get.FlatButton(ent)
@@ -137,7 +136,7 @@ func (rdm renderingManager) renderFlatButton(ent *entity.Entity) error {
 	return nil
 }
 
-func (rdm renderingManager) renderText(v *entity.Entity) error {
+func (rdm renderingManager) renderText(v *goecs.Entity) error {
 	textCmp := ui.Get.Text(v)
 	posCmp := geometry.Get.Point(v)
 	colorCmp := color.Get.Solid(v)
@@ -152,14 +151,14 @@ func (rdm renderingManager) renderText(v *entity.Entity) error {
 	return nil
 }
 
-func (rdm renderingManager) isRenderable(ent *entity.Entity) bool {
+func (rdm renderingManager) isRenderable(ent *goecs.Entity) bool {
 	return ent.Contains(geometry.TYPE.Point) &&
 		(ent.Contains(sprite.TYPE) || ent.Contains(ui.TYPE.Text) || ent.Contains(shapes.TYPE.Box) ||
 			ent.Contains(ui.TYPE.FlatButton))
 }
 
-func (rdm renderingManager) getSortedByLayers(world *world.World) []*entity.Entity {
-	entities := make([]*entity.Entity, world.Size())
+func (rdm renderingManager) getSortedByLayers(world *goecs.World) []*goecs.Entity {
+	entities := make([]*goecs.Entity, world.Size())
 	i := 0
 	for it := world.Iterator(); it != nil; it = it.Next() {
 		e := it.Value()
@@ -191,7 +190,7 @@ func (rdm renderingManager) getSortedByLayers(world *world.World) []*entity.Enti
 	return entities
 }
 
-func (rdm renderingManager) System(world *world.World, _ float32) error {
+func (rdm renderingManager) System(world *goecs.World, _ float32) error {
 	for _, v := range rdm.getSortedByLayers(world) {
 		if v.Contains(sprite.TYPE) {
 			if err := rdm.renderSprite(v); err != nil {

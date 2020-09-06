@@ -24,7 +24,7 @@
 package geometry
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs"
 	"math"
 	"reflect"
 )
@@ -114,14 +114,14 @@ var TYPE = types{
 }
 
 type gets struct {
-	// Point gets a geometry.Point from a entity.Entity
-	Point func(e *entity.Entity) Point
+	// Point gets a geometry.Point from a goecs.Entity
+	Point func(e *goecs.Entity) Point
 }
 
 // Get a geometry component
 var Get = gets{
-	// Point gets a geometry.Point from a entity.Entity
-	Point: func(e *entity.Entity) Point {
+	// Point gets a geometry.Point from a goecs.Entity
+	Point: func(e *goecs.Entity) Point {
 		return e.Get(TYPE.Point).(Point)
 	},
 }

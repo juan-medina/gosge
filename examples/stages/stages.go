@@ -23,7 +23,6 @@
 package main
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
@@ -91,7 +90,7 @@ func mainStage(eng engine.Engine) error {
 	}
 
 	// get the world
-	wld := eng.World()
+	world := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
@@ -100,7 +99,7 @@ func mainStage(eng engine.Engine) error {
 	eng.SetBackgroundColor(color.SkyBlue)
 
 	// add the centered text
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.Text{
 			String:     "Main Stage",
 			HAlignment: ui.CenterHAlignment,
@@ -119,10 +118,10 @@ func mainStage(eng engine.Engine) error {
 			To:    color.Yellow,
 		},
 		effects.Layer{Depth: 0},
-	))
+	)
 
 	// add the center sprite
-	wld.Add(entity.New(
+	world.AddEntity(
 		sprite.Sprite{
 			Sheet: spriteSheetName,
 			Name:  gameSprite,
@@ -133,7 +132,7 @@ func mainStage(eng engine.Engine) error {
 			Y: designResolution.Height / 2 * gameScale.Point.Y,
 		},
 		effects.Layer{Depth: 1},
-	))
+	)
 
 	spriteScale := float32(0.5)
 	var spriteSize geometry.Size
@@ -143,7 +142,7 @@ func mainStage(eng engine.Engine) error {
 	spriteSize.Width *= spriteScale
 	spriteSize.Height *= spriteScale
 
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.SpriteButton{
 			Sheet:  spriteSheetName,
 			Normal: buttonExitNormalSprite,
@@ -156,7 +155,7 @@ func mainStage(eng engine.Engine) error {
 			Y: (spriteSize.Height / 2) * gameScale.Point.Y,
 		},
 		effects.Layer{Depth: 0},
-	))
+	)
 
 	return nil
 }
@@ -173,7 +172,7 @@ func menuStage(eng engine.Engine) error {
 	}
 
 	// get the world
-	wld := eng.World()
+	world := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
@@ -182,7 +181,7 @@ func menuStage(eng engine.Engine) error {
 	eng.SetBackgroundColor(color.Gopher)
 
 	// add the centered text
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.Text{
 			String:     "Menu",
 			HAlignment: ui.CenterHAlignment,
@@ -201,10 +200,10 @@ func menuStage(eng engine.Engine) error {
 			To:    color.Yellow,
 		},
 		effects.Layer{Depth: 0},
-	))
+	)
 
 	// add the center sprite
-	wld.Add(entity.New(
+	world.AddEntity(
 		sprite.Sprite{
 			Sheet: spriteSheetName,
 			Name:  menuSprite,
@@ -215,7 +214,7 @@ func menuStage(eng engine.Engine) error {
 			Y: designResolution.Height / 2 * gameScale.Point.Y,
 		},
 		effects.Layer{Depth: 1},
-	))
+	)
 
 	// measuring the biggest text for size all the buttons equally
 	var measure geometry.Size
@@ -228,7 +227,7 @@ func menuStage(eng engine.Engine) error {
 	measure.Height += measure.Height * buttonExtraHeight
 
 	// add the play button, it will sent a event to change to the main stage
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
 			Event:  events.ChangeGameStage{Stage: "main"},
@@ -256,10 +255,10 @@ func menuStage(eng engine.Engine) error {
 			To:   color.SkyBlue,
 		},
 		effects.Layer{Depth: 0},
-	))
+	)
 
 	// add the exit button, it will trigger the event to close the game
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
 			Event:  events.GameCloseEvent{},
@@ -287,7 +286,7 @@ func menuStage(eng engine.Engine) error {
 			To:   color.SkyBlue,
 		},
 		effects.Layer{Depth: 0},
-	))
+	)
 
 	return nil
 }

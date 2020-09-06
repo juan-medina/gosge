@@ -24,7 +24,7 @@
 package engine
 
 import (
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
@@ -32,8 +32,8 @@ import (
 
 // Engine is the interface for the game engine
 type Engine interface {
-	// World returns the game world.World
-	World() *world.World
+	// World returns the game goecs.World
+	World() *goecs.World
 	// LoadSpriteSheet preloads a sprite.
 	//Sprite sheet
 	LoadSpriteSheet(fileName string) error

@@ -23,8 +23,7 @@
 package main
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/pkg/components/animation"
 	"github.com/juan-medina/gosge/pkg/components/audio"
 	"github.com/juan-medina/gosge/pkg/components/color"
@@ -71,9 +70,9 @@ const (
 )
 
 var (
-	playButton *entity.Entity // the play button entity
-	gopher     *entity.Entity // the gopher sprite entity
-	geng       engine.Engine  // the game engine
+	playButton *goecs.Entity // the play button entity
+	gopher     *goecs.Entity // the gopher sprite entity
+	geng       engine.Engine // the game engine
 )
 
 var (
@@ -114,13 +113,13 @@ func loadGame(eng engine.Engine) error {
 	}
 
 	// Get the ECS world
-	wld := eng.World()
+	world := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
 	// add the bottom text
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.Text{
 			String:     "click on the buttons or the gopher, press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
@@ -137,7 +136,7 @@ func loadGame(eng engine.Engine) error {
 			From: color.White,
 			To:   color.White.Alpha(0),
 		},
-	))
+	)
 
 	// calculate the size of the buttons
 	spriteScale := float32(0.25)
@@ -149,7 +148,7 @@ func loadGame(eng engine.Engine) error {
 	spriteSize.Height *= spriteScale
 
 	// add the play button
-	playButton = wld.Add(entity.New(
+	playButton = world.AddEntity(
 		ui.SpriteButton{
 			Sheet:  spriteSheet,
 			Normal: playButtonNormalSprite,
@@ -165,10 +164,10 @@ func loadGame(eng engine.Engine) error {
 			Y: (designResolution.Height / 2) * gameScale.Point.Y,
 		},
 		effects.Layer{Depth: 0},
-	))
+	)
 
 	// add the stop button
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.SpriteButton{
 			Sheet:  spriteSheet,
 			Normal: stopButtonNormalSprite,
@@ -184,13 +183,13 @@ func loadGame(eng engine.Engine) error {
 			Y: (designResolution.Height / 2) * gameScale.Point.Y,
 		},
 		effects.Layer{Depth: 0},
-	))
+	)
 
 	// the scale for our gopher sprite
 	spriteScale = float32(2)
 
 	// add the gopher with it animations
-	gopher = wld.Add(entity.New(
+	gopher = world.AddEntity(
 		animation.Animation{
 			Sequences: map[string]animation.Sequence{
 				danceAnim: {
@@ -215,16 +214,16 @@ func loadGame(eng engine.Engine) error {
 			X: (designResolution.Width / 2) * gameScale.Point.X,
 			Y: (designResolution.Height/2)*gameScale.Point.Y - gopherVerticalGap,
 		},
-	))
+	)
 
 	// add the listener for mouse clicks
-	wld.Listen(mouseListener)
+	world.AddListener(mouseListener)
 	// add the listener to update the ui when music status change
-	wld.Listen(musicStateListener)
+	world.AddListener(musicStateListener)
 	return err
 }
 
-func mouseListener(wld *world.World, event interface{}, _ float32) error {
+func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
 	// check if we get a mouse up
 	case events.MouseUpEvent:
@@ -241,13 +240,13 @@ func mouseListener(wld *world.World, event interface{}, _ float32) error {
 			}
 			gopher.Set(anim)
 			// play the gopher sound
-			return wld.Signal(events.PlaySoundEvent{Name: gopherSound})
+			return world.Signal(events.PlaySoundEvent{Name: gopherSound})
 		}
 	}
 	return nil
 }
 
-func musicStateListener(_ *world.World, event interface{}, _ float32) error {
+func musicStateListener(_ *goecs.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
 	// if is the music state has change
 	case events.MusicStateChangeEvent:

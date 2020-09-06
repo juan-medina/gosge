@@ -58,13 +58,13 @@ func loadGame(eng engine.Engine) error {
 	}
 
 	// get the ECS world
-	wld := eng.World()
+	world := eng.World()
 
 	// gameScale from the real screen size to our design resolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
 	// add the centered text
-	wld.Add(entity.New(
+	world.AddEntity(
 		text.Text{
 			String:     "Hello World",
 			HAlignment: text.CenterHAlignment,
@@ -77,14 +77,14 @@ func loadGame(eng engine.Engine) error {
 			Y: designResolution.Height / 2 * gameScale.Point.Y,
 		},
 		color.White,
-	))
+	)
 	return nil
 }
 ```
 
 ## Run examples
 
-The examples are available on [this folder](/examples), or can be run using make:
+The examples are available on [this folder](/examples), and can be run using make:
 
 ```bash
 $ make run example=hello
@@ -93,6 +93,7 @@ $ make run example=layers
 $ make run example=stages
 $ make run example=animation
 $ make run example=audio
+$ make run example=tiled
 ```
 
 Alternatively you could run them with :
@@ -104,6 +105,7 @@ $ go run examples/layers/layers.go
 $ go run examples/stages/stages.go
 $ go run examples/animation/animation.go
 $ go run examples/audio/audio.go
+$ go run examples/tiled/tiled.go
 ```
 
 ## Requirements

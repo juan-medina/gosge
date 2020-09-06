@@ -24,14 +24,14 @@ package managers
 
 import (
 	"fmt"
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/pkg/components/animation"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 )
 
 type animationManager struct{}
 
-func (animationManager) System(world *world.World, delta float32) error {
+func (animationManager) System(world *goecs.World, delta float32) error {
 	for it := world.Iterator(animation.TYPE.Animation); it != nil; it = it.Next() {
 		ent := it.Value()
 

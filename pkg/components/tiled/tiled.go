@@ -23,7 +23,7 @@
 package tiled
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"reflect"
 )
@@ -54,20 +54,20 @@ var TYPE = types{
 }
 
 type gets struct {
-	// Map gets a tiled.Map from a entity.Entity
-	Map func(e *entity.Entity) Map
-	// MapState gets a tiled.MapState from a entity.Entity
-	MapState func(e *entity.Entity) MapState
+	// Map gets a tiled.Map from a goecs.Entity
+	Map func(e *goecs.Entity) Map
+	// MapState gets a tiled.MapState from a goecs.Entity
+	MapState func(e *goecs.Entity) MapState
 }
 
 // Get a geometry component
 var Get = gets{
-	// Map gets a tiled.Map from a entity.Entity
-	Map: func(e *entity.Entity) Map {
+	// Map gets a tiled.Map from a goecs.Entity
+	Map: func(e *goecs.Entity) Map {
 		return e.Get(TYPE.Map).(Map)
 	},
-	// MapState gets a tiled.MapState from a entity.Entity
-	MapState: func(e *entity.Entity) MapState {
+	// MapState gets a tiled.MapState from a goecs.Entity
+	MapState: func(e *goecs.Entity) MapState {
 		return e.Get(TYPE.MapState).(MapState)
 	},
 }

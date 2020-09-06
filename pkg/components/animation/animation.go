@@ -24,7 +24,7 @@
 package animation
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs"
 	"reflect"
 )
 
@@ -72,26 +72,26 @@ var TYPE = types{
 }
 
 type gets struct {
-	// AlternateColor gets a AlternateColor from a entity.Entity
-	Animation func(e *entity.Entity) Animation
-	// Layer gets a Layer from a entity.Entity
-	State func(e *entity.Entity) State
-	// Layer gets a Layer from a entity.Entity
-	Sequence func(e *entity.Entity) Sequence
+	// AlternateColor gets a AlternateColor from a goecs.Entity
+	Animation func(e *goecs.Entity) Animation
+	// Layer gets a Layer from a goecs.Entity
+	State func(e *goecs.Entity) State
+	// Layer gets a Layer from a goecs.Entity
+	Sequence func(e *goecs.Entity) Sequence
 }
 
 // Get animation component
 var Get = gets{
-	// Animation gets a animation.Animation from a entity.Entity
-	Animation: func(e *entity.Entity) Animation {
+	// Animation gets a animation.Animation from a goecs.Entity
+	Animation: func(e *goecs.Entity) Animation {
 		return e.Get(TYPE.Animation).(Animation)
 	},
-	// State gets a animation.State from a entity.Entity
-	State: func(e *entity.Entity) State {
+	// State gets a animation.State from a goecs.Entity
+	State: func(e *goecs.Entity) State {
 		return e.Get(TYPE.State).(State)
 	},
-	// Sequence gets a animation.Sequence from a entity.Entity
-	Sequence: func(e *entity.Entity) Sequence {
+	// Sequence gets a animation.Sequence from a goecs.Entity
+	Sequence: func(e *goecs.Entity) Sequence {
 		return e.Get(TYPE.Sequence).(Sequence)
 	},
 }

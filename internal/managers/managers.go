@@ -20,36 +20,32 @@
  *  THE SOFTWARE.
  */
 
+// Package managers are the world.System for the engine
 package managers
 
 import (
-	"github.com/juan-medina/goecs/pkg/world"
-	"github.com/juan-medina/gosge/internal/render"
-	"github.com/juan-medina/gosge/internal/storage"
-	"github.com/juan-medina/gosge/pkg/events"
+	"github.com/juan-medina/goecs"
 )
 
-type soundManager struct {
-	rdr render.Render
-	ds  storage.Storage
+// Manager can have world.System or world.Listener
+type Manager interface{}
+
+// WithSystem have a world.System
+type WithSystem interface {
+	// System is a world.System
+	System(world *goecs.World, delta float32) error
 }
 
-func (sm soundManager) Listener(_ *world.World, event interface{}, _ float32) error {
-	switch e := event.(type) {
-	case events.PlaySoundEvent:
-		if def, err := sm.ds.GetSoundDef(e.Name); err == nil {
-			sm.rdr.PlaySound(def)
-		} else {
-			return err
-		}
-	}
-	return nil
+// WithListener have a world.Listener
+type WithListener interface {
+	// Listener is a world.Listener
+	Listener(world *goecs.World, signal interface{}, delta float32) error
 }
 
-// Sounds returns a managers.WithListener that handle audio waves
-func Sounds(rdr render.Render, ds storage.Storage) WithListener {
-	return &soundManager{
-		rdr: rdr,
-		ds:  ds,
-	}
+// WithSystemAndListener have a world.System and a world.Listener
+type WithSystemAndListener interface {
+	// System is a world.System
+	System(world *goecs.World, delta float32) error
+	// Listener is a world.Listener
+	Listener(world *goecs.World, signal interface{}, delta float32) error
 }

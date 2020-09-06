@@ -23,17 +23,17 @@
 package managers
 
 import (
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 )
 
 type effectManager struct{}
 
-func (e effectManager) System(wld *world.World, delta float32) error {
-	return e.alternateColorSystem(wld, delta)
+func (e effectManager) System(world *goecs.World, delta float32) error {
+	return e.alternateColorSystem(world, delta)
 }
-func (e effectManager) alternateColorSystem(world *world.World, delta float32) error {
+func (e effectManager) alternateColorSystem(world *goecs.World, delta float32) error {
 	for it := world.Iterator(effects.TYPE.AlternateColor); it != nil; it = it.Next() {
 		ent := it.Value()
 		ac := effects.Get.AlternateColor(ent)

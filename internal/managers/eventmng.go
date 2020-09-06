@@ -1,7 +1,7 @@
 package managers
 
 import (
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
@@ -42,23 +42,23 @@ var (
 	}
 )
 
-func (em eventManager) sendGameClose(wld *world.World) error {
-	return wld.Signal(events.GameCloseEvent{})
+func (em eventManager) sendGameClose(world *goecs.World) error {
+	return world.Signal(events.GameCloseEvent{})
 }
 
-func (em eventManager) sendMouseMove(wld *world.World) error {
-	return wld.Signal(em.mme)
+func (em eventManager) sendMouseMove(world *goecs.World) error {
+	return world.Signal(em.mme)
 }
 
-func (em eventManager) sendMouseRelease(wld *world.World, button device.MouseButton) error {
-	return wld.Signal(events.MouseUpEvent{Point: em.mme.Point, MouseButton: button})
+func (em eventManager) sendMouseRelease(world *goecs.World, button device.MouseButton) error {
+	return world.Signal(events.MouseUpEvent{Point: em.mme.Point, MouseButton: button})
 }
 
-func (em eventManager) sendKeyEvent(wld *world.World, key device.Key, status device.KeyStatus) error {
-	return wld.Signal(events.KeyEvent{Key: key, Status: status})
+func (em eventManager) sendKeyEvent(world *goecs.World, key device.Key, status device.KeyStatus) error {
+	return world.Signal(events.KeyEvent{Key: key, Status: status})
 }
 
-func (em *eventManager) System(world *world.World, _ float32) error {
+func (em *eventManager) System(world *goecs.World, _ float32) error {
 	if em.rdr.ShouldClose() {
 		if err := em.sendGameClose(world); err != nil {
 			return err

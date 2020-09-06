@@ -24,7 +24,7 @@
 package effects
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"reflect"
 )
@@ -67,26 +67,26 @@ var TYPE = types{
 }
 
 type gets struct {
-	// AlternateColorState gets a AlternateColorState from a entity.Entity
-	AlternateColorState func(e *entity.Entity) AlternateColorState
-	// AlternateColor gets a AlternateColor from a entity.Entity
-	AlternateColor func(e *entity.Entity) AlternateColor
-	// Layer gets a Layer from a entity.Entity
-	Layer func(e *entity.Entity) Layer
+	// AlternateColorState gets a AlternateColorState from a goecs.Entity
+	AlternateColorState func(e *goecs.Entity) AlternateColorState
+	// AlternateColor gets a AlternateColor from a goecs.Entity
+	AlternateColor func(e *goecs.Entity) AlternateColor
+	// Layer gets a Layer from a goecs.Entity
+	Layer func(e *goecs.Entity) Layer
 }
 
 // Get effect component
 var Get = gets{
-	// AlternateColorState gets a AlternateColorState from a entity.Entity
-	AlternateColorState: func(e *entity.Entity) AlternateColorState {
+	// AlternateColorState gets a AlternateColorState from a goecs.Entity
+	AlternateColorState: func(e *goecs.Entity) AlternateColorState {
 		return e.Get(TYPE.AlternateColorState).(AlternateColorState)
 	},
-	// AlternateColor gets a AlternateColor from a entity.Entity
-	AlternateColor: func(e *entity.Entity) AlternateColor {
+	// AlternateColor gets a AlternateColor from a goecs.Entity
+	AlternateColor: func(e *goecs.Entity) AlternateColor {
 		return e.Get(TYPE.AlternateColor).(AlternateColor)
 	},
-	// Layer gets a Layer from a entity.Entity
-	Layer: func(e *entity.Entity) Layer {
+	// Layer gets a Layer from a goecs.Entity
+	Layer: func(e *goecs.Entity) Layer {
 		return e.Get(TYPE.Layer).(Layer)
 	},
 }

@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/juan-medina/goecs/pkg/entity"
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
@@ -64,7 +63,7 @@ var (
 	}
 
 	// uiText contains the text on top of the screen
-	uiText *entity.Entity
+	uiText *goecs.Entity
 
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
@@ -87,7 +86,7 @@ func load(eng engine.Engine) error {
 	}
 
 	// get the world
-	wld := eng.World()
+	world := eng.World()
 
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
@@ -106,15 +105,15 @@ func load(eng engine.Engine) error {
 	uiTextPos := geometry.Point{X: (designResolution.Width / 2) * gameScale.Point.X, Y: boxSize.Height / 2}
 
 	// add the top box
-	wld.Add(entity.New(
+	world.AddEntity(
 		shapes.Box{Size: boxSize, Scale: 1},
 		uiPos,
 		color.DarkBlue.Alpha(200),
 		uiLayer,
-	))
+	)
 
 	// add the text
-	uiText = wld.Add(entity.New(
+	uiText = world.AddEntity(
 		ui.Text{
 			String:     "xx is Front",
 			VAlignment: ui.MiddleVAlignment,
@@ -125,10 +124,10 @@ func load(eng engine.Engine) error {
 		uiTextPos,
 		color.SkyBlue,
 		uiLayer,
-	))
+	)
 
 	// add the bottom text
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.Text{
 			String:     "press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
@@ -146,13 +145,13 @@ func load(eng engine.Engine) error {
 			To:   color.DarkBlue.Alpha(150),
 		},
 		uiLayer,
-	))
+	)
 
 	// add the items
-	addItems(itemsToAdd, wld, gameScale)
+	addItems(itemsToAdd, world, gameScale)
 
 	// at the layout system
-	wld.AddSystem(swapLayersOnTimeSystem)
+	world.AddSystem(swapLayersOnTimeSystem)
 	return nil
 }
 
@@ -167,7 +166,7 @@ const (
 )
 
 // addItem add a set of random items to the world
-func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
+func addItems(toAdd int, world *goecs.World, scl geometry.Scale) {
 	// for as many items we like to add
 	for i := 0; i < toAdd; i++ {
 		// pick a random group
@@ -189,7 +188,7 @@ func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 			stp := geometry.Point{X: x + 5, Y: y + 5}
 
 			// add the texts shadow
-			wld.Add(entity.New(
+			world.AddEntity(
 				ui.Text{
 					String:     gr.name,
 					VAlignment: ui.MiddleVAlignment,
@@ -200,10 +199,10 @@ func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 				stp,
 				color.DarkGray.Alpha(127),
 				gr.layer,
-			))
+			)
 
 			// add the text
-			wld.Add(entity.New(
+			world.AddEntity(
 				ui.Text{
 					String:     gr.name,
 					VAlignment: ui.MiddleVAlignment,
@@ -214,9 +213,9 @@ func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 				pos,
 				gr.clr,
 				gr.layer,
-			))
+			)
 		case itemTypeSprite:
-			wld.Add(entity.New(
+			world.AddEntity(
 				sprite.Sprite{
 					Sheet: "resources/gamer.json",
 					Name:  "gamer.png",
@@ -225,7 +224,7 @@ func addItems(toAdd int, wld *world.World, scl geometry.Scale) {
 				pos,
 				gr.clr,
 				gr.layer,
-			))
+			)
 		}
 	}
 }
@@ -235,7 +234,7 @@ var (
 )
 
 // Update the system checking when need to swap layers
-func swapLayersOnTimeSystem(w *world.World, delta float32) error {
+func swapLayersOnTimeSystem(w *goecs.World, delta float32) error {
 	// increase time
 	time += delta
 
@@ -258,7 +257,7 @@ func swapLayersOnTimeSystem(w *world.World, delta float32) error {
 }
 
 // swapLayers swap the layers of two groups
-func swapLayers(w *world.World, old, new int) error {
+func swapLayers(w *goecs.World, old, new int) error {
 	for it := w.Iterator(effects.TYPE.Layer); it != nil; it = it.Next() {
 		ent := it.Value()
 		ly := effects.Get.Layer(ent)
@@ -278,7 +277,7 @@ func swapLayers(w *world.World, old, new int) error {
 }
 
 // updateUI update the ui telling what group is top and when is going to change
-func updateUI(_ *world.World) error {
+func updateUI(_ *goecs.World) error {
 	var top = 0
 	for i := 0; i < 3; i++ {
 		if groups[i].layer.Depth == topLayer.Depth {

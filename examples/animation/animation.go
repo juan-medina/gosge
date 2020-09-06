@@ -24,8 +24,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/juan-medina/goecs/pkg/entity"
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/pkg/components/animation"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/device"
@@ -68,7 +67,7 @@ var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
 	// robot is our robot sprite
-	robot *entity.Entity
+	robot *goecs.Entity
 	// gameScale is our game scale
 	gameScale geometry.Scale
 )
@@ -104,23 +103,23 @@ func loadGame(eng engine.Engine) error {
 	}
 
 	// get the ECS world
-	wld := eng.World()
+	world := eng.World()
 
 	// for each city layer
 	for l := int32(1); l <= numLayers; l++ {
 		// generate the layer file name
 		layerFile := fmt.Sprintf(layerFile, l)
 		// add a sprite that will be attached to the sprite that we scroll
-		attached := wld.Add(entity.New(
+		attached := world.AddEntity(
 			sprite.Sprite{
 				Name:  layerFile,
 				Scale: gameScale.Min,
 			},
 			geometry.Point{X: -9000}, // we move it out of the screen
 			effects.Layer{Depth: float32(l)},
-		))
+		)
 		// add each layer to the screen
-		wld.Add(entity.New(
+		world.AddEntity(
 			sprite.Sprite{
 				Name:  layerFile,
 				Scale: gameScale.Min,
@@ -128,7 +127,7 @@ func loadGame(eng engine.Engine) error {
 			geometry.Point{},
 			effects.Layer{Depth: float32(l)}, // each layer is have it own depth
 			attach{ent: attached},            // attach the layer that is attached
-		))
+		)
 	}
 
 	// calculate the position for our robot
@@ -138,7 +137,7 @@ func loadGame(eng engine.Engine) error {
 	}
 
 	// add the robot with it animations
-	robot = wld.Add(entity.New(
+	robot = world.AddEntity(
 		spritePos,
 		animation.Animation{
 			Sequences: map[string]animation.Sequence{
@@ -161,10 +160,10 @@ func loadGame(eng engine.Engine) error {
 			Speed:   1,
 		},
 		effects.Layer{Depth: robotLayer},
-	))
+	)
 
 	// add the bottom text
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.Text{
 			String:     "press <ESC> to close, cursors to move",
 			HAlignment: ui.CenterHAlignment,
@@ -182,33 +181,33 @@ func loadGame(eng engine.Engine) error {
 			To:   color.White.Alpha(0),
 		},
 		effects.Layer{Depth: fontLayer},
-	))
+	)
 
 	// system that move our robot and the layers
-	wld.AddSystem(robotMoveSystem)
+	world.AddSystem(robotMoveSystem)
 
 	// listen to keys
-	wld.Listen(keysListener)
+	world.AddListener(keysListener)
 
 	return nil
 }
 
 // a component to have an attached entity
 type attach struct {
-	ent *entity.Entity
+	ent *goecs.Entity
 }
 
 // the reflect type of the attach struct
 var attachType = reflect.TypeOf(attach{})
 
 // on update
-func robotMoveSystem(wld *world.World, delta float32) error {
+func robotMoveSystem(world *goecs.World, delta float32) error {
 	// get the animation from our robot
 	anim := animation.Get.Animation(robot)
 	// if its running
 	if anim.Current == runAnim {
 		// get from the ECS all the entities that have a layer a position and an attachment
-		for it := wld.Iterator(effects.TYPE.Layer, geometry.TYPE.Point, attachType); it != nil; it = it.Next() {
+		for it := world.Iterator(effects.TYPE.Layer, geometry.TYPE.Point, attachType); it != nil; it = it.Next() {
 			// get the entity
 			ent := it.Value()
 
@@ -255,7 +254,7 @@ func robotMoveSystem(wld *world.World, delta float32) error {
 }
 
 // notified on events
-func keysListener(_ *world.World, e interface{}, _ float32) error {
+func keysListener(_ *goecs.World, e interface{}, _ float32) error {
 	if e == nil {
 		log.Trace().Interface("signal", e).Msg("got event")
 	}

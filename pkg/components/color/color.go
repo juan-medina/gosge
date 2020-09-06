@@ -24,7 +24,7 @@
 package color
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs"
 	"reflect"
 )
 
@@ -136,20 +136,20 @@ var TYPE = types{
 }
 
 type gets struct {
-	// Solid get a color.Solid from a entity.Entity
-	Solid func(e *entity.Entity) Solid
-	// Gradient get a color.Gradient from a entity.Entity
-	Gradient func(e *entity.Entity) Gradient
+	// Solid get a color.Solid from a goecs.Entity
+	Solid func(e *goecs.Entity) Solid
+	// Gradient get a color.Gradient from a goecs.Entity
+	Gradient func(e *goecs.Entity) Gradient
 }
 
 // Get a color component
 var Get = gets{
-	// Solid get a color.Solid from a entity.Entity
-	Solid: func(e *entity.Entity) Solid {
+	// Solid get a color.Solid from a goecs.Entity
+	Solid: func(e *goecs.Entity) Solid {
 		return e.Get(TYPE.Solid).(Solid)
 	},
-	// Gradient get a color.Gradient from a entity.Entity
-	Gradient: func(e *entity.Entity) Gradient {
+	// Gradient get a color.Gradient from a goecs.Entity
+	Gradient: func(e *goecs.Entity) Gradient {
 		return e.Get(TYPE.Gradient).(Gradient)
 	},
 }

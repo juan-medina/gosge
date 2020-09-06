@@ -24,7 +24,7 @@
 package ui
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs"
 	"reflect"
 )
 
@@ -48,32 +48,32 @@ var TYPE = types{
 }
 
 type gets struct {
-	// FlatButton gets a ui.FlatButton from a entity.Entity
-	FlatButton func(e *entity.Entity) FlatButton
-	// ButtonHoverColors gets a ui.ButtonHoverColors from a entity.Entity
-	ButtonHoverColors func(e *entity.Entity) ButtonHoverColors
-	// SpriteButton gets a ui.SpriteButton from a entity.Entity
-	SpriteButton func(e *entity.Entity) SpriteButton
-	// Text gets a ui.Text from a entity.Entity
-	Text func(e *entity.Entity) Text
+	// FlatButton gets a ui.FlatButton from a goecs.Entity
+	FlatButton func(e *goecs.Entity) FlatButton
+	// ButtonHoverColors gets a ui.ButtonHoverColors from a goecs.Entity
+	ButtonHoverColors func(e *goecs.Entity) ButtonHoverColors
+	// SpriteButton gets a ui.SpriteButton from a goecs.Entity
+	SpriteButton func(e *goecs.Entity) SpriteButton
+	// Text gets a ui.Text from a goecs.Entity
+	Text func(e *goecs.Entity) Text
 }
 
 // Get a ui component
 var Get = gets{
-	// FlatButton gets a ui.FlatButton from a entity.Entity
-	FlatButton: func(e *entity.Entity) FlatButton {
+	// FlatButton gets a ui.FlatButton from a goecs.Entity
+	FlatButton: func(e *goecs.Entity) FlatButton {
 		return e.Get(TYPE.FlatButton).(FlatButton)
 	},
-	// FlatButton gets a ui.FlatButton from a entity.Entity
-	ButtonHoverColors: func(e *entity.Entity) ButtonHoverColors {
+	// FlatButton gets a ui.FlatButton from a goecs.Entity
+	ButtonHoverColors: func(e *goecs.Entity) ButtonHoverColors {
 		return e.Get(TYPE.ButtonHoverColors).(ButtonHoverColors)
 	},
-	// SpriteButton gets a ui.SpriteButton from a entity.Entity
-	SpriteButton: func(e *entity.Entity) SpriteButton {
+	// SpriteButton gets a ui.SpriteButton from a goecs.Entity
+	SpriteButton: func(e *goecs.Entity) SpriteButton {
 		return e.Get(TYPE.SpriteButton).(SpriteButton)
 	},
-	// Text gets a ui.Text from a entity.Entity
-	Text: func(e *entity.Entity) Text {
+	// Text gets a ui.Text from a goecs.Entity
+	Text: func(e *goecs.Entity) Text {
 		return e.Get(TYPE.Text).(Text)
 	},
 }

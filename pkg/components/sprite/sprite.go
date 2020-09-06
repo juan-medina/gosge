@@ -24,7 +24,7 @@
 package sprite
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs"
 	"reflect"
 )
 
@@ -41,7 +41,7 @@ type Sprite struct {
 // TYPE is the reflect.Type of the Sprite
 var TYPE = reflect.TypeOf(Sprite{})
 
-// Get gets a Sprite from a entity.Entity
-func Get(e *entity.Entity) Sprite {
+// Get gets a Sprite from a goecs.Entity
+func Get(e *goecs.Entity) Sprite {
 	return e.Get(TYPE).(Sprite)
 }

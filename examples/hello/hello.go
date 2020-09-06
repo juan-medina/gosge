@@ -23,7 +23,6 @@
 package main
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/effects"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
@@ -64,13 +63,13 @@ func loadGame(eng engine.Engine) error {
 		return err
 	}
 
-	wld := eng.World()
+	world := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
 	// add the centered text
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.Text{
 			String:     "Hello World",
 			HAlignment: ui.CenterHAlignment,
@@ -88,10 +87,10 @@ func loadGame(eng engine.Engine) error {
 			From:  color.Red,
 			To:    color.Yellow,
 		},
-	))
+	)
 
 	// add the bottom text
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.Text{
 			String:     "press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
@@ -108,6 +107,6 @@ func loadGame(eng engine.Engine) error {
 			From: color.White,
 			To:   color.White.Alpha(0),
 		},
-	))
+	)
 	return nil
 }

@@ -25,7 +25,7 @@ package engine
 
 import (
 	"fmt"
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/internal/managers"
 	"github.com/juan-medina/gosge/internal/render"
@@ -63,7 +63,7 @@ type Impl interface {
 
 type engineImpl struct {
 	opt       options.Options
-	wld       *world.World
+	world     *goecs.World
 	status    engineStatus
 	init      engine.InitFunc
 	frameTime float32
@@ -89,11 +89,11 @@ func (ei *engineImpl) LoadSpriteSheet(fileName string) error {
 	return ei.ds.LoadSpriteSheet(fileName)
 }
 
-func (ei *engineImpl) World() *world.World {
-	return ei.wld
+func (ei *engineImpl) World() *goecs.World {
+	return ei.world
 }
 
-func (ei *engineImpl) Listener(_ *world.World, event interface{}, _ float32) error {
+func (ei *engineImpl) Listener(_ *goecs.World, event interface{}, _ float32) error {
 	switch v := event.(type) {
 	case events.GameCloseEvent:
 		ei.status = statusEnding
@@ -108,7 +108,7 @@ func New(opt options.Options, init engine.InitFunc) Impl {
 	rdr := render.New()
 	return &engineImpl{
 		opt:    opt,
-		wld:    world.New(),
+		world:  goecs.Default(),
 		status: statusInitializing,
 		init:   init,
 		ds:     storage.New(rdr),
@@ -146,12 +146,12 @@ func (ei *engineImpl) drawLoading() {
 func (ei *engineImpl) register(mng managers.Manager, priority int32) {
 	switch m := mng.(type) {
 	case managers.WithSystemAndListener:
-		ei.wld.AddSystemWithPriority(m.System, priority)
-		ei.wld.ListenWithPriority(m.Listener, priority)
+		ei.world.AddSystemWithPriority(m.System, priority)
+		ei.world.AddListenerWithPriority(m.Listener, priority)
 	case managers.WithSystem:
-		ei.wld.AddSystemWithPriority(m.System, priority)
+		ei.world.AddSystemWithPriority(m.System, priority)
 	case managers.WithListener:
-		ei.wld.ListenWithPriority(m.Listener, priority)
+		ei.world.AddListenerWithPriority(m.Listener, priority)
 	default:
 		panic("can not register manager")
 	}
@@ -195,7 +195,7 @@ func (ei *engineImpl) running() error {
 	ei.rdr.BeginFrame()
 
 	// update the systems
-	err := ei.wld.Update(ei.frameTime)
+	err := ei.world.Update(ei.frameTime)
 
 	// we end the frame regardless of if we have an error
 	ei.rdr.EndFrame()
@@ -245,7 +245,7 @@ func (ei *engineImpl) changeStage(name string) error {
 	if _, ok := ei.stages[name]; ok {
 		ei.rdr.StopAllSounds()
 		// clear all entities and systems
-		ei.wld.Clear()
+		ei.world.Clear()
 		// clear all storage
 		ei.ds.Clear()
 

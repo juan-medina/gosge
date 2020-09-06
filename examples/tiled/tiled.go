@@ -23,8 +23,7 @@
 package main
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/pkg/components/color"
 	"github.com/juan-medina/gosge/pkg/components/device"
 	"github.com/juan-medina/gosge/pkg/components/effects"
@@ -56,7 +55,7 @@ var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
 	// mapEnt is our map entity
-	mapEnt *entity.Entity
+	mapEnt *goecs.Entity
 
 	// minMapPos is the min position that we could scroll the map
 	minMapPos geometry.Point
@@ -83,12 +82,12 @@ func loadGame(eng engine.Engine) error {
 		return err
 	}
 
-	wld := eng.World()
+	world := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
-	wld.Add(entity.New(
+	world.AddEntity(
 		shapes.Box{
 			Size: geometry.Size{
 				Width:  designResolution.Width,
@@ -102,7 +101,7 @@ func loadGame(eng engine.Engine) error {
 			To:        color.Orange,
 			Direction: color.GradientVertical,
 		},
-	))
+	)
 
 	// Get map size
 	var mapSize geometry.Size
@@ -121,16 +120,16 @@ func loadGame(eng engine.Engine) error {
 	}
 
 	// add the map
-	mapEnt = wld.Add(entity.New(
+	mapEnt = world.AddEntity(
 		tiled.Map{
 			Name:  mapFile,
 			Scale: gameScale.Min,
 		},
 		minMapPos,
-	))
+	)
 
 	// add the bottom text
-	wld.Add(entity.New(
+	world.AddEntity(
 		ui.Text{
 			String:     "move the map with cursors, press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
@@ -148,14 +147,14 @@ func loadGame(eng engine.Engine) error {
 			To:   color.White.Alpha(0),
 		},
 		effects.Layer{Depth: 0},
-	))
+	)
 
-	wld.Listen(keyListener)
+	world.AddListener(keyListener)
 
 	return nil
 }
 
-func keyListener(_ *world.World, event interface{}, delta float32) error {
+func keyListener(_ *goecs.World, event interface{}, delta float32) error {
 	switch e := event.(type) {
 	case events.KeyEvent:
 		if e.Status.Down {

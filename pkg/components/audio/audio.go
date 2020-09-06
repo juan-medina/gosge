@@ -24,7 +24,7 @@
 package audio
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs"
 	"reflect"
 )
 
@@ -63,20 +63,20 @@ var TYPE = types{
 }
 
 type gets struct {
-	// Music gets a audio.Music from a entity.Entity
-	Music func(e *entity.Entity) Music
-	// Music gets a audio.MusicState from a entity.Entity
-	MusicState func(e *entity.Entity) MusicState
+	// Music gets a audio.Music from a goecs.Entity
+	Music func(e *goecs.Entity) Music
+	// Music gets a audio.MusicState from a goecs.Entity
+	MusicState func(e *goecs.Entity) MusicState
 }
 
 // Get a audio component
 var Get = gets{
-	// Music gets a audio.Music from a entity.Entity
-	Music: func(e *entity.Entity) Music {
+	// Music gets a audio.Music from a goecs.Entity
+	Music: func(e *goecs.Entity) Music {
 		return e.Get(TYPE.Music).(Music)
 	},
-	// MusicState gets a audio.MusicState from a entity.Entity
-	MusicState: func(e *entity.Entity) MusicState {
+	// MusicState gets a audio.MusicState from a goecs.Entity
+	MusicState: func(e *goecs.Entity) MusicState {
 		return e.Get(TYPE.MusicState).(MusicState)
 	},
 }

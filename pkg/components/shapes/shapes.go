@@ -24,7 +24,7 @@
 package shapes
 
 import (
-	"github.com/juan-medina/goecs/pkg/entity"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/pkg/components/geometry"
 	"reflect"
 )
@@ -57,14 +57,14 @@ var TYPE = types{
 }
 
 type gets struct {
-	// Box gets a shapes.Box from a entity.Entity
-	Box func(e *entity.Entity) Box
+	// Box gets a shapes.Box from a goecs.Entity
+	Box func(e *goecs.Entity) Box
 }
 
 // Get a geometry component
 var Get = gets{
-	// Box gets a shapes.Box from a entity.Entity
-	Box: func(e *entity.Entity) Box {
+	// Box gets a shapes.Box from a goecs.Entity
+	Box: func(e *goecs.Entity) Box {
 		return e.Get(TYPE.Box).(Box)
 	},
 }

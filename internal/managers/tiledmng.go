@@ -24,8 +24,7 @@ package managers
 
 import (
 	"fmt"
-	"github.com/juan-medina/goecs/pkg/entity"
-	"github.com/juan-medina/goecs/pkg/world"
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/internal/components"
 	"github.com/juan-medina/gosge/internal/render"
 	"github.com/juan-medina/gosge/internal/storage"
@@ -44,8 +43,8 @@ const (
 	rightDown = "right-down"
 )
 
-func (tm tiledManager) System(wld *world.World, _ float32) (err error) {
-	for it := wld.Iterator(tiled.TYPE.Map, geometry.TYPE.Point); it != nil; it = it.Next() {
+func (tm tiledManager) System(world *goecs.World, _ float32) (err error) {
+	for it := world.Iterator(tiled.TYPE.Map, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
 		tiledMap := tiled.Get.Map(ent)
 		pos := geometry.Get.Point(ent)
@@ -55,7 +54,7 @@ func (tm tiledManager) System(wld *world.World, _ float32) (err error) {
 				depth = effects.Get.Layer(ent).Depth
 			}
 
-			if err = tm.addSpriteFromTiledMap(wld, tiledMap, depth, pos); err == nil {
+			if err = tm.addSpriteFromTiledMap(world, tiledMap, depth, pos); err == nil {
 				pos := geometry.Get.Point(ent)
 				ent.Set(tiled.MapState{Position: pos, Scale: tiledMap.Scale})
 			}
@@ -67,7 +66,7 @@ func (tm tiledManager) System(wld *world.World, _ float32) (err error) {
 					X: state.Position.X - pos.X,
 					Y: state.Position.Y - pos.Y,
 				}
-				tm.updateSprites(wld, tiledMap, diff)
+				tm.updateSprites(world, tiledMap, diff)
 				state.Position = pos
 				state.Scale = tiledMap.Scale
 				ent.Set(state)
@@ -84,7 +83,7 @@ func (tm *tiledManager) GetTilePosition(x, y int, def components.TiledMapDef) ge
 	}
 }
 
-func (tm tiledManager) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Map, depth float32, mapPos geometry.Point) (err error) {
+func (tm tiledManager) addSpriteFromTiledMap(world *goecs.World, tiledMap tiled.Map, depth float32, mapPos geometry.Point) (err error) {
 	if mapDef, err := tm.ds.GetTiledMapDef(tiledMap.Name); err == nil {
 		if !(mapDef.Data.RenderOrder == "" || mapDef.Data.RenderOrder == rightDown) {
 			return fmt.Errorf("unsupported tiled render order : got %q, want %q", mapDef.Data.RenderOrder, rightDown)
@@ -116,7 +115,7 @@ func (tm tiledManager) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Ma
 					pos := tm.GetTilePosition(x, y, mapDef)
 					pos.X = (pos.X * tiledMap.Scale) + mapPos.X
 					pos.Y = (pos.Y * tiledMap.Scale) + mapPos.Y
-					wld.Add(entity.New(
+					world.AddEntity(
 						sprite.Sprite{
 							Sheet: tiledMap.Name,
 							Name:  sprName,
@@ -126,7 +125,7 @@ func (tm tiledManager) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Ma
 						},
 						pos,
 						effects.Layer{Depth: ld},
-					))
+					)
 					i++
 				}
 			}
@@ -137,8 +136,8 @@ func (tm tiledManager) addSpriteFromTiledMap(wld *world.World, tiledMap tiled.Ma
 	return
 }
 
-func (tm tiledManager) updateSprites(wld *world.World, tiledMap tiled.Map, diff geometry.Point) {
-	for it := wld.Iterator(sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
+func (tm tiledManager) updateSprites(world *goecs.World, tiledMap tiled.Map, diff geometry.Point) {
+	for it := world.Iterator(sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
 		spr := sprite.Get(ent)
 		if spr.Sheet == tiledMap.Name {
