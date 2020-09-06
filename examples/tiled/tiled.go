@@ -47,10 +47,11 @@ var opt = options.Options{
 }
 
 const (
-	fontName     = "resources/go_regular.fnt"
-	fontSmall    = 60
-	mapFile      = "resources/maps/gameart2d-desert.tmx"
-	mapMoveSpeed = 850 // map move speed design resolution pixel / second
+	fontName       = "resources/go_regular.fnt"
+	fontSmall      = 60
+	mapFile        = "resources/maps/gameart2d-desert.tmx"
+	mapMoveSpeed   = 850 // map move speed design resolution pixel / second
+	defaultTopText = "click a tile with a 'name' property"
 )
 
 var (
@@ -141,14 +142,14 @@ func loadGame(eng *gosge.Engine) error {
 	)
 
 	var textSize geometry.Size
-	if textSize, err = eng.MeasureText(fontName, "some text", fontSmall); err != nil {
+	if textSize, err = eng.MeasureText(fontName, defaultTopText, fontSmall); err != nil {
 		return err
 	}
 
 	// add the top text
 	topText = world.AddEntity(
 		ui.Text{
-			String:     "Click a tile with a name property",
+			String:     defaultTopText,
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.TopVAlignment,
 			Font:       fontName,
@@ -200,11 +201,15 @@ func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 			if gen.SpriteAtContains(spr, pos, e.Point) {
 				if v, ok := properties.Values["name"]; ok {
 					text := ui.Get.Text(topText)
-					text.String = fmt.Sprintf("Tiled clicked has name %q", v)
+					text.String = fmt.Sprintf("Tiled clicked has 'name' = %q", v)
 					topText.Set(text)
+					return nil
 				}
 			}
 		}
+		text := ui.Get.Text(topText)
+		text.String = defaultTopText
+		topText.Set(text)
 	}
 	return nil
 }
