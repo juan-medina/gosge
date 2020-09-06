@@ -61,18 +61,19 @@ func loadGame(eng *gosge.Engine) error {
 
 // game constants
 const (
-	buttonExtraWidth       = 0.15                       // the additional width for a button si it is not only the text size
-	buttonExtraHeight      = 0.15                       // the additional width for a button si it is not only the text size
-	shadowExtraWidth       = 5                          // the x offset for the buttons shadow
-	shadowExtraHeight      = 5                          // the y offset for the buttons shadow
-	fontTittle             = 100                        // tittle font size
-	fontBig                = 100                        // big buttons font size
-	fontName               = "resources/go_regular.fnt" // game font
-	spriteSheetName        = "resources/stages.json"    // game sprite sheet
-	gameSprite             = "go-fuzz.png"              // game sprite
-	menuSprite             = "gamer.png"                // menu sprite
-	buttonExitNormalSprite = "button_exit_normal.png"   // exit button sprite normal state
-	buttonExitHoverSprite  = "button_exit_hover.png"    // exit button sprite hover state
+	buttonExtraWidth       = 0.15                        // the additional width for a button si it is not only the text size
+	buttonExtraHeight      = 0.15                        // the additional width for a button si it is not only the text size
+	shadowExtraWidth       = 5                           // the x offset for the buttons shadow
+	shadowExtraHeight      = 5                           // the y offset for the buttons shadow
+	fontTittle             = 100                         // tittle font size
+	fontBig                = 100                         // big buttons font size
+	fontName               = "resources/go_regular.fnt"  // game font
+	spriteSheetName        = "resources/stages.json"     // game sprite sheet
+	gameSprite             = "go-fuzz.png"               // game sprite
+	menuSprite             = "gamer.png"                 // menu sprite
+	buttonExitNormalSprite = "button_exit_normal.png"    // exit button sprite normal state
+	buttonExitHoverSprite  = "button_exit_hover.png"     // exit button sprite hover state
+	clickSound             = "resources/audio/click.wav" // click sound
 )
 
 func mainStage(eng *gosge.Engine) error {
@@ -85,6 +86,11 @@ func mainStage(eng *gosge.Engine) error {
 
 	// pre load sprites
 	if err = eng.LoadSpriteSheet(spriteSheetName); err != nil {
+		return err
+	}
+
+	// pre load sounds
+	if err = eng.LoadSound(clickSound); err != nil {
 		return err
 	}
 
@@ -147,7 +153,11 @@ func mainStage(eng *gosge.Engine) error {
 			Normal: buttonExitNormalSprite,
 			Hover:  buttonExitHoverSprite,
 			Scale:  gameScale.Min * spriteScale,
-			Event:  events.ChangeGameStage{Stage: "menu"},
+			Sound:  clickSound,
+			Event: events.DelaySignal{
+				Signal: events.ChangeGameStage{Stage: "menu"},
+				Time:   0.15,
+			},
 		},
 		geometry.Point{
 			X: (designResolution.Width - (spriteSize.Width / 2)) * gameScale.Point.X,
@@ -160,13 +170,20 @@ func mainStage(eng *gosge.Engine) error {
 }
 
 func menuStage(eng *gosge.Engine) error {
+	var err error
+
 	// Preload font
-	if err := eng.LoadFont(fontName); err != nil {
+	if err = eng.LoadFont(fontName); err != nil {
 		return err
 	}
 
 	// pre load sprites
-	if err := eng.LoadSpriteSheet(spriteSheetName); err != nil {
+	if err = eng.LoadSpriteSheet(spriteSheetName); err != nil {
+		return err
+	}
+
+	// pre load sounds
+	if err = eng.LoadSound(clickSound); err != nil {
 		return err
 	}
 
@@ -217,7 +234,6 @@ func menuStage(eng *gosge.Engine) error {
 
 	// measuring the biggest text for size all the buttons equally
 	var measure geometry.Size
-	var err error
 	if measure, err = eng.MeasureText(fontName, "Play !", fontBig); err != nil {
 		return err
 	}
@@ -229,7 +245,11 @@ func menuStage(eng *gosge.Engine) error {
 	world.AddEntity(
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
-			Event:  events.ChangeGameStage{Stage: "main"},
+			Sound:  clickSound,
+			Event: events.DelaySignal{
+				Signal: events.ChangeGameStage{Stage: "main"},
+				Time:   0.15,
+			},
 		},
 		geometry.Point{
 			X: ((designResolution.Width / 2) - (measure.Width / 2)) * gameScale.Point.X,
@@ -260,7 +280,11 @@ func menuStage(eng *gosge.Engine) error {
 	world.AddEntity(
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
-			Event:  events.GameCloseEvent{},
+			Sound:  clickSound,
+			Event: events.DelaySignal{
+				Signal: events.GameCloseEvent{},
+				Time:   0.15,
+			},
 		},
 		geometry.Point{
 			X: ((designResolution.Width / 2) - (measure.Width / 2)) * gameScale.Point.X,

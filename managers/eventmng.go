@@ -35,6 +35,18 @@ type eventManager struct {
 	ks  []device.KeyStatus
 }
 
+func (em eventManager) Listener(world *goecs.World, signal interface{}, delta float32) error {
+	switch e := signal.(type) {
+	case events.DelaySignal:
+		e.Time -= delta
+		if e.Time <= 0 {
+			return world.Signal(e.Signal)
+		}
+		return world.Signal(e)
+	}
+	return nil
+}
+
 var (
 	mouseButtonsTocCheck = []device.MouseButton{
 		device.MouseLeftButton, device.MouseMiddleButton, device.MouseRightButton,
@@ -94,7 +106,7 @@ func (em *eventManager) System(world *goecs.World, _ float32) error {
 }
 
 // Events returns a managers.WithSystem that will handle signals
-func Events(dm DeviceManager) WithSystem {
+func Events(dm DeviceManager) WithSystemAndListener {
 	return &eventManager{
 		dm: dm,
 		mme: events.MouseMoveEvent{

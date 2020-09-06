@@ -42,6 +42,7 @@ type ButtonHoverColors struct {
 // FlatButton is a UI element for displaying a button
 type FlatButton struct {
 	Shadow geometry.Size // Shadow is the offset of the shadow on the ui.FlatButton
+	Sound  string        // Sound is the click sound for this FlatButton
 	Event  interface{}   // Event is the event that will be trigger when this button is click
 }
 

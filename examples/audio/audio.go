@@ -44,28 +44,28 @@ var opt = options.Options{
 }
 
 const (
-	fontName                = "resources/go_regular.fnt"        // the font for the game
-	fontSmall               = 60                                // the font size
-	musicFile               = "resources/audio/loop.ogg"        // music file
-	gopherSound             = "resources/audio/gopher.wav"      // gopher sound
-	clickSound              = "resources/audio/metal_click.wav" // click sound
-	spriteSheet             = "resources/audio.json"            // sprite sheet with our graphics
-	buttonsGap              = 5                                 // separation between buttons
-	playButtonNormalSprite  = "play_button_normal.png"          // the normal sprite for the play button
-	playButtonHoverSprite   = "play_button_hover.png"           // the hover sprite for the play button
-	stopButtonNormalSprite  = "stop_button_normal.png"          // the normal sprite for the stop button
-	stopButtonHoverSprite   = "stop_button_hover.png"           // the hover sprite for the stop button
-	pauseButtonNormalSprite = "pause_button_normal.png"         // the normal sprite for the pause button
-	pauseButtonHoverSprite  = "pause_button_hover.png"          // the hover sprite for the pause button
-	gopherVerticalGap       = 300                               // vertical gap from the center for our gopher
-	danceAnim               = "dance"                           // the dance animation name
-	idleAnim                = "idle"                            // the idle animation name
-	gopherIdle              = "gopher_coffee_%02d.png"          // sprite frame base name for the idle animation
-	gopherIdleFrames        = 10                                // number of frames for the gopher idle animation
-	gopherDance             = "gopher_dance_%02d.png"           // sprite frame base name for the dance animation
-	gopherDanceFrames       = 24                                // number of frames for the gopher dance animation
-	gopherFrameDelay        = 0.100                             // delay between frames for the gopher animations
-	danceAnimSpeedIncrease  = 0.20                              // how much more faster will dance the gopher on click
+	fontName                = "resources/go_regular.fnt"   // the font for the game
+	fontSmall               = 60                           // the font size
+	musicFile               = "resources/audio/loop.ogg"   // music file
+	gopherSound             = "resources/audio/gopher.wav" // gopher sound
+	clickSound              = "resources/audio/click.wav"  // click sound
+	spriteSheet             = "resources/audio.json"       // sprite sheet with our graphics
+	buttonsGap              = 5                            // separation between buttons
+	playButtonNormalSprite  = "play_button_normal.png"     // the normal sprite for the play button
+	playButtonHoverSprite   = "play_button_hover.png"      // the hover sprite for the play button
+	stopButtonNormalSprite  = "stop_button_normal.png"     // the normal sprite for the stop button
+	stopButtonHoverSprite   = "stop_button_hover.png"      // the hover sprite for the stop button
+	pauseButtonNormalSprite = "pause_button_normal.png"    // the normal sprite for the pause button
+	pauseButtonHoverSprite  = "pause_button_hover.png"     // the hover sprite for the pause button
+	gopherVerticalGap       = 300                          // vertical gap from the center for our gopher
+	danceAnim               = "dance"                      // the dance animation name
+	idleAnim                = "idle"                       // the idle animation name
+	gopherIdle              = "gopher_coffee_%02d.png"     // sprite frame base name for the idle animation
+	gopherIdleFrames        = 10                           // number of frames for the gopher idle animation
+	gopherDance             = "gopher_dance_%02d.png"      // sprite frame base name for the dance animation
+	gopherDanceFrames       = 24                           // number of frames for the gopher dance animation
+	gopherFrameDelay        = 0.100                        // delay between frames for the gopher animations
+	danceAnimSpeedIncrease  = 0.20                         // how much more faster will dance the gopher on click
 )
 
 var (

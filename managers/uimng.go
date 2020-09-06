@@ -122,6 +122,11 @@ func (uim uiManager) flatButtonsMouseUp(world *goecs.World, mue events.MouseUpEv
 		box := shapes.Get.Box(ent)
 
 		if box.Contains(pos, mue.Point) {
+			if btn.Sound != "" {
+				if err := world.Signal(events.PlaySoundEvent{Name: btn.Sound}); err != nil {
+					return err
+				}
+			}
 			return world.Signal(btn.Event)
 		}
 	}

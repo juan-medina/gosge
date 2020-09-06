@@ -90,3 +90,9 @@ type MusicStateChangeEvent struct {
 type PlaySoundEvent struct {
 	Name string
 }
+
+// DelaySignal is a signal that will happen after a time
+type DelaySignal struct {
+	Signal interface{} // Signal that will be emitted after the Time
+	Time   float32     // Time to this Signal to be emitted, in seconds
+}
