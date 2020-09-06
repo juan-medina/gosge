@@ -32,7 +32,6 @@ import (
 	"github.com/juan-medina/gosge/pkg/components/shapes"
 	"github.com/juan-medina/gosge/pkg/components/sprite"
 	"github.com/juan-medina/gosge/pkg/components/ui"
-	"sort"
 )
 
 type renderingManager struct {
@@ -157,22 +156,12 @@ func (rdm renderingManager) isRenderable(ent *goecs.Entity) bool {
 			ent.Contains(ui.TYPE.FlatButton))
 }
 
-func (rdm renderingManager) getSortedByLayers(world *goecs.World) []*goecs.Entity {
-	entities := make([]*goecs.Entity, world.Size())
-	i := 0
-	for it := world.Iterator(); it != nil; it = it.Next() {
-		e := it.Value()
-		if rdm.isRenderable(e) {
-			entities[i] = e
-			i++
-		}
-	}
-	entities = entities[:i]
-
-	sort.Slice(entities, func(i, j int) bool {
-		first := entities[i]
-		second := entities[j]
-
+func (rdm renderingManager) sortRenderable(first, second *goecs.Entity) bool {
+	if !rdm.isRenderable(first) {
+		return false
+	} else if !rdm.isRenderable(second) {
+		return true
+	} else {
 		firstDepth := render.DefaultLayer
 		if first.Contains(effects.TYPE.Layer) {
 			firstDepth = effects.Get.Layer(first).Depth
@@ -186,12 +175,19 @@ func (rdm renderingManager) getSortedByLayers(world *goecs.World) []*goecs.Entit
 			return first.ID() < second.ID()
 		}
 		return firstDepth > secondDepth
-	})
-	return entities
+	}
 }
 
 func (rdm renderingManager) System(world *goecs.World, _ float32) error {
-	for _, v := range rdm.getSortedByLayers(world) {
+	// sort by renderable in-place
+	world.Sort(rdm.sortRenderable)
+
+	// go trough all the world
+	for it := world.Iterator(); it != nil; it = it.Next() {
+		v := it.Value()
+		if !rdm.isRenderable(v) {
+			break // since is sorted by renderable we don't have nothing more to render
+		}
 		if v.Contains(sprite.TYPE) {
 			if err := rdm.renderSprite(v); err != nil {
 				return err
