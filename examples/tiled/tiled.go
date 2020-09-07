@@ -43,15 +43,14 @@ var opt = options.Options{
 	Title:      "Tiled Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
-	Windowed:   true,
 }
 
 const (
-	fontName       = "resources/go_regular.fnt"
-	fontSmall      = 60
-	mapFile        = "resources/maps/gameart2d-desert.tmx"
-	mapMoveSpeed   = 850 // map move speed design resolution pixel / second
-	defaultTopText = "click a tile with a 'name' property"
+	fontName       = "resources/go_regular.fnt"              // our game font
+	fontSmall      = 60                                      // font size
+	mapFile        = "resources/maps/gameart2d-desert.tmx"   // tiled map file
+	mapMoveSpeed   = 850                                     // map move speed, pixel / second
+	defaultTopText = "click a tile with a \"name\" property" // default top text
 )
 
 var (
@@ -100,6 +99,7 @@ func loadGame(eng *gosge.Engine) error {
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
+	// add a gradient background
 	world.AddEntity(
 		shapes.Box{
 			Size: geometry.Size{
@@ -122,11 +122,13 @@ func loadGame(eng *gosge.Engine) error {
 		return err
 	}
 
+	// calculate minimum map position for scrolling
 	minMapPos = geometry.Point{
 		X: 0,
 		Y: (designResolution.Height - mapSize.Height) * gameScale.Point.Y,
 	}
 
+	// calculate maximum map position for scrolling
 	maxMapPos = geometry.Point{
 		X: (mapSize.Width - designResolution.Width) * gameScale.Point.X,
 		Y: 0,
@@ -184,40 +186,59 @@ func loadGame(eng *gosge.Engine) error {
 		effects.Layer{Depth: 0},
 	)
 
+	// add our key listener
 	world.AddListener(keyListener)
+	// add mour mouse listener
 	world.AddListener(mouseListener)
 
 	return nil
 }
 
+// listen to mouse clicks
 func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
 	case events.MouseUpEvent:
-		for it := world.Iterator(tiled.TYPE.Properties, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
+		// the block info of a clicked block
+		var clickedInfo tiled.BlockInfo
+		// get ll the blocks
+		for it := world.Iterator(tiled.TYPE.BlockInfo, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
+			// get values
 			ent := it.Value()
-			properties := tiled.Get.Properties(ent)
+			info := tiled.Get.BlockInfo(ent)
 			spr := sprite.Get(ent)
 			pos := geometry.Get.Point(ent)
+			// if we click it with the mouse
 			if gen.SpriteAtContains(spr, pos, e.Point) {
-				if v, ok := properties.Values["name"]; ok {
-					text := ui.Get.Text(topText)
-					text.String = fmt.Sprintf("Tiled clicked has 'name' = %q", v)
-					topText.Set(text)
-					return nil
+				// if we have name property
+				if _, ok := info.Properties["name"]; ok {
+					// we click this block
+					clickedInfo = info
 				}
 			}
 		}
+		// get the top text component
 		text := ui.Get.Text(topText)
-		text.String = defaultTopText
+		// if we don't have a layer we haven't click nothing
+		if clickedInfo.Layer == "" {
+			// set default text
+			text.String = defaultTopText
+		} else {
+			// set the text with the block information
+			text.String = fmt.Sprintf("Tiled clicked has name = %q, layer = %q", clickedInfo.Properties["name"], clickedInfo.Layer)
+		}
+		// update the top entity
 		topText.Set(text)
 	}
 	return nil
 }
 
+// listen to keys
 func keyListener(_ *goecs.World, event interface{}, delta float32) error {
 	switch e := event.(type) {
 	case events.KeyEvent:
+		// if a key is down
 		if e.Status.Down {
+			// how much we move
 			move := geometry.Point{}
 			switch e.Key {
 			case device.KeyLeft:
@@ -229,14 +250,19 @@ func keyListener(_ *goecs.World, event interface{}, delta float32) error {
 			case device.KeyDown:
 				move.Y = mapMoveSpeed * delta
 			}
-
+			// i fwe need to move anything
 			if move.X != 0 || move.Y != 0 {
+				// get the current position
 				pos := geometry.Get.Point(mapEnt)
 
+				// move it
 				pos.X += move.X
 				pos.Y -= move.Y
+
+				// clamp to out min and max scroll pos
 				pos.Clamp(minMapPos, maxMapPos)
 
+				// update entity
 				mapEnt.Set(pos)
 			}
 		}

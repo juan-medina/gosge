@@ -81,23 +81,6 @@ func (tm *tiledManager) GetTilePosition(x, y int, def components.TiledMapDef) ge
 	}
 }
 
-func (tm tiledManager) getTiledProperties(id uint32, mapDef components.TiledMapDef) (result map[string]string) {
-	result = make(map[string]string, 0)
-
-	for _, ts := range mapDef.Data.Tilesets {
-		for _, t := range ts.Tiles {
-			if t.ID == id {
-				for _, p := range t.Properties {
-					result[p.Name] = p.Value
-				}
-				return
-			}
-		}
-	}
-
-	return
-}
-
 func (tm tiledManager) addSpriteFromTiledMap(world *goecs.World, tiledMap tiled.Map, depth float32, mapPos geometry.Point) (err error) {
 	if mapDef, err := tm.sm.GetTiledMapDef(tiledMap.Name); err == nil {
 		if !(mapDef.Data.RenderOrder == "" || mapDef.Data.RenderOrder == rightDown) {
@@ -140,7 +123,12 @@ func (tm tiledManager) addSpriteFromTiledMap(world *goecs.World, tiledMap tiled.
 							FlipX: l.Tiles[i].HorizontalFlip,
 							FlipY: l.Tiles[i].VerticalFlip,
 						},
-						tiled.Properties{Values: tm.getTiledProperties(id, mapDef)},
+						tiled.BlockInfo{
+							Properties: mapDef.Properties[id],
+							Layer:      l.Name,
+							Row:        y,
+							Col:        x,
+						},
 						pos,
 						effects.Layer{Depth: ld},
 					)

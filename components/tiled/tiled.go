@@ -41,9 +41,12 @@ type MapState struct {
 	Scale    float32        // Scale is the map scale
 }
 
-// Properties contains the properties for a title
-type Properties struct {
-	Values map[string]string
+// BlockInfo contains the info for a title block
+type BlockInfo struct {
+	Properties map[string]string // Properties are the properties for this block
+	Row        int               // Row is the row of this block in the map
+	Col        int               // Col is the col of this block in the map
+	Layer      string            // Layer is the layer name for this block
 }
 
 type types struct {
@@ -51,15 +54,15 @@ type types struct {
 	Map reflect.Type
 	// MapState is the reflect.Type for tiled.MapState
 	MapState reflect.Type
-	// Properties is the reflect.Type for tiled.Properties
-	Properties reflect.Type
+	// BlockInfo is the reflect.Type for tiled.BlockInfo
+	BlockInfo reflect.Type
 }
 
 // TYPE hold the reflect.Type for our tiled components
 var TYPE = types{
-	Map:        reflect.TypeOf(Map{}),
-	MapState:   reflect.TypeOf(MapState{}),
-	Properties: reflect.TypeOf(Properties{}),
+	Map:       reflect.TypeOf(Map{}),
+	MapState:  reflect.TypeOf(MapState{}),
+	BlockInfo: reflect.TypeOf(BlockInfo{}),
 }
 
 type gets struct {
@@ -67,8 +70,8 @@ type gets struct {
 	Map func(e *goecs.Entity) Map
 	// MapState gets a tiled.MapState from a goecs.Entity
 	MapState func(e *goecs.Entity) MapState
-	// Properties gets a tiled.Properties from a goecs.Entity
-	Properties func(e *goecs.Entity) Properties
+	// BlockInfo gets a tiled.BlockInfo from a goecs.Entity
+	BlockInfo func(e *goecs.Entity) BlockInfo
 }
 
 // Get a geometry component
@@ -81,8 +84,8 @@ var Get = gets{
 	MapState: func(e *goecs.Entity) MapState {
 		return e.Get(TYPE.MapState).(MapState)
 	},
-	// Values gets a tiled.Values from a goecs.Entity
-	Properties: func(e *goecs.Entity) Properties {
-		return e.Get(TYPE.Properties).(Properties)
+	// Properties gets a tiled.Properties from a goecs.Entity
+	BlockInfo: func(e *goecs.Entity) BlockInfo {
+		return e.Get(TYPE.BlockInfo).(BlockInfo)
 	},
 }

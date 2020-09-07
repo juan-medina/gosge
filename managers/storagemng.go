@@ -90,6 +90,7 @@ func (sm StorageManager) loadTileMap(name string) (result components.TiledMapDef
 	var tiledMap *tiled.Map
 	if tiledMap, err = tiled.LoadFromFile(name); err == nil {
 
+		result.Properties = make(map[uint32]map[string]string, 0)
 		result.Cols = int32(tiledMap.Width)
 		result.Rows = int32(tiledMap.Height)
 		result.TileSize = geometry.Size{
@@ -139,8 +140,8 @@ func (sm StorageManager) loadTileMap(name string) (result components.TiledMapDef
 						Height: float32(ts.TileHeight),
 					},
 				}
-
-				sprName := strconv.Itoa(int(i - 1))
+				id := i - 1
+				sprName := strconv.Itoa(int(id))
 				st[sprName] = components.SpriteDef{
 					Texture: texture,
 					Origin:  origin,
@@ -149,6 +150,14 @@ func (sm StorageManager) loadTileMap(name string) (result components.TiledMapDef
 						Y: 0,
 					},
 				}
+			}
+			// cache block properties
+			for _, t := range ts.Tiles {
+				properties := make(map[string]string, 0)
+				for _, p := range t.Properties {
+					properties[p.Name] = p.Value
+				}
+				result.Properties[t.ID] = properties
 			}
 		}
 	}
