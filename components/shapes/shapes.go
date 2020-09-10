@@ -46,19 +46,30 @@ func (b Box) Contains(at geometry.Point, point geometry.Point) bool {
 	}.IsPointInRect(point)
 }
 
+// Line is a component that represent a line
+type Line struct {
+	To        geometry.Point // To where the line goes
+	Thickness float32        // Thickness of the line
+}
+
 type types struct {
 	// Box is the reflect.Type for shapes.Box
 	Box reflect.Type
+	// Line is the reflect.Type for shapes.Line
+	Line reflect.Type
 }
 
 // TYPE hold the reflect.Type for our shapes components
 var TYPE = types{
-	Box: reflect.TypeOf(Box{}),
+	Box:  reflect.TypeOf(Box{}),
+	Line: reflect.TypeOf(Line{}),
 }
 
 type gets struct {
 	// Box gets a shapes.Box from a goecs.Entity
 	Box func(e *goecs.Entity) Box
+	// Line gets a shapes.Line from a goecs.Entity
+	Line func(e *goecs.Entity) Line
 }
 
 // Get a geometry component
@@ -66,5 +77,9 @@ var Get = gets{
 	// Box gets a shapes.Box from a goecs.Entity
 	Box: func(e *goecs.Entity) Box {
 		return e.Get(TYPE.Box).(Box)
+	},
+	// Line gets a shapes.Line from a goecs.Entity
+	Line: func(e *goecs.Entity) Line {
+		return e.Get(TYPE.Line).(Line)
 	},
 }

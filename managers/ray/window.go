@@ -43,3 +43,8 @@ func (dmi DeviceManagerImpl) GetMousePoint() geometry.Point {
 func (dmi DeviceManagerImpl) IsMouseRelease(button device.MouseButton) bool {
 	return rl.IsMouseButtonReleased(int32(button))
 }
+
+// IsMousePressed check if the given MouseButton has been pressed
+func (dmi DeviceManagerImpl) IsMousePressed(button device.MouseButton) bool {
+	return rl.IsMouseButtonPressed(int32(button))
+}

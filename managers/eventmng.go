@@ -65,6 +65,10 @@ func (em eventManager) sendMouseRelease(world *goecs.World, button device.MouseB
 	return world.Signal(events.MouseUpEvent{Point: em.mme.Point, MouseButton: button})
 }
 
+func (em eventManager) sendMousePressed(world *goecs.World, button device.MouseButton) error {
+	return world.Signal(events.MouseDownEvent{Point: em.mme.Point, MouseButton: button})
+}
+
 func (em eventManager) sendKeyEvent(world *goecs.World, key device.Key, status device.KeyStatus) error {
 	return world.Signal(events.KeyEvent{Key: key, Status: status})
 }
@@ -87,6 +91,11 @@ func (em *eventManager) System(world *goecs.World, _ float32) error {
 	for _, v := range mouseButtonsTocCheck {
 		if em.dm.IsMouseRelease(v) {
 			if err := em.sendMouseRelease(world, v); err != nil {
+				return err
+			}
+		}
+		if em.dm.IsMousePressed(v) {
+			if err := em.sendMousePressed(world, v); err != nil {
 				return err
 			}
 		}

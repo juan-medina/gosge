@@ -186,3 +186,16 @@ func (dmi *DeviceManagerImpl) MeasureText(fnt components.FontDef, str string, si
 		Height: av.Y,
 	}
 }
+
+// DrawLine between from and to with a given thickness and color.Solid
+func (dmi DeviceManagerImpl) DrawLine(from, to geometry.Point, thickness float32, color color.Solid) {
+	rf := rl.Vector2{
+		X: from.X,
+		Y: from.Y,
+	}
+	rt := rl.Vector2{
+		X: to.X,
+		Y: to.Y,
+	}
+	rl.DrawLineEx(rf, rt, thickness, dmi.color2RayColor(color))
+}

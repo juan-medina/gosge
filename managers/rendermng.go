@@ -60,7 +60,7 @@ func (rdm renderingManager) renderSprite(ent *goecs.Entity) error {
 	return nil
 }
 
-func (rdm renderingManager) renderShape(ent *goecs.Entity) error {
+func (rdm renderingManager) renderBox(ent *goecs.Entity) error {
 	pos := geometry.Get.Point(ent)
 	box := shapes.Get.Box(ent)
 	if ent.Contains(color.TYPE.Solid) {
@@ -70,6 +70,20 @@ func (rdm renderingManager) renderShape(ent *goecs.Entity) error {
 		gra := color.Get.Gradient(ent)
 		rdm.dm.DrawGradientBox(pos, box, gra)
 	}
+	return nil
+}
+
+func (rdm renderingManager) renderLine(ent *goecs.Entity) error {
+	pos := geometry.Get.Point(ent)
+	line := shapes.Get.Line(ent)
+	clr := color.White
+
+	if ent.Contains(color.TYPE.Solid) {
+		clr = color.Get.Solid(ent)
+	}
+
+	rdm.dm.DrawLine(pos, line.To, line.Thickness, clr)
+
 	return nil
 }
 
@@ -151,7 +165,7 @@ func (rdm renderingManager) renderText(v *goecs.Entity) error {
 func (rdm renderingManager) isRenderable(ent *goecs.Entity) bool {
 	return ent.Contains(geometry.TYPE.Point) &&
 		(ent.Contains(sprite.TYPE) || ent.Contains(ui.TYPE.Text) || ent.Contains(shapes.TYPE.Box) ||
-			ent.Contains(ui.TYPE.FlatButton))
+			ent.Contains(ui.TYPE.FlatButton) || ent.Contains(shapes.TYPE.Line))
 }
 
 func (rdm renderingManager) sortRenderable(first, second *goecs.Entity) bool {
@@ -195,11 +209,15 @@ func (rdm renderingManager) System(world *goecs.World, _ float32) error {
 				return err
 			}
 		} else if v.Contains(shapes.TYPE.Box) {
-			if err := rdm.renderShape(v); err != nil {
+			if err := rdm.renderBox(v); err != nil {
 				return err
 			}
 		} else if v.Contains(ui.TYPE.Text, color.TYPE.Solid) {
 			if err := rdm.renderText(v); err != nil {
+				return err
+			}
+		} else if v.Contains(shapes.TYPE.Line) {
+			if err := rdm.renderLine(v); err != nil {
 				return err
 			}
 		}

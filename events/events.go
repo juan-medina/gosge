@@ -39,9 +39,17 @@ type MouseMoveEvent struct {
 
 // MouseUpEvent is an event that indicates that the mouse is release
 type MouseUpEvent struct {
-	// Point is the geometry.Point where the mouse is  when released
+	// Point is the geometry.Point where the mouse is when released
 	Point geometry.Point
 	// MouseButton is the device.MouseButton been released
+	MouseButton device.MouseButton
+}
+
+// MouseDownEvent is an event that indicates that the mouse is pressed
+type MouseDownEvent struct {
+	// Point is the geometry.Point where the mouse is when pressed
+	Point geometry.Point
+	// MouseButton is the device.MouseButton been pressed
 	MouseButton device.MouseButton
 }
 

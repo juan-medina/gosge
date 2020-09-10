@@ -56,6 +56,9 @@ type DeviceManager interface {
 	// IsMouseRelease check if the given MouseButton has been release
 	IsMouseRelease(button device.MouseButton) bool
 
+	// IsMousePressed check if the given MouseButton has been pressed
+	IsMousePressed(button device.MouseButton) bool
+
 	// GetKeyStatus returns the device.KeyStatus for a given device.Key
 	GetKeyStatus(key device.Key) device.KeyStatus
 
@@ -108,6 +111,8 @@ type DeviceManager interface {
 	DrawGradientBox(pos geometry.Point, box shapes.Box, gradient color.Gradient)
 	// MeasureText return the geometry.Size of a string with a defined size
 	MeasureText(fnt components.FontDef, str string, size float32) geometry.Size
+	// DrawLine between from and to with a given thickness and color.Solid
+	DrawLine(from, to geometry.Point, thickness float32, color color.Solid)
 }
 
 // Device return the DeviceManager

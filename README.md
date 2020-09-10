@@ -94,6 +94,7 @@ $ make run example=stages
 $ make run example=animation
 $ make run example=audio
 $ make run example=tiled
+$ make run example=draw
 ```
 
 Alternatively you could run them with :
@@ -106,6 +107,7 @@ $ go run examples/stages/stages.go
 $ go run examples/animation/animation.go
 $ go run examples/audio/audio.go
 $ go run examples/tiled/tiled.go
+$ go run examples/draw/draw.go
 ```
 
 ## Requirements
