@@ -243,30 +243,27 @@ func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 // listen to keys
 func keyListener(_ *goecs.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
-	case events.KeyEvent:
-		// if a key is down
-		if e.Status.Pressed {
-			switch e.Key {
-			case device.KeyLeft:
-				move.X = -mapMoveSpeed
-			case device.KeyRight:
-				move.X = mapMoveSpeed
-			case device.KeyUp:
-				move.Y = -mapMoveSpeed
-			case device.KeyDown:
-				move.Y = mapMoveSpeed
-			}
-		} else if e.Status.Released {
-			switch e.Key {
-			case device.KeyLeft:
-				move.X = 0
-			case device.KeyRight:
-				move.X = 0
-			case device.KeyUp:
-				move.Y = 0
-			case device.KeyDown:
-				move.Y = 0
-			}
+	case events.KeyDownEvent:
+		switch e.Key {
+		case device.KeyLeft:
+			move.X = -mapMoveSpeed
+		case device.KeyRight:
+			move.X = mapMoveSpeed
+		case device.KeyUp:
+			move.Y = -mapMoveSpeed
+		case device.KeyDown:
+			move.Y = mapMoveSpeed
+		}
+	case events.KeyUpEvent:
+		switch e.Key {
+		case device.KeyLeft:
+			move.X = 0
+		case device.KeyRight:
+			move.X = 0
+		case device.KeyUp:
+			move.Y = 0
+		case device.KeyDown:
+			move.Y = 0
 		}
 	}
 	return nil

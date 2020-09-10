@@ -61,10 +61,14 @@ type ChangeGameStage struct {
 	Stage string
 }
 
-// KeyEvent this event triggers when the status of a key change
-type KeyEvent struct {
-	Key    device.Key
-	Status device.KeyStatus
+// KeyUpEvent this event triggers when a key is up
+type KeyUpEvent struct {
+	Key device.Key
+}
+
+// KeyDownEvent this event triggers when a key is down
+type KeyDownEvent struct {
+	Key device.Key
 }
 
 // PlayMusicEvent is an event to play a music stream

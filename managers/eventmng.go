@@ -32,7 +32,6 @@ import (
 type eventManager struct {
 	mme events.MouseMoveEvent
 	dm  DeviceManager
-	ks  []device.KeyStatus
 }
 
 func (em eventManager) Listener(world *goecs.World, signal interface{}, delta float32) error {
@@ -69,8 +68,12 @@ func (em eventManager) sendMousePressed(world *goecs.World, button device.MouseB
 	return world.Signal(events.MouseDownEvent{Point: em.mme.Point, MouseButton: button})
 }
 
-func (em eventManager) sendKeyEvent(world *goecs.World, key device.Key, status device.KeyStatus) error {
-	return world.Signal(events.KeyEvent{Key: key, Status: status})
+func (em eventManager) sendKeyDownEvent(world *goecs.World, key device.Key) error {
+	return world.Signal(events.KeyDownEvent{Key: key})
+}
+
+func (em eventManager) sendKeyUpEvent(world *goecs.World, key device.Key) error {
+	return world.Signal(events.KeyUpEvent{Key: key})
 }
 
 func (em *eventManager) System(world *goecs.World, _ float32) error {
@@ -102,10 +105,13 @@ func (em *eventManager) System(world *goecs.World, _ float32) error {
 	}
 
 	for key := device.FirstKey + 1; key < device.TotalKeys; key++ {
-		status := em.dm.GetKeyStatus(key)
-		if !status.Equals(em.ks[key]) {
-			em.ks[key] = status
-			if err := em.sendKeyEvent(world, key, status); err != nil {
+		if em.dm.IsKeyReleased(key) {
+			if err := em.sendKeyUpEvent(world, key); err != nil {
+				return err
+			}
+		}
+		if em.dm.IsKeyPressed(key) {
+			if err := em.sendKeyDownEvent(world, key); err != nil {
 				return err
 			}
 		}
@@ -124,6 +130,5 @@ func Events(dm DeviceManager) WithSystemAndListener {
 				Y: -1,
 			},
 		},
-		ks: make([]device.KeyStatus, device.TotalKeys),
 	}
 }

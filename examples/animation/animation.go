@@ -258,25 +258,33 @@ func keysListener(_ *goecs.World, e interface{}, _ float32) error {
 		log.Trace().Interface("signal", e).Msg("got event")
 	}
 	switch v := e.(type) {
-	// is a key event
-	case events.KeyEvent:
+	// is we get a key down event
+	case events.KeyDownEvent:
 		// it is the left o right cursor change animations
 		if v.Key == device.KeyRight || v.Key == device.KeyLeft {
 			// get the animation
 			anim := animation.Get.Animation(robot)
-			// if the key is currently down
-			if v.Status.Pressed {
-				// if we are idle
-				if anim.Current == idleAnim {
-					anim.Current = runAnim // run
-				}
-				// if the key was released
-			} else if v.Status.Released {
-				// if we are running
-				if anim.Current == runAnim {
-					anim.Current = idleAnim // idle
-				}
+
+			// if we are idle
+			if anim.Current == idleAnim {
+				anim.Current = runAnim // run
 			}
+			// we flip the animation if the key was left
+			anim.FlipX = v.Key == device.KeyLeft
+			// update the entity animation
+			robot.Set(anim)
+		}
+	case events.KeyUpEvent:
+		// it is the left o right cursor change animations
+		if v.Key == device.KeyRight || v.Key == device.KeyLeft {
+			// get the animation
+			anim := animation.Get.Animation(robot)
+
+			// if we are running
+			if anim.Current == runAnim {
+				anim.Current = idleAnim // idle
+			}
+
 			// we flip the animation if the key was left
 			anim.FlipX = v.Key == device.KeyLeft
 			// update the entity animation

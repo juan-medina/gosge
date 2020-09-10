@@ -50,14 +50,3 @@ const (
 	KeyCtrlRight             // KeyCtrlRight if the right control key
 	TotalKeys                // TotalKeys is the total number of keys
 )
-
-// KeyStatus represent the status of a Key
-type KeyStatus struct {
-	Pressed  bool // Pressed indicates if the key was pressed once
-	Released bool // Released indicates if the key was released once
-}
-
-// Equals return if this device.KeyStatus is equals to other
-func (ks KeyStatus) Equals(other KeyStatus) bool {
-	return ks.Pressed == other.Pressed && ks.Released == other.Released
-}

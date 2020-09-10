@@ -113,14 +113,18 @@ var engineKeyToRayKey = map[device.Key]int32{
 	device.KeyCtrlRight: rl.KeyRightControl,
 }
 
-// GetKeyStatus returns the device.KeyStatus for a given device.Key
-func (dmi DeviceManagerImpl) GetKeyStatus(key device.Key) device.KeyStatus {
-	status := device.KeyStatus{}
-
+// IsKeyPressed returns if given device.Key is pressed
+func (dmi DeviceManagerImpl) IsKeyPressed(key device.Key) bool {
 	if v, ok := engineKeyToRayKey[key]; ok {
-		status.Pressed = rl.IsKeyPressed(v)
-		status.Released = rl.IsKeyReleased(v)
+		return rl.IsKeyPressed(v)
 	}
+	return false
+}
 
-	return status
+// IsKeyReleased returns if given device.Key is released
+func (dmi DeviceManagerImpl) IsKeyReleased(key device.Key) bool {
+	if v, ok := engineKeyToRayKey[key]; ok {
+		return rl.IsKeyReleased(v)
+	}
+	return false
 }

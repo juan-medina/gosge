@@ -59,8 +59,11 @@ type DeviceManager interface {
 	// IsMousePressed check if the given MouseButton has been pressed
 	IsMousePressed(button device.MouseButton) bool
 
-	// GetKeyStatus returns the device.KeyStatus for a given device.Key
-	GetKeyStatus(key device.Key) device.KeyStatus
+	// IsKeyPressed returns if given device.Key is pressed
+	IsKeyPressed(key device.Key) bool
+
+	// IsKeyReleased returns if given device.Key is released
+	IsKeyReleased(key device.Key) bool
 
 	// GetFrameTime returns the time from the delta time for current frame
 	GetFrameTime() float32
