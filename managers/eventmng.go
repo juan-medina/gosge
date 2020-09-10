@@ -81,8 +81,19 @@ func (em *eventManager) System(world *goecs.World, _ float32) error {
 		if err := em.sendGameClose(world); err != nil {
 			return err
 		}
-	}
+	} else {
+		if err := em.handleMouse(world); err != nil {
+			return err
+		}
 
+		if err := em.handleKeys(world); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (em eventManager) handleMouse(world *goecs.World) error {
 	mp := em.dm.GetMousePoint()
 	if em.mme.Point != mp {
 		em.mme.Point = mp
@@ -91,19 +102,23 @@ func (em *eventManager) System(world *goecs.World, _ float32) error {
 		}
 	}
 
-	for _, v := range mouseButtonsTocCheck {
-		if em.dm.IsMouseRelease(v) {
-			if err := em.sendMouseRelease(world, v); err != nil {
+	for _, button := range mouseButtonsTocCheck {
+		if em.dm.IsMouseRelease(button) {
+			if err := em.sendMouseRelease(world, button); err != nil {
 				return err
 			}
 		}
-		if em.dm.IsMousePressed(v) {
-			if err := em.sendMousePressed(world, v); err != nil {
+		if em.dm.IsMousePressed(button) {
+			if err := em.sendMousePressed(world, button); err != nil {
 				return err
 			}
 		}
 	}
 
+	return nil
+}
+
+func (em eventManager) handleKeys(world *goecs.World) error {
 	for key := device.FirstKey + 1; key < device.TotalKeys; key++ {
 		if em.dm.IsKeyReleased(key) {
 			if err := em.sendKeyUpEvent(world, key); err != nil {
@@ -116,7 +131,6 @@ func (em *eventManager) System(world *goecs.World, _ float32) error {
 			}
 		}
 	}
-
 	return nil
 }
 
