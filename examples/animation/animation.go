@@ -265,7 +265,7 @@ func keysListener(_ *goecs.World, e interface{}, _ float32) error {
 			// get the animation
 			anim := animation.Get.Animation(robot)
 			// if the key is currently down
-			if v.Status.Down {
+			if v.Status.Pressed {
 				// if we are idle
 				if anim.Current == idleAnim {
 					anim.Current = runAnim // run

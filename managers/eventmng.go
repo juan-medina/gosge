@@ -94,7 +94,7 @@ func (em *eventManager) System(world *goecs.World, _ float32) error {
 
 	for key := device.FirstKey + 1; key < device.TotalKeys; key++ {
 		status := em.dm.GetKeyStatus(key)
-		if !status.Equals(em.ks[key]) || (status.Down) {
+		if !status.Equals(em.ks[key]) {
 			em.ks[key] = status
 			if err := em.sendKeyEvent(world, key, status); err != nil {
 				return err

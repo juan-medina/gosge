@@ -118,8 +118,6 @@ func (dmi DeviceManagerImpl) GetKeyStatus(key device.Key) device.KeyStatus {
 	status := device.KeyStatus{}
 
 	if v, ok := engineKeyToRayKey[key]; ok {
-		status.Down = rl.IsKeyDown(v)
-		status.Up = rl.IsKeyUp(v)
 		status.Pressed = rl.IsKeyPressed(v)
 		status.Released = rl.IsKeyReleased(v)
 	}

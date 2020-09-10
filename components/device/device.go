@@ -53,13 +53,11 @@ const (
 
 // KeyStatus represent the status of a Key
 type KeyStatus struct {
-	Up       bool // Up indicates if the key is up
-	Down     bool // Down indicates if the key is down
 	Pressed  bool // Pressed indicates if the key was pressed once
 	Released bool // Released indicates if the key was released once
 }
 
 // Equals return if this device.KeyStatus is equals to other
 func (ks KeyStatus) Equals(other KeyStatus) bool {
-	return ks.Down == other.Down && ks.Pressed == other.Pressed && ks.Released == other.Released && ks.Up == other.Up
+	return ks.Pressed == other.Pressed && ks.Released == other.Released
 }

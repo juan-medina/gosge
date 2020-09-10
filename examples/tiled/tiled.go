@@ -70,6 +70,12 @@ var (
 
 	// topText is the text on top of the screen
 	topText *goecs.Entity
+
+	// move indicate how we are moving
+	move geometry.Point
+
+	// our game scale
+	gameScale geometry.Scale
 )
 
 func main() {
@@ -97,7 +103,7 @@ func loadGame(eng *gosge.Engine) error {
 	gen = eng
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
-	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
+	gameScale = eng.GetScreenSize().CalculateScale(designResolution)
 
 	// add a gradient background
 	world.AddEntity(
@@ -188,8 +194,10 @@ func loadGame(eng *gosge.Engine) error {
 
 	// add our key listener
 	world.AddListener(keyListener)
-	// add mour mouse listener
+	// add our mouse listener
 	world.AddListener(mouseListener)
+	// add our move system
+	world.AddSystem(moveSystem)
 
 	return nil
 }
@@ -233,39 +241,52 @@ func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 }
 
 // listen to keys
-func keyListener(_ *goecs.World, event interface{}, delta float32) error {
+func keyListener(_ *goecs.World, event interface{}, _ float32) error {
 	switch e := event.(type) {
 	case events.KeyEvent:
 		// if a key is down
-		if e.Status.Down {
-			// how much we move
-			move := geometry.Point{}
+		if e.Status.Pressed {
 			switch e.Key {
 			case device.KeyLeft:
-				move.X = -mapMoveSpeed * delta
+				move.X = -mapMoveSpeed
 			case device.KeyRight:
-				move.X = mapMoveSpeed * delta
+				move.X = mapMoveSpeed
 			case device.KeyUp:
-				move.Y = -mapMoveSpeed * delta
+				move.Y = -mapMoveSpeed
 			case device.KeyDown:
-				move.Y = mapMoveSpeed * delta
+				move.Y = mapMoveSpeed
 			}
-			// i fwe need to move anything
-			if move.X != 0 || move.Y != 0 {
-				// get the current position
-				pos := geometry.Get.Point(mapEnt)
-
-				// move it
-				pos.X += move.X
-				pos.Y -= move.Y
-
-				// clamp to out min and max scroll pos
-				pos.Clamp(minMapPos, maxMapPos)
-
-				// update entity
-				mapEnt.Set(pos)
+		} else if e.Status.Released {
+			switch e.Key {
+			case device.KeyLeft:
+				move.X = 0
+			case device.KeyRight:
+				move.X = 0
+			case device.KeyUp:
+				move.Y = 0
+			case device.KeyDown:
+				move.Y = 0
 			}
 		}
+	}
+	return nil
+}
+
+func moveSystem(_ *goecs.World, delta float32) error {
+	// if we need to move anything
+	if move.X != 0 || move.Y != 0 {
+		// get the current position
+		pos := geometry.Get.Point(mapEnt)
+
+		// move it
+		pos.X += move.X * delta * gameScale.Point.X
+		pos.Y -= move.Y * delta * gameScale.Point.Y
+
+		// clamp to min and max scroll pos
+		pos.Clamp(minMapPos, maxMapPos)
+
+		// update entity
+		mapEnt.Set(pos)
 	}
 	return nil
 }
