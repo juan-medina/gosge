@@ -112,7 +112,7 @@ func loadGame(eng *gosge.Engine) error {
 	// add the bottom text
 	world.AddEntity(
 		ui.Text{
-			String:     "press <ESC> to close",
+			String:     "move sprite with cursors, press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
