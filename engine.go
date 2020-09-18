@@ -272,6 +272,11 @@ func (e Engine) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geo
 	return e.cm.SpriteAtContains(spr, at, point)
 }
 
+// SpritesCollides indicates if two sprite.Sprite collides
+func (e Engine) SpritesCollides(spr1 sprite.Sprite, at1 geometry.Point, spr2 sprite.Sprite, at2 geometry.Point) bool {
+	return e.cm.SpritesCollides(spr1, at1, spr2, at2)
+}
+
 // LoadMusic preloads a music stream
 func (e Engine) LoadMusic(filename string) error {
 	return e.sm.LoadMusic(filename)

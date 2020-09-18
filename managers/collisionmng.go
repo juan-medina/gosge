@@ -51,6 +51,14 @@ func (cm CollisionManager) SpriteAtContains(spr sprite.Sprite, at geometry.Point
 	return cm.getSpriteRect(spr, at).IsPointInRect(point)
 }
 
+// SpritesCollides indicates if two sprite.Sprite collides
+func (cm CollisionManager) SpritesCollides(spr1 sprite.Sprite, at1 geometry.Point, spr2 sprite.Sprite, at2 geometry.Point) bool {
+	rec1 := cm.getSpriteRect(spr1, at1)
+	rec2 := cm.getSpriteRect(spr2, at2)
+
+	return rec1.Collides(rec2)
+}
+
 // Collisions returns a CollisionManager
 func Collisions(sm *StorageManager) *CollisionManager {
 	return &CollisionManager{sm: sm}

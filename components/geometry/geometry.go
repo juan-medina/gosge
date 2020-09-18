@@ -103,6 +103,20 @@ func (r Rect) IsPointInRect(point Point) bool {
 		r.From.Y+r.Size.Height >= point.Y
 }
 
+func (r Rect) collidesOneDirection(other Rect) bool {
+	point1 := Point{X: other.From.X, Y: other.From.Y}
+	point2 := Point{X: other.From.X, Y: other.From.Y + other.Size.Height}
+	point3 := Point{X: other.From.X + other.Size.Width, Y: other.From.Y}
+	point4 := Point{X: other.From.X + other.Size.Width, Y: other.From.Y + other.Size.Height}
+
+	return r.IsPointInRect(point1) || r.IsPointInRect(point2) || r.IsPointInRect(point3) || r.IsPointInRect(point4)
+}
+
+// Collides return if a given geometry.Rect collides with this geometry.Rect
+func (r Rect) Collides(other Rect) bool {
+	return r.collidesOneDirection(other) || other.collidesOneDirection(r)
+}
+
 type types struct {
 	// Point is the reflect.Type for geometry.Point
 	Point reflect.Type
