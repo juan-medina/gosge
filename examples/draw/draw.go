@@ -39,6 +39,10 @@ var opt = options.Options{
 	Title:      "Draw Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
+	// Uncomment this for using windowed mode
+	// Windowed:   true,
+	// Width:      2048,
+	// Height:     1536,
 }
 
 const (
@@ -55,6 +59,9 @@ var (
 
 	// pos is the current mouse position
 	pos geometry.Point
+
+	// gameScale has a geometry.Scale from the real screen size to our designResolution
+	gameScale geometry.Scale
 )
 
 func main() {
@@ -73,7 +80,7 @@ func loadGame(eng *gosge.Engine) error {
 	world := eng.World()
 
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
-	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
+	gameScale = eng.GetScreenSize().CalculateScale(designResolution)
 
 	// add the bottom text
 	world.AddEntity(
@@ -82,7 +89,7 @@ func loadGame(eng *gosge.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
-			Size:       fontSmall * gameScale.Min,
+			Size:       fontSmall * gameScale.Max,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -122,7 +129,7 @@ func mouseListener(world *goecs.World, signal interface{}, _ float32) error {
 			currentLine = world.AddEntity(
 				shapes.Line{
 					To:        pos,
-					Thickness: 10,
+					Thickness: 5 * gameScale.Max,
 				},
 				pos,
 			)
