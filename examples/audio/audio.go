@@ -41,6 +41,10 @@ var opt = options.Options{
 	Title:      "Audio Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
+	// Uncomment this for using windowed mode
+	// Windowed: true,
+	// Width:    2048,
+	// Height:   1536,
 }
 
 const (
@@ -50,7 +54,6 @@ const (
 	gopherSound             = "resources/audio/gopher.wav" // gopher sound
 	clickSound              = "resources/audio/click.wav"  // click sound
 	spriteSheet             = "resources/audio.json"       // sprite sheet with our graphics
-	buttonsGap              = 5                            // separation between buttons
 	playButtonNormalSprite  = "play_button_normal.png"     // the normal sprite for the play button
 	playButtonHoverSprite   = "play_button_hover.png"      // the hover sprite for the play button
 	stopButtonNormalSprite  = "stop_button_normal.png"     // the normal sprite for the stop button
@@ -124,7 +127,7 @@ func loadGame(eng *gosge.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
-			Size:       fontSmall * gameScale.Min,
+			Size:       fontSmall * gameScale.Max,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -146,13 +149,15 @@ func loadGame(eng *gosge.Engine) error {
 	spriteSize.Width *= spriteScale
 	spriteSize.Height *= spriteScale
 
+	buttonsGap := spriteSize.Width / 4
+
 	// add the play button
 	playButton = world.AddEntity(
 		ui.SpriteButton{
 			Sheet:  spriteSheet,
 			Normal: playButtonNormalSprite,
 			Hover:  playButtonHoverSprite,
-			Scale:  gameScale.Min * spriteScale,
+			Scale:  gameScale.Max * spriteScale,
 			Sound:  clickSound,
 			Event: events.PlayMusicEvent{ // on click send a event to play the music
 				Name: musicFile,
@@ -171,7 +176,7 @@ func loadGame(eng *gosge.Engine) error {
 			Sheet:  spriteSheet,
 			Normal: stopButtonNormalSprite,
 			Hover:  stopButtonHoverSprite,
-			Scale:  gameScale.Min * spriteScale,
+			Scale:  gameScale.Max * spriteScale,
 			Sound:  clickSound,
 			Event: events.StopMusicEvent{ // on click send a event to stop the music
 				Name: musicFile,
@@ -194,14 +199,14 @@ func loadGame(eng *gosge.Engine) error {
 				danceAnim: {
 					Sheet:  spriteSheet,
 					Base:   gopherDance,
-					Scale:  gameScale.Min * spriteScale,
+					Scale:  gameScale.Max * spriteScale,
 					Frames: gopherDanceFrames,
 					Delay:  gopherFrameDelay,
 				},
 				idleAnim: {
 					Sheet:  spriteSheet,
 					Base:   gopherIdle,
-					Scale:  gameScale.Min * spriteScale,
+					Scale:  gameScale.Max * spriteScale,
 					Frames: gopherIdleFrames,
 					Delay:  gopherFrameDelay,
 				},
