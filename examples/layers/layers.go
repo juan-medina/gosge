@@ -20,6 +20,10 @@ var opt = options.Options{
 	Title:      "Layers Game",
 	BackGround: color.Black,
 	Icon:       "resources/icon.png",
+	// Uncomment this for using windowed mode
+	// Windowed: true,
+	// Width:    2048,
+	// Height:   1536,
 }
 
 func main() {
@@ -94,18 +98,20 @@ func load(eng *gosge.Engine) error {
 		return err
 	}
 
+	ss := eng.GetScreenSize()
+
 	// calculate the UI Points
-	boxWidth := designResolution.Width * 0.70
-	boxStartX := (designResolution.Width / 2) - (boxWidth / 2)
+	boxWidth := ss.Width / gameScale.Max * 0.85
+	boxStartX := ((designResolution.Width * gameScale.Point.X) - (boxWidth * gameScale.Max)) / 2
 
 	// set the Point with scale
-	boxSize := geometry.Size{Width: boxWidth * gameScale.Point.X, Height: uiFontSize * gameScale.Point.Y}
-	uiPos := geometry.Point{X: boxStartX * gameScale.Point.X, Y: 0}
-	uiTextPos := geometry.Point{X: (designResolution.Width / 2) * gameScale.Point.X, Y: boxSize.Height / 2}
+	boxSize := geometry.Size{Width: boxWidth, Height: uiFontSize}
+	uiPos := geometry.Point{X: boxStartX, Y: 0}
+	uiTextPos := geometry.Point{X: (designResolution.Width / 2) * gameScale.Point.X, Y: boxSize.Height / 2 * gameScale.Point.Y}
 
 	// add the top box
 	world.AddEntity(
-		shapes.Box{Size: boxSize, Scale: 1},
+		shapes.Box{Size: boxSize, Scale: gameScale.Max},
 		uiPos,
 		color.DarkBlue.Alpha(200),
 		uiLayer,
@@ -118,7 +124,7 @@ func load(eng *gosge.Engine) error {
 			VAlignment: ui.MiddleVAlignment,
 			HAlignment: ui.CenterHAlignment,
 			Font:       fontName,
-			Size:       uiFontSize * gameScale.Min,
+			Size:       uiFontSize * gameScale.Max,
 		},
 		uiTextPos,
 		color.SkyBlue,
@@ -132,7 +138,7 @@ func load(eng *gosge.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
-			Size:       uiFontSize * gameScale.Min,
+			Size:       uiFontSize * gameScale.Max,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
