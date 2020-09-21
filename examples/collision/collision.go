@@ -40,6 +40,10 @@ var opt = options.Options{
 	Title:      "Collision Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
+	// Uncomment this for using windowed mode
+	// Windowed:   true,
+	// Width:      2048,
+	// Height:     1536,
 }
 
 const (
@@ -86,7 +90,7 @@ func loadGame(eng *gosge.Engine) error {
 		sprite.Sprite{
 			Sheet: "resources/gamer.json",
 			Name:  "gamer.png",
-			Scale: gameScale.Min * 0.25,
+			Scale: gameScale.Max * 0.25,
 			FlipX: false,
 			FlipY: false},
 		geometry.Point{
@@ -100,7 +104,7 @@ func loadGame(eng *gosge.Engine) error {
 		sprite.Sprite{
 			Sheet: "resources/gamer.json",
 			Name:  "gamer.png",
-			Scale: gameScale.Min * 0.25,
+			Scale: gameScale.Max * 0.25,
 			FlipX: false,
 			FlipY: false},
 		geometry.Point{
@@ -116,7 +120,7 @@ func loadGame(eng *gosge.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
-			Size:       fontSmall * gameScale.Min,
+			Size:       fontSmall * gameScale.Max,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
