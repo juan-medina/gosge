@@ -44,6 +44,10 @@ var opt = options.Options{
 	Title:      "Animation Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
+	// Uncomment this for using windowed mode
+	// Windowed:   true,
+	// Width:      2048,
+	// Height:     1536,
 }
 
 // Game constants
@@ -60,6 +64,7 @@ const (
 	idleAnim   = "idle"                                   // name for the idle animation
 	numLayers  = 8                                        // number of layers for the city
 	layerFile  = "resources/background/city/layer_%d.png" // each layer frame name
+	moveSpeed  = 75                                       // our movement speed
 )
 
 var (
@@ -112,7 +117,7 @@ func loadGame(eng *gosge.Engine) error {
 		attached := world.AddEntity(
 			sprite.Sprite{
 				Name:  layerFile,
-				Scale: gameScale.Min,
+				Scale: gameScale.Max,
 			},
 			geometry.Point{X: -9000}, // we move it out of the screen
 			effects.Layer{Depth: float32(l)},
@@ -121,7 +126,7 @@ func loadGame(eng *gosge.Engine) error {
 		world.AddEntity(
 			sprite.Sprite{
 				Name:  layerFile,
-				Scale: gameScale.Min,
+				Scale: gameScale.Max,
 			},
 			geometry.Point{},
 			effects.Layer{Depth: float32(l)}, // each layer is have it own depth
@@ -132,7 +137,7 @@ func loadGame(eng *gosge.Engine) error {
 	// calculate the position for our robot
 	spritePos := geometry.Point{
 		X: designResolution.Width / 2 * gameScale.Point.X,
-		Y: (designResolution.Height - robotPosY) * gameScale.Point.Y,
+		Y: (designResolution.Height - robotPosY) * gameScale.Max,
 	}
 
 	// add the robot with it animations
@@ -143,14 +148,14 @@ func loadGame(eng *gosge.Engine) error {
 				runAnim: {
 					Sheet:  robotSheet,
 					Base:   robotRun,
-					Scale:  gameScale.Min * 0.5,
+					Scale:  gameScale.Max * 0.5,
 					Frames: 8,
 					Delay:  0.065,
 				},
 				idleAnim: {
 					Sheet:  robotSheet,
 					Base:   robotIdle,
-					Scale:  gameScale.Min * 0.5,
+					Scale:  gameScale.Max * 0.5,
 					Frames: 10,
 					Delay:  0.065,
 				},
@@ -168,11 +173,11 @@ func loadGame(eng *gosge.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
-			Size:       fontSize * gameScale.Min,
+			Size:       fontSize * gameScale.Max,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
-			Y: designResolution.Height * gameScale.Point.Y,
+			Y: designResolution.Height * gameScale.Max,
 		},
 		effects.AlternateColor{
 			Time: .25,
@@ -221,10 +226,10 @@ func robotMoveSystem(world *goecs.World, delta float32) error {
 			}
 
 			// what is the width of this layer is
-			layerWidth := designResolution.Width * gameScale.Point.X
+			layerWidth := designResolution.Width * gameScale.Max
 
 			// moving according the direction we are facing
-			pos.X -= delta * 150 * (8 - ly.Depth) * direction
+			pos.X -= delta * moveSpeed * (8 - ly.Depth) * direction * gameScale.Max
 
 			// check if we need to wrap since we are completely off-screen
 			if pos.X < -layerWidth {

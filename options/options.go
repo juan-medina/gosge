@@ -31,7 +31,9 @@ import (
 type Options struct {
 	Title      string      // Title is the game title
 	BackGround color.Solid // BackGround is the background color.Color
-	Monitor    int         // Monitor is the monitor that we will use
+	Monitor    int         // Monitor is the monitor that we will use for full screen
 	Icon       string      // Icon is a path for a PNG containing the application icon
 	Windowed   bool        // Windowed will indicate if we want the game on a window
+	Width      int         // Width is the desired width
+	Height     int         // Height is the desired height
 }

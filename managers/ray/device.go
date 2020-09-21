@@ -54,10 +54,8 @@ func (dmi *DeviceManagerImpl) Init(opt options.Options) {
 		}
 	})
 
-	w := rl.GetMonitorWidth(opt.Monitor)
-	h := rl.GetMonitorHeight(opt.Monitor)
 	rl.SetConfigFlags(rl.FlagVsyncHint)
-	rl.InitWindow(int32(w), int32(h), opt.Title)
+	rl.InitWindow(int32(opt.Width), int32(opt.Height), opt.Title)
 
 	if opt.Icon != "" {
 		if file, err := os.Open(opt.Icon); err == nil {
@@ -73,6 +71,7 @@ func (dmi *DeviceManagerImpl) Init(opt options.Options) {
 		// rl.ToggleFullscreen does not work ok on linux
 		if !strings.Contains(runtime.GOOS, "linux") {
 			rl.ToggleFullscreen()
+			rl.SetWindowMonitor(opt.Monitor)
 		}
 	}
 	rl.InitAudioDevice()
