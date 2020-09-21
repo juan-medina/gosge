@@ -39,6 +39,10 @@ var opt = options.Options{
 	Title:      "Stages Game",
 	BackGround: color.Black,
 	Icon:       "resources/icon.png",
+	// Uncomment this for using windowed mode
+	// Windowed:   true,
+	// Width:      2048,
+	// Height:     1536,
 }
 
 var (
@@ -109,7 +113,7 @@ func mainStage(eng *gosge.Engine) error {
 			String:     "Main Stage",
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.TopVAlignment,
-			Size:       fontTittle * gameScale.Min,
+			Size:       fontTittle * gameScale.Max,
 			Font:       fontName,
 		},
 		geometry.Point{
@@ -130,7 +134,7 @@ func mainStage(eng *gosge.Engine) error {
 		sprite.Sprite{
 			Sheet: spriteSheetName,
 			Name:  gameSprite,
-			Scale: 1 * gameScale.Min,
+			Scale: 1 * gameScale.Max,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -152,7 +156,7 @@ func mainStage(eng *gosge.Engine) error {
 			Sheet:  spriteSheetName,
 			Normal: buttonExitNormalSprite,
 			Hover:  buttonExitHoverSprite,
-			Scale:  gameScale.Min * spriteScale,
+			Scale:  gameScale.Max * spriteScale,
 			Sound:  clickSound,
 			Event: events.DelaySignal{
 				Signal: events.ChangeGameStage{Stage: "menu"},
@@ -202,7 +206,7 @@ func menuStage(eng *gosge.Engine) error {
 			String:     "Menu",
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.TopVAlignment,
-			Size:       fontTittle * gameScale.Min,
+			Size:       fontTittle * gameScale.Max,
 			Font:       fontName,
 		},
 		geometry.Point{
@@ -223,7 +227,7 @@ func menuStage(eng *gosge.Engine) error {
 		sprite.Sprite{
 			Sheet: spriteSheetName,
 			Name:  menuSprite,
-			Scale: 1 * gameScale.Min,
+			Scale: 1 * gameScale.Max,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -260,11 +264,11 @@ func menuStage(eng *gosge.Engine) error {
 				Width:  measure.Width,
 				Height: measure.Height,
 			},
-			Scale: gameScale.Min,
+			Scale: gameScale.Max,
 		},
 		ui.Text{
 			String:     "Play!",
-			Size:       fontBig * gameScale.Min,
+			Size:       fontBig * gameScale.Max,
 			Font:       fontName,
 			VAlignment: ui.MiddleVAlignment,
 			HAlignment: ui.CenterHAlignment,
@@ -295,11 +299,11 @@ func menuStage(eng *gosge.Engine) error {
 				Width:  measure.Width,
 				Height: measure.Height,
 			},
-			Scale: gameScale.Min,
+			Scale: gameScale.Max,
 		},
 		ui.Text{
 			String:     "Exit",
-			Size:       fontBig * gameScale.Min,
+			Size:       fontBig * gameScale.Max,
 			Font:       fontName,
 			VAlignment: ui.MiddleVAlignment,
 			HAlignment: ui.CenterHAlignment,
