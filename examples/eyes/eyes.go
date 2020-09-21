@@ -42,6 +42,10 @@ var opt = options.Options{
 	Title:      "Eyes Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
+	// Uncomment this for using windowed mode
+	// Windowed: true,
+	// Width:    2048,
+	// Height:   1536,
 }
 
 // entities that we are going to create
@@ -55,7 +59,14 @@ var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
 
+	// dizzy how much dizzy we are
 	dizzy = float32(0)
+
+	// lastMousePos is the last mouse position
+	lastMousePos geometry.Point
+
+	// dizzyBarWith is the dizzy bar with
+	dizzyBarWith float32
 )
 
 // game constants
@@ -65,12 +76,11 @@ const (
 	fontName        = "resources/go_regular.fnt"
 	textSmallSize   = 60
 	textBigSize     = 100
-	dizzyBarWith    = 1500
 	dizzyBarHeight  = 100
 	dizzyBarGap     = 50
 	maxDizzy        = 2.5
-	dizzyGainRate   = 5
-	dizzyReduceRate = 0.5
+	dizzyGainRate   = 1.0
+	dizzyReduceRate = 0.45
 )
 
 func main() {
@@ -126,32 +136,32 @@ func loadGame(eng *gosge.Engine) error {
 
 	// add the nose sprite
 	world.AddEntity(
-		sprite.Sprite{Sheet: "resources/gopher.json", Name: "nose.png", Scale: gameScale.Min},
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "nose.png", Scale: gameScale.Max},
 		nosePos,
 	)
 
 	// add the left exterior eye
 	leftExterior = world.AddEntity(
-		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior.png", Scale: gameScale.Min},
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior.png", Scale: gameScale.Max},
 		leftEyePos,
 	)
 
 	// add the lef exterior eye
 	world.AddEntity(
-		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior.png", Scale: gameScale.Min},
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior.png", Scale: gameScale.Max},
 		leftEyePos,
 		lookAtMouse{pivot: leftExterior, radius: eyeRadius},
 	)
 
 	// add the right exterior eye
 	rightExterior = world.AddEntity(
-		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior.png", Scale: gameScale.Min},
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_exterior.png", Scale: gameScale.Max},
 		rightEyePos,
 	)
 
 	// add the right interior eye
 	world.AddEntity(
-		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior.png", Scale: gameScale.Min},
+		sprite.Sprite{Sheet: "resources/gopher.json", Name: "eye_interior.png", Scale: gameScale.Max},
 		rightEyePos,
 		lookAtMouse{pivot: rightExterior, radius: eyeRadius},
 	)
@@ -169,11 +179,15 @@ func loadGame(eng *gosge.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
-			Size:       textSmallSize * gameScale.Min,
+			Size:       textSmallSize * gameScale.Max,
 		},
 		textPos,
 		color.White,
 	)
+
+	ss := eng.GetScreenSize()
+
+	dizzyBarWith = ss.Width / gameScale.Max * 0.75
 
 	// our bar shape
 	box := shapes.Box{
@@ -181,19 +195,19 @@ func loadGame(eng *gosge.Engine) error {
 			Width:  dizzyBarWith,
 			Height: dizzyBarHeight,
 		},
-		Scale: gameScale.Min,
+		Scale: gameScale.Max,
 	}
 
 	// Point of the bar
 	dizzyBarPoint := geometry.Point{
-		X: (designResolution.Width - dizzyBarWith) / 2 * gameScale.Min,
-		Y: dizzyBarGap * gameScale.Min,
+		X: ((designResolution.Width * gameScale.Point.X) - (dizzyBarWith * gameScale.Max)) / 2,
+		Y: dizzyBarGap * gameScale.Max,
 	}
 
 	// Point the dizzy text
 	dizzyTextPoint := geometry.Point{
-		X: designResolution.Width / 2 * gameScale.Min,
-		Y: (dizzyBarGap + (dizzyBarHeight / 2)) * gameScale.Min,
+		X: designResolution.Width / 2 * gameScale.Point.X,
+		Y: (dizzyBarGap + (dizzyBarHeight / 2)) * gameScale.Max,
 	}
 
 	// Add the dizzy bar
@@ -217,7 +231,7 @@ func loadGame(eng *gosge.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.MiddleVAlignment,
 			Font:       fontName,
-			Size:       textBigSize * gameScale.Min,
+			Size:       textBigSize * gameScale.Max,
 		},
 		color.Green,
 		dizzyTextPoint,
@@ -229,6 +243,12 @@ func loadGame(eng *gosge.Engine) error {
 	world.AddSystem(decreaseDizzySystem)
 	// add our dizzy bar system
 	world.AddSystem(updateDizzyBarSystem)
+
+	// set last mouse pos
+	lastMousePos = geometry.Point{
+		X: -1,
+		Y: -1,
+	}
 
 	return nil
 }
@@ -256,8 +276,16 @@ func mouseMoveListener(gw *goecs.World, event interface{}, delta float32) error 
 			// make this entity to look at the mouse
 			lookAt(v, la, ev.Point)
 		}
-		// increase how dizzy we are
-		dizzy = float32(math.Min(float64(dizzy+(delta*dizzyGainRate)), 2.5))
+		pos := ev.Point
+		if lastMousePos.X == -1 && lastMousePos.Y == -1 {
+			lastMousePos = pos
+		} else {
+			if lastMousePos.X != pos.X || lastMousePos.Y != lastMousePos.Y {
+				// increase how dizzy we are
+				dizzy = float32(math.Min(float64(dizzy+(delta*dizzyGainRate)), 2.5))
+				lastMousePos = pos
+			}
+		}
 	}
 	return nil
 }
@@ -283,7 +311,7 @@ func lookAt(ent *goecs.Entity, la lookAtMouse, mouse geometry.Point) {
 
 func decreaseDizzySystem(_ *goecs.World, delta float32) error {
 	// in each frame we reduce how dizzy we are
-	dizzy = float32(math.Max(float64(dizzy-(delta/dizzyReduceRate)), 0))
+	dizzy = float32(math.Max(float64(dizzy-(delta*dizzyReduceRate)), 0))
 	return nil
 }
 
