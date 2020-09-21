@@ -43,6 +43,10 @@ var opt = options.Options{
 	Title:      "Tiled Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
+	// Uncomment this for using windowed mode
+	// Windowed:   true,
+	// Width:      2048,
+	// Height:     1536,
 }
 
 const (
@@ -112,7 +116,7 @@ func loadGame(eng *gosge.Engine) error {
 				Width:  designResolution.Width,
 				Height: designResolution.Height,
 			},
-			Scale: gameScale.Min,
+			Scale: gameScale.Max,
 		},
 		geometry.Point{},
 		color.Gradient{
@@ -144,7 +148,7 @@ func loadGame(eng *gosge.Engine) error {
 	mapEnt = world.AddEntity(
 		tiled.Map{
 			Name:  mapFile,
-			Scale: gameScale.Min,
+			Scale: gameScale.Max,
 		},
 		minMapPos,
 	)
@@ -161,7 +165,7 @@ func loadGame(eng *gosge.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.TopVAlignment,
 			Font:       fontName,
-			Size:       fontSmall * gameScale.Min,
+			Size:       fontSmall * gameScale.Max,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -178,7 +182,7 @@ func loadGame(eng *gosge.Engine) error {
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
-			Size:       fontSmall * gameScale.Min,
+			Size:       fontSmall * gameScale.Max,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
