@@ -145,7 +145,7 @@ func (dmi DeviceManagerImpl) DrawSprite(def components.SpriteDef, sprite sprite.
 }
 
 // DrawSolidBox draws a solid box with an color.Solid and a scale
-func (dmi DeviceManagerImpl) DrawSolidBox(pos geometry.Point, box shapes.Box, solid color.Solid) {
+func (dmi DeviceManagerImpl) DrawSolidBox(pos geometry.Point, box shapes.SolidBox, solid color.Solid) {
 	rec := rl.Rectangle{
 		X:      pos.X,
 		Y:      pos.Y,
@@ -156,8 +156,20 @@ func (dmi DeviceManagerImpl) DrawSolidBox(pos geometry.Point, box shapes.Box, so
 	rl.DrawRectangleRec(rec, dmi.color2RayColor(solid))
 }
 
+// DrawBox draws a box outline with an color.Solid and a scale
+func (dmi DeviceManagerImpl) DrawBox(pos geometry.Point, box shapes.Box, solid color.Solid) {
+	rec := rl.Rectangle{
+		X:      pos.X,
+		Y:      pos.Y,
+		Width:  box.Size.Width * box.Scale,
+		Height: box.Size.Height * box.Scale,
+	}
+
+	rl.DrawRectangleLinesEx(rec, box.Thickness, dmi.color2RayColor(solid))
+}
+
 // DrawGradientBox draws a solid box with an color.Solid and a scale
-func (dmi DeviceManagerImpl) DrawGradientBox(pos geometry.Point, box shapes.Box, gradient color.Gradient) {
+func (dmi DeviceManagerImpl) DrawGradientBox(pos geometry.Point, box shapes.SolidBox, gradient color.Gradient) {
 	x := int32(pos.X)
 	y := int32(pos.Y)
 	w := int32(box.Size.Width * box.Scale)

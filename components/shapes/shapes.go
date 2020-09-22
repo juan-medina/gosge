@@ -29,14 +29,21 @@ import (
 	"reflect"
 )
 
-//Box is a rectangular shape that we could draw in a geometry.Point with a color.Solid or color.Gradient
+//Box is a rectangular outline that we could draw in a geometry.Point with a color.Solid
 type Box struct {
+	Size      geometry.Size // The box size
+	Scale     float32       // The box scale
+	Thickness int32         // Thickness of the line
+}
+
+//SolidBox is a rectangular shape that we could draw in a geometry.Point with a color.Solid or color.Gradient
+type SolidBox struct {
 	Size  geometry.Size // The box size
 	Scale float32       // The box scale
 }
 
 // Contains return if a box at a geometry.Point contains a point
-func (b Box) Contains(at geometry.Point, point geometry.Point) bool {
+func (b SolidBox) Contains(at geometry.Point, point geometry.Point) bool {
 	return geometry.Rect{
 		From: at,
 		Size: geometry.Size{
@@ -55,19 +62,24 @@ type Line struct {
 type types struct {
 	// Box is the reflect.Type for shapes.Box
 	Box reflect.Type
+	// SolidBox is the reflect.Type for shapes.SolidBox
+	SolidBox reflect.Type
 	// Line is the reflect.Type for shapes.Line
 	Line reflect.Type
 }
 
 // TYPE hold the reflect.Type for our shapes components
 var TYPE = types{
-	Box:  reflect.TypeOf(Box{}),
-	Line: reflect.TypeOf(Line{}),
+	Box:      reflect.TypeOf(Box{}),
+	SolidBox: reflect.TypeOf(SolidBox{}),
+	Line:     reflect.TypeOf(Line{}),
 }
 
 type gets struct {
 	// Box gets a shapes.Box from a goecs.Entity
 	Box func(e *goecs.Entity) Box
+	// SolidBox gets a shapes.SolidBox from a goecs.Entity
+	SolidBox func(e *goecs.Entity) SolidBox
 	// Line gets a shapes.Line from a goecs.Entity
 	Line func(e *goecs.Entity) Line
 }
@@ -76,7 +88,11 @@ type gets struct {
 var Get = gets{
 	// Box gets a shapes.Box from a goecs.Entity
 	Box: func(e *goecs.Entity) Box {
-		return e.Get(TYPE.Box).(Box)
+		return e.Get(TYPE.SolidBox).(Box)
+	},
+	// SolidBox gets a shapes.SolidBox from a goecs.Entity
+	SolidBox: func(e *goecs.Entity) SolidBox {
+		return e.Get(TYPE.SolidBox).(SolidBox)
 	},
 	// Line gets a shapes.Line from a goecs.Entity
 	Line: func(e *goecs.Entity) Line {

@@ -88,11 +88,11 @@ func (uim uiManager) flatButtons(world *goecs.World) {
 }
 
 func (uim uiManager) flatButtonsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
-	for it := world.Iterator(ui.TYPE.FlatButton, ui.TYPE.ButtonHoverColors, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
+	for it := world.Iterator(ui.TYPE.FlatButton, ui.TYPE.ButtonHoverColors, geometry.TYPE.Point, shapes.TYPE.SolidBox); it != nil; it = it.Next() {
 		ent := it.Value()
 		bcl := ui.Get.ButtonHoverColors(ent)
 		pos := geometry.Get.Point(ent)
-		box := shapes.Get.Box(ent)
+		box := shapes.Get.SolidBox(ent)
 
 		var clr interface{} = color.White
 
@@ -114,12 +114,12 @@ func (uim uiManager) flatButtonsMouseMove(world *goecs.World, mme events.MouseMo
 }
 
 func (uim uiManager) flatButtonsMouseUp(world *goecs.World, mue events.MouseUpEvent) error {
-	for it := world.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
+	for it := world.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.SolidBox); it != nil; it = it.Next() {
 		ent := it.Value()
 		btn := ui.Get.FlatButton(ent)
 
 		pos := geometry.Get.Point(ent)
-		box := shapes.Get.Box(ent)
+		box := shapes.Get.SolidBox(ent)
 
 		if box.Contains(pos, mue.Point) {
 			if btn.Sound != "" {

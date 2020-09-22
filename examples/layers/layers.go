@@ -111,7 +111,7 @@ func load(eng *gosge.Engine) error {
 
 	// add the top box
 	world.AddEntity(
-		shapes.Box{Size: boxSize, Scale: gameScale.Max},
+		shapes.SolidBox{Size: boxSize, Scale: gameScale.Max},
 		uiPos,
 		color.DarkBlue.Alpha(200),
 		uiLayer,

@@ -190,7 +190,7 @@ func loadGame(eng *gosge.Engine) error {
 	dizzyBarWith = ss.Width / gameScale.Max * 0.75
 
 	// our bar shape
-	box := shapes.Box{
+	box := shapes.SolidBox{
 		Size: geometry.Size{
 			Width:  dizzyBarWith,
 			Height: dizzyBarHeight,
@@ -322,7 +322,7 @@ func updateDizzyBarSystem(_ *goecs.World, _ float32) error {
 	// get the Point of the regular dizzy bar
 	dizzyBarPoint := geometry.Get.Point(dizzyBar)
 	// get the Point
-	box := shapes.Get.Box(dizzyBar)
+	box := shapes.Get.SolidBox(dizzyBar)
 
 	// calculate Point and width
 	box.Size.Width = box.Size.Width * percent

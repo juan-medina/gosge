@@ -108,10 +108,12 @@ type DeviceManager interface {
 	DrawText(ftd components.FontDef, txt ui.Text, pos geometry.Point, color color.Solid)
 	// DrawSprite draws a sprite.Sprite in the given geometry.Point with the tint color.Color
 	DrawSprite(def components.SpriteDef, sprite sprite.Sprite, pos geometry.Point, tint color.Solid) error
+	// DrawBox draws a box outline with an color.Solid and a scale
+	DrawBox(pos geometry.Point, box shapes.Box, solid color.Solid)
 	// DrawSolidBox draws a solid box with an color.Solid and a scale
-	DrawSolidBox(pos geometry.Point, box shapes.Box, solid color.Solid)
+	DrawSolidBox(pos geometry.Point, box shapes.SolidBox, solid color.Solid)
 	// DrawGradientBox draws a solid box with an color.Solid and a scale
-	DrawGradientBox(pos geometry.Point, box shapes.Box, gradient color.Gradient)
+	DrawGradientBox(pos geometry.Point, box shapes.SolidBox, gradient color.Gradient)
 	// MeasureText return the geometry.Size of a string with a defined size
 	MeasureText(fnt components.FontDef, str string, size float32) geometry.Size
 	// DrawLine between from and to with a given thickness and color.Solid

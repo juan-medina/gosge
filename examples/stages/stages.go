@@ -259,7 +259,7 @@ func menuStage(eng *gosge.Engine) error {
 			X: ((designResolution.Width / 2) - (measure.Width / 2)) * gameScale.Point.X,
 			Y: ((designResolution.Height - 210) - (measure.Height / 2)) * gameScale.Point.Y,
 		},
-		shapes.Box{
+		shapes.SolidBox{
 			Size: geometry.Size{
 				Width:  measure.Width,
 				Height: measure.Height,
@@ -294,7 +294,7 @@ func menuStage(eng *gosge.Engine) error {
 			X: ((designResolution.Width / 2) - (measure.Width / 2)) * gameScale.Point.X,
 			Y: ((designResolution.Height - 80) - (measure.Height / 2)) * gameScale.Point.Y,
 		},
-		shapes.Box{
+		shapes.SolidBox{
 			Size: geometry.Size{
 				Width:  measure.Width,
 				Height: measure.Height,
