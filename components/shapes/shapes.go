@@ -88,7 +88,7 @@ type gets struct {
 var Get = gets{
 	// Box gets a shapes.Box from a goecs.Entity
 	Box: func(e *goecs.Entity) Box {
-		return e.Get(TYPE.SolidBox).(Box)
+		return e.Get(TYPE.Box).(Box)
 	},
 	// SolidBox gets a shapes.SolidBox from a goecs.Entity
 	SolidBox: func(e *goecs.Entity) SolidBox {

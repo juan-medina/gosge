@@ -29,6 +29,7 @@ import (
 	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/effects"
 	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/shapes"
 	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/components/ui"
 	"github.com/juan-medina/gosge/events"
@@ -50,15 +51,48 @@ const (
 	fontName    = "resources/go_regular.fnt"
 	fontSmall   = 60
 	gopherSpeed = 500
+	spriteScale = 0.25
 )
+
+type demoFactors struct {
+	factor1 geometry.Point
+	factor2 geometry.Point
+}
 
 var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
 	gEng             *gosge.Engine
-	gopher           *goecs.Entity
+	gopher1          *goecs.Entity
+	gopher2          *goecs.Entity
 	move             geometry.Point
 	gameScale        geometry.Scale
+	area1            *goecs.Entity
+	area2            *goecs.Entity
+	spriteSize       geometry.Size
+	currentFactor    int
+	factors          = []demoFactors{
+		{
+			factor1: geometry.Point{X: 1, Y: 1},
+			factor2: geometry.Point{X: 1, Y: 1},
+		},
+		{
+			factor1: geometry.Point{X: 0.5, Y: 1},
+			factor2: geometry.Point{X: 1, Y: 1},
+		},
+		{
+			factor1: geometry.Point{X: 0.5, Y: 1},
+			factor2: geometry.Point{X: 0.5, Y: 1},
+		},
+		{
+			factor1: geometry.Point{X: 0.5, Y: 0.5},
+			factor2: geometry.Point{X: 0.5, Y: 1},
+		},
+		{
+			factor1: geometry.Point{X: 0.5, Y: 0.5},
+			factor2: geometry.Point{X: 0.5, Y: 0.5},
+		},
+	}
 )
 
 func main() {
@@ -68,10 +102,11 @@ func main() {
 }
 
 func loadGame(eng *gosge.Engine) error {
+	var err error
 	gEng = eng
 
 	// Preload font
-	if err := eng.LoadFont(fontName); err != nil {
+	if err = eng.LoadFont(fontName); err != nil {
 		return err
 	}
 
@@ -81,42 +116,83 @@ func loadGame(eng *gosge.Engine) error {
 	gameScale = eng.GetScreenSize().CalculateScale(designResolution)
 
 	// preload sprite sheet
-	if err := eng.LoadSpriteSheet("resources/gamer.json"); err != nil {
+	if err = eng.LoadSpriteSheet("resources/gamer.json"); err != nil {
 		return err
 	}
 
-	// add an static gopher
-	world.AddEntity(
-		sprite.Sprite{
-			Sheet: "resources/gamer.json",
-			Name:  "gamer.png",
-			Scale: gameScale.Max * 0.25,
-			FlipX: false,
-			FlipY: false},
-		geometry.Point{
-			X: designResolution.Width / 2 * gameScale.Point.X,
-			Y: designResolution.Height / 2 * gameScale.Point.Y,
-		},
-	)
+	// get sprite size
+	if spriteSize, err = eng.GetSpriteSize("resources/gamer.json", "gamer.png"); err != nil {
+		return err
+	}
+
+	gopherPos := geometry.Point{
+		X: designResolution.Width / 4 * gameScale.Point.X,
+		Y: designResolution.Height / 2 * gameScale.Point.Y,
+	}
+
+	areaPos := geometry.Point{
+		X: gopherPos.X - (spriteSize.Width * spriteScale / 2 * gameScale.Max),
+		Y: gopherPos.Y - (spriteSize.Height * spriteScale / 2 * gameScale.Max),
+	}
 
 	// add our moving gopher
-	gopher = world.AddEntity(
+	gopher1 = world.AddEntity(
 		sprite.Sprite{
 			Sheet: "resources/gamer.json",
 			Name:  "gamer.png",
-			Scale: gameScale.Max * 0.25,
+			Scale: gameScale.Max * spriteScale,
 			FlipX: false,
 			FlipY: false},
-		geometry.Point{
-			X: designResolution.Width / 4 * gameScale.Point.X,
-			Y: designResolution.Height / 2 * gameScale.Point.Y,
-		},
+		gopherPos,
 	)
+
+	area1 = world.AddEntity(
+		shapes.Box{
+			Size:      spriteSize,
+			Scale:     gameScale.Max * spriteScale,
+			Thickness: 1,
+		},
+		areaPos,
+		color.Red,
+	)
+
+	gopherPos = geometry.Point{
+		X: designResolution.Width / 2 * gameScale.Point.X,
+		Y: designResolution.Height / 2 * gameScale.Point.Y,
+	}
+
+	areaPos = geometry.Point{
+		X: gopherPos.X - (spriteSize.Width * spriteScale / 2 * gameScale.Max),
+		Y: gopherPos.Y - (spriteSize.Height * spriteScale / 2 * gameScale.Max),
+	}
+
+	// add an static gopher
+	gopher2 = world.AddEntity(
+		sprite.Sprite{
+			Sheet: "resources/gamer.json",
+			Name:  "gamer.png",
+			Scale: gameScale.Max * spriteScale,
+			FlipX: false,
+			FlipY: false},
+		gopherPos,
+	)
+
+	area2 = world.AddEntity(
+		shapes.Box{
+			Size:      spriteSize,
+			Scale:     gameScale.Max * spriteScale,
+			Thickness: 1,
+		},
+		areaPos,
+		color.Red,
+	)
+
+	currentFactor = 0
 
 	// add the bottom text
 	world.AddEntity(
 		ui.Text{
-			String:     "move sprite with cursors, press <ESC> to close",
+			String:     "move with cursors, space change collision, press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
@@ -139,18 +215,43 @@ func loadGame(eng *gosge.Engine) error {
 	// add the movement system
 	world.AddSystem(moveSystem)
 
+	// update areas system
+	world.AddSystem(updateAreasSystem)
+
 	// add the key listener
 	world.AddListener(keyListener)
 
 	return nil
 }
 
+func updateAreasSystem(_ *goecs.World, _ float32) error {
+	updateArea(gopher1, area1, factors[currentFactor].factor1)
+	updateArea(gopher2, area2, factors[currentFactor].factor2)
+	return nil
+}
+
+func updateArea(sprite *goecs.Entity, area *goecs.Entity, factor geometry.Point) {
+	spritePos := geometry.Get.Point(sprite)
+	size := geometry.Size{
+		Width:  spriteSize.Width * factor.X,
+		Height: spriteSize.Height * factor.Y,
+	}
+	areaPos := geometry.Point{
+		X: spritePos.X - (spriteSize.Width * spriteScale / 2 * gameScale.Max * factor.X),
+		Y: spritePos.Y - (spriteSize.Height * spriteScale / 2 * gameScale.Max * factor.Y),
+	}
+	box := shapes.Get.Box(area)
+	box.Size = size
+	area.Set(box)
+	area.Set(areaPos)
+}
+
 // move the gopher using the current move
 func moveSystem(_ *goecs.World, delta float32) error {
-	pos := geometry.Get.Point(gopher)
+	pos := geometry.Get.Point(gopher1)
 	pos.X += move.X * delta
 	pos.Y += move.Y * delta
-	gopher.Set(pos)
+	gopher1.Set(pos)
 	return nil
 }
 
@@ -160,28 +261,27 @@ func keyListener(_ *goecs.World, signal interface{}, _ float32) error {
 	case events.KeyDownEvent:
 		if e.Key == device.KeyUp {
 			move.Y = -gopherSpeed * gameScale.Point.Y
-		}
-		if e.Key == device.KeyDown {
+		} else if e.Key == device.KeyDown {
 			move.Y = gopherSpeed * gameScale.Point.Y
-		}
-		if e.Key == device.KeyLeft {
+		} else if e.Key == device.KeyLeft {
 			move.X = -gopherSpeed * gameScale.Point.X
-		}
-		if e.Key == device.KeyRight {
+		} else if e.Key == device.KeyRight {
 			move.X = gopherSpeed * gameScale.Point.X
 		}
 	case events.KeyUpEvent:
 		if e.Key == device.KeyUp {
 			move.Y = 0
-		}
-		if e.Key == device.KeyDown {
+		} else if e.Key == device.KeyDown {
 			move.Y = 0
-		}
-		if e.Key == device.KeyLeft {
+		} else if e.Key == device.KeyLeft {
 			move.X = 0
-		}
-		if e.Key == device.KeyRight {
+		} else if e.Key == device.KeyRight {
 			move.X = 0
+		} else if e.Key == device.KeySpace {
+			currentFactor++
+			if currentFactor >= len(factors) {
+				currentFactor = 0
+			}
 		}
 	}
 
