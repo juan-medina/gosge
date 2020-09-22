@@ -277,6 +277,12 @@ func (e Engine) SpritesCollides(spr1 sprite.Sprite, at1 geometry.Point, spr2 spr
 	return e.cm.SpritesCollides(spr1, at1, spr2, at2)
 }
 
+// SpritesCollidesFactor indicates if two sprite.Sprite collides with a factor
+func (e Engine) SpritesCollidesFactor(spr1 sprite.Sprite, at1 geometry.Point, spr2 sprite.Sprite, at2 geometry.Point,
+	factor1 geometry.Point, factor2 geometry.Point) bool {
+	return e.cm.SpritesCollidesFactor(spr1, at1, spr2, at2, factor1, factor2)
+}
+
 // LoadMusic preloads a music stream
 func (e Engine) LoadMusic(filename string) error {
 	return e.sm.LoadMusic(filename)

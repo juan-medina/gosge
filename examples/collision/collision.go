@@ -2,7 +2,7 @@
  * Copyright (c) 2020 Juan Medina.
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to deal
+ *  of this software and associated documgopher1tion files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is
@@ -91,6 +91,14 @@ var (
 		{
 			factor1: geometry.Point{X: 0.5, Y: 0.5},
 			factor2: geometry.Point{X: 0.5, Y: 0.5},
+		},
+		{
+			factor1: geometry.Point{X: 1, Y: 0.5},
+			factor2: geometry.Point{X: 1, Y: 1},
+		},
+		{
+			factor1: geometry.Point{X: 1, Y: 0.5},
+			factor2: geometry.Point{X: 1, Y: 0.5},
 		},
 	}
 )
@@ -289,34 +297,28 @@ func keyListener(_ *goecs.World, signal interface{}, _ float32) error {
 }
 
 // color in red sprites that collides
-func collideSystem(world *goecs.World, _ float32) error {
-	// go trough all the sprites
-	for itA := world.Iterator(sprite.TYPE, geometry.TYPE.Point); itA != nil; itA = itA.Next() {
-		// no collision is color white
-		colorA := color.White
-		// get a components
-		entA := itA.Value()
-		posA := geometry.Get.Point(entA)
-		sprA := sprite.Get(entA)
-		// go trough all the sprites
-		for itB := world.Iterator(sprite.TYPE, geometry.TYPE.Point); itB != nil; itB = itB.Next() {
-			// no collision is color white
-			colorB := color.White
-			entB := itB.Value()
-			posB := geometry.Get.Point(entB)
-			sprB := sprite.Get(entB)
-			// if a and b are not the same sprite and collide
-			if entA.ID() != entB.ID() && gEng.SpritesCollides(sprA, posA, sprB, posB) {
-				// tim them in red
-				colorA = color.Red
-				colorB = color.Red
-			}
-			// update b color
-			entB.Set(colorB)
-		}
-		// update a color
-		entA.Set(colorA)
+func collideSystem(_ *goecs.World, _ float32) error {
+	// no collision is color white
+	color1 := color.White
+	color2 := color.White
+
+	// get a components
+	pos1 := geometry.Get.Point(gopher1)
+	spr1 := sprite.Get(gopher1)
+
+	pos2 := geometry.Get.Point(gopher2)
+	spr2 := sprite.Get(gopher2)
+
+	// if they collide
+	if gEng.SpritesCollidesFactor(spr1, pos1, spr2, pos2, factors[currentFactor].factor1, factors[currentFactor].factor2) {
+		// tim them in red
+		color1 = color.Red
+		color2 = color.Red
 	}
+
+	// update colors
+	gopher1.Set(color1)
+	gopher2.Set(color2)
 
 	return nil
 }

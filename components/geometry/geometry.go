@@ -89,6 +89,14 @@ func (s Size) Scale(factor float32) Size {
 	}
 }
 
+// ScaleXYFactor return a geometry.Size scaled by a x/y factor
+func (s Size) ScaleXYFactor(factor Point) Size {
+	return Size{
+		Width:  s.Width * factor.X,
+		Height: s.Height * factor.Y,
+	}
+}
+
 // Rect is a rectangular area
 type Rect struct {
 	From Point // From is the origin of the area
