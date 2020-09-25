@@ -155,6 +155,64 @@ func (rdm renderingManager) renderFlatButton(ent *goecs.Entity) error {
 	return nil
 }
 
+func (rdm renderingManager) renderProgressBar(v *goecs.Entity) error {
+	box := shapes.Get.Box(v)
+	pos := geometry.Get.Point(v)
+	pro := ui.Get.ProgressBar(v)
+	clr := ui.Get.ProgressBarColor(v)
+
+	sb := shapes.SolidBox{
+		Size:  box.Size,
+		Scale: box.Scale,
+	}
+
+	// draw shadow
+	if pro.Shadow.Width > 0 || pro.Shadow.Height > 0 {
+		shadowPos := geometry.Point{
+			X: pos.X + pro.Shadow.Width,
+			Y: pos.Y + pro.Shadow.Height,
+		}
+
+		sc := color.Gray.Alpha(127)
+		rdm.dm.DrawSolidBox(shadowPos, sb, sc)
+	}
+
+	// draw background
+	rdm.dm.DrawSolidBox(pos, sb, clr.Empty)
+
+	total := pro.Max - pro.Min
+	per := pro.Current / total
+
+	// if we need to fill anything
+	if per > 0 {
+		// if we need scissor
+		if per < 1 {
+			size := box.Size.Scale(box.Scale)
+			size.Width = size.Width * per
+			rdm.dm.BeginScissor(pos, size)
+		}
+
+		// draw fill
+		if clr.Gradient.From.Equals(clr.Gradient.To) {
+			rdm.dm.DrawSolidBox(pos, sb, clr.Solid)
+		} else {
+			rdm.dm.DrawGradientBox(pos, sb, clr.Gradient)
+		}
+
+		// if we need scissor
+		if per < 1 {
+			rdm.dm.EndScissor()
+		}
+	}
+
+	// draw border
+	if box.Thickness > 0 {
+		rdm.dm.DrawBox(pos, box, clr.Border)
+	}
+
+	return nil
+}
+
 func (rdm renderingManager) renderText(v *goecs.Entity) error {
 	textCmp := ui.Get.Text(v)
 	posCmp := geometry.Get.Point(v)
@@ -173,7 +231,8 @@ func (rdm renderingManager) renderText(v *goecs.Entity) error {
 func (rdm renderingManager) isRenderable(ent *goecs.Entity) bool {
 	return ent.Contains(geometry.TYPE.Point) &&
 		(ent.Contains(sprite.TYPE) || ent.Contains(ui.TYPE.Text) || ent.Contains(shapes.TYPE.Box) ||
-			ent.Contains(shapes.TYPE.SolidBox) || ent.Contains(ui.TYPE.FlatButton) || ent.Contains(shapes.TYPE.Line))
+			ent.Contains(shapes.TYPE.SolidBox) || ent.Contains(ui.TYPE.FlatButton) ||
+			ent.Contains(ui.TYPE.ProgressBar) || ent.Contains(shapes.TYPE.Line))
 }
 
 func (rdm renderingManager) sortRenderable(first, second *goecs.Entity) bool {
@@ -214,6 +273,10 @@ func (rdm renderingManager) System(world *goecs.World, _ float32) error {
 			}
 		} else if v.Contains(ui.TYPE.FlatButton) {
 			if err := rdm.renderFlatButton(v); err != nil {
+				return err
+			}
+		} else if v.Contains(ui.TYPE.ProgressBar) {
+			if err := rdm.renderProgressBar(v); err != nil {
 				return err
 			}
 		} else if v.Contains(shapes.TYPE.Box) {

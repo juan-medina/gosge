@@ -37,14 +37,23 @@ type types struct {
 	SpriteButton reflect.Type
 	// Text is the reflect.Type for ui.Text
 	Text reflect.Type
+	// ProgressBar is the reflect.Type for ui.ProgressBar
+	ProgressBar reflect.Type
+	// ProgressBarColor is the reflect.Type for ui.ProgressBarColor
+	ProgressBarColor reflect.Type
+	// ProgressBarHoverColor is the reflect.Type for ui.ProgressBarHoverColor
+	ProgressBarHoverColor reflect.Type
 }
 
 // TYPE hold the reflect.Type for our ui components
 var TYPE = types{
-	FlatButton:        reflect.TypeOf(FlatButton{}),
-	ButtonHoverColors: reflect.TypeOf(ButtonHoverColors{}),
-	SpriteButton:      reflect.TypeOf(SpriteButton{}),
-	Text:              reflect.TypeOf(Text{}),
+	FlatButton:            reflect.TypeOf(FlatButton{}),
+	ButtonHoverColors:     reflect.TypeOf(ButtonHoverColors{}),
+	SpriteButton:          reflect.TypeOf(SpriteButton{}),
+	Text:                  reflect.TypeOf(Text{}),
+	ProgressBar:           reflect.TypeOf(ProgressBar{}),
+	ProgressBarColor:      reflect.TypeOf(ProgressBarColor{}),
+	ProgressBarHoverColor: reflect.TypeOf(ProgressBarHoverColor{}),
 }
 
 type gets struct {
@@ -56,6 +65,12 @@ type gets struct {
 	SpriteButton func(e *goecs.Entity) SpriteButton
 	// Text gets a ui.Text from a goecs.Entity
 	Text func(e *goecs.Entity) Text
+	// ProgressBar gets a ui.ProgressBar from a goecs.Entity
+	ProgressBar func(e *goecs.Entity) ProgressBar
+	// ProgressBarColor gets a ui.ProgressBarColor from a goecs.Entity
+	ProgressBarColor func(e *goecs.Entity) ProgressBarColor
+	// ProgressBarHoverColor gets a ui.ProgressBarHoverColor from a goecs.Entity
+	ProgressBarHoverColor func(e *goecs.Entity) ProgressBarHoverColor
 }
 
 // Get a ui component
@@ -75,5 +90,17 @@ var Get = gets{
 	// Text gets a ui.Text from a goecs.Entity
 	Text: func(e *goecs.Entity) Text {
 		return e.Get(TYPE.Text).(Text)
+	},
+	// ProgressBar gets a ui.ProgressBar from a goecs.Entity
+	ProgressBar: func(e *goecs.Entity) ProgressBar {
+		return e.Get(TYPE.ProgressBar).(ProgressBar)
+	},
+	// ProgressBarColor gets a ui.ProgressBarColor from a goecs.Entity
+	ProgressBarColor: func(e *goecs.Entity) ProgressBarColor {
+		return e.Get(TYPE.ProgressBarColor).(ProgressBarColor)
+	},
+	// ProgressBarHoverColor gets a ui.ProgressBarHoverColor from a goecs.Entity
+	ProgressBarHoverColor: func(e *goecs.Entity) ProgressBarHoverColor {
+		return e.Get(TYPE.ProgressBarHoverColor).(ProgressBarHoverColor)
 	},
 }

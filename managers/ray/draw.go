@@ -156,6 +156,16 @@ func (dmi DeviceManagerImpl) DrawSolidBox(pos geometry.Point, box shapes.SolidBo
 	rl.DrawRectangleRec(rec, dmi.color2RayColor(solid))
 }
 
+// BeginScissor start a scissor draw (define screen area for following drawing)
+func (dmi DeviceManagerImpl) BeginScissor(from geometry.Point, size geometry.Size) {
+	rl.BeginScissorMode(int32(from.X), int32(from.Y), int32(size.Width), int32(size.Height))
+}
+
+// EndScissor end scissor
+func (dmi DeviceManagerImpl) EndScissor() {
+	rl.EndScissorMode()
+}
+
 // DrawBox draws a box outline with an color.Solid and a scale
 func (dmi DeviceManagerImpl) DrawBox(pos geometry.Point, box shapes.Box, solid color.Solid) {
 	rec := rl.Rectangle{

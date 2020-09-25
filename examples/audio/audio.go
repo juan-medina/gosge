@@ -23,6 +23,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge"
 	"github.com/juan-medina/gosge/components/animation"
@@ -30,6 +31,7 @@ import (
 	"github.com/juan-medina/gosge/components/color"
 	"github.com/juan-medina/gosge/components/effects"
 	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/shapes"
 	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/components/ui"
 	"github.com/juan-medina/gosge/events"
@@ -72,9 +74,11 @@ const (
 )
 
 var (
-	playButton *goecs.Entity // the play button entity
-	gopher     *goecs.Entity // the gopher sprite entity
-	geng       *gosge.Engine // the game engine
+	playButton  *goecs.Entity // the play button entity
+	gopher      *goecs.Entity // the gopher sprite entity
+	geng        *gosge.Engine // the game engine
+	masterLabel *goecs.Entity // the master volume label
+	masterBar   *goecs.Entity // the progress bar
 )
 
 var (
@@ -87,6 +91,9 @@ func main() {
 		log.Fatal().Err(err).Msg("error running the game")
 	}
 }
+
+// BarClickEvent is trigger when the bar is clicked
+type BarClickEvent struct{}
 
 func loadGame(eng *gosge.Engine) error {
 	geng = eng
@@ -223,13 +230,91 @@ func loadGame(eng *gosge.Engine) error {
 		},
 	)
 
+	textPos := geometry.Point{
+		X: (designResolution.Width / 2) * gameScale.Point.X,
+		Y: (designResolution.Height / 2) * gameScale.Point.Y,
+	}
+
+	textPos.Y += spriteSize.Height * gameScale.Max
+
+	// add the master volume label
+	masterLabel = world.AddEntity(
+		ui.Text{
+			String:     "Master Volume: 100%",
+			Size:       fontSmall,
+			Font:       fontName,
+			VAlignment: ui.MiddleVAlignment,
+			HAlignment: ui.CenterHAlignment,
+		},
+		textPos,
+		color.White,
+	)
+
+	var textSize geometry.Size
+	if textSize, err = eng.MeasureText(fontName, "Master Volume: 100%", fontSmall); err != nil {
+		return err
+	}
+
+	barPos := textPos
+	barPos.Y += textSize.Height * gameScale.Max * 0.5
+	barPos.X -= 150 * gameScale.Max
+
+	// add a master volume bar
+	masterBar = world.AddEntity(
+		ui.ProgressBar{
+			Min:     0,
+			Max:     100,
+			Current: 100,
+			Shadow: geometry.Size{
+				Width:  5 * gameScale.Max,
+				Height: 5 * gameScale.Max,
+			},
+			Sound:  clickSound,
+			Volume: 1,
+			Event:  BarClickEvent{},
+		},
+		barPos,
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  150 * gameScale.Max,
+				Height: 20 * gameScale.Max,
+			},
+			Scale:     gameScale.Max,
+			Thickness: int32(2 * gameScale.Max),
+		},
+		ui.ProgressBarColor{
+			Gradient: color.Gradient{
+				From:      color.Blue,
+				To:        color.SkyBlue,
+				Direction: color.GradientHorizontal,
+			},
+			Border: color.White,
+			Empty:  color.Solid{R: 192, G: 192, B: 192, A: 255},
+		},
+	)
+
 	// add the listener for mouse clicks
 	world.AddListener(mouseListener)
 	// add the listener to update the ui when music status change
 	world.AddListener(musicStateListener)
 
+	// listen on bar clicks
+	world.AddListener(barClickListener)
+
 	// set the master volume
 	return world.Signal(events.ChangeMasterVolumeEvent{Volume: 1})
+}
+
+func barClickListener(world *goecs.World, signal interface{}, _ float32) error {
+	switch signal.(type) {
+	case BarClickEvent:
+		bar := ui.Get.ProgressBar(masterBar)
+		text := ui.Get.Text(masterLabel)
+		text.String = fmt.Sprintf("Master Volume : %d%%", int(bar.Current))
+		masterLabel.Set(text)
+		return world.Signal(events.ChangeMasterVolumeEvent{Volume: bar.Current / 100})
+	}
+	return nil
 }
 
 func mouseListener(world *goecs.World, event interface{}, _ float32) error {

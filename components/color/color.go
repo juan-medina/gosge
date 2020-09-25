@@ -76,6 +76,11 @@ func (rc Solid) Inverse() Solid {
 	return Solid{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
+// Equals returns if two color.Solid are equal
+func (rc Solid) Equals(other Solid) bool {
+	return rc.R == other.R && rc.G == other.G && rc.B == other.B && rc.A == other.A
+}
+
 // GradientDirection is the direction of color.Gradient
 type GradientDirection int
 

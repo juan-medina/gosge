@@ -46,6 +46,10 @@ type DeviceManager interface {
 	EndFrame()
 	// ShouldClose returns if th engine should close
 	ShouldClose() bool
+	// BeginScissor start a scissor draw (define screen area for following drawing)
+	BeginScissor(from geometry.Point, size geometry.Size)
+	// EndScissor end the current scissor
+	EndScissor()
 
 	// GetScreenSize get the current screen size
 	GetScreenSize() geometry.Size

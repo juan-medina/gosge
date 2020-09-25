@@ -44,6 +44,7 @@ type uiManager struct {
 
 func (uim uiManager) System(world *goecs.World, _ float32) error {
 	uim.flatButtons(world)
+	uim.progressBars(world)
 	uim.spriteButtons(world)
 	return nil
 }
@@ -52,9 +53,13 @@ func (uim uiManager) Listener(world *goecs.World, event interface{}, _ float32) 
 	switch v := event.(type) {
 	case events.MouseMoveEvent:
 		uim.flatButtonsMouseMove(world, v)
+		uim.progressBarsMouseMove(world, v)
 		uim.spriteButtonsMouseMove(world, v)
 	case events.MouseUpEvent:
 		if err := uim.flatButtonsMouseUp(world, v); err != nil {
+			return err
+		}
+		if err := uim.progressBarsMouseUp(world, v); err != nil {
 			return err
 		}
 		if err := uim.spriteButtonsMouseUp(world, v); err != nil {
@@ -128,6 +133,85 @@ func (uim uiManager) flatButtonsMouseUp(world *goecs.World, mue events.MouseUpEv
 				}
 			}
 			return world.Signal(btn.Event)
+		}
+	}
+	return nil
+}
+
+func (uim uiManager) progressBars(world *goecs.World) {
+	for it := world.Iterator(ui.TYPE.ProgressBar); it != nil; it = it.Next() {
+		ent := it.Value()
+		// calculate state if is not done yet
+		if ent.NotContains(ui.TYPE.ProgressBarHoverColor) {
+			clr := ui.Get.ProgressBarColor(ent)
+			phc := ui.ProgressBarHoverColor{}
+
+			phc.Hover.Empty = clr.Empty
+			phc.Hover.Border = clr.Border
+			phc.Normal.Empty = clr.Empty.Blend(color.Black, normalColorDarkenFactor)
+			phc.Normal.Border = clr.Border.Blend(color.Black, normalColorDarkenFactor)
+
+			if clr.Gradient.From.Equals(clr.Gradient.To) {
+				phc.Hover.Solid = clr.Solid
+				phc.Normal.Solid = clr.Solid.Blend(color.Black, normalColorDarkenFactor)
+			} else {
+				phc.Hover.Gradient = clr.Gradient
+				phc.Normal.Gradient = color.Gradient{
+					From:      clr.Gradient.From.Blend(color.Black, normalColorDarkenFactor),
+					To:        clr.Gradient.To.Blend(color.Black, normalColorDarkenFactor),
+					Direction: clr.Gradient.Direction,
+				}
+			}
+			ent.Set(phc)
+		}
+	}
+}
+
+func (uim uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
+	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
+		shapes.TYPE.Box); it != nil; it = it.Next() {
+		ent := it.Value()
+		bcl := ui.Get.ProgressBarHoverColor(ent)
+		pos := geometry.Get.Point(ent)
+		box := shapes.Get.Box(ent)
+
+		var clr interface{} = color.White
+
+		if box.Contains(pos, mme.Point) {
+			ent.Set(bcl.Hover)
+		} else {
+			ent.Set(bcl.Normal)
+		}
+		ent.Set(clr)
+	}
+}
+
+func (uim uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUpEvent) error {
+	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
+		shapes.TYPE.Box); it != nil; it = it.Next() {
+		ent := it.Value()
+		bar := ui.Get.ProgressBar(ent)
+
+		pos := geometry.Get.Point(ent)
+		box := shapes.Get.Box(ent)
+
+		if box.Contains(pos, mue.Point) {
+			total := box.Size.Width * box.Scale
+			max := pos.X + total
+			cur := max - mue.Point.X
+			per := 1 - (cur / total)
+
+			diff := bar.Max - bar.Min
+			bar.Current = diff * per
+			ent.Set(bar)
+			if bar.Sound != "" {
+				if err := world.Signal(events.PlaySoundEvent{Name: bar.Sound, Volume: bar.Volume}); err != nil {
+					return err
+				}
+			}
+			if bar.Event != nil {
+				return world.Signal(bar.Event)
+			}
 		}
 	}
 	return nil
