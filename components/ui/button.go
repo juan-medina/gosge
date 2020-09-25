@@ -31,6 +31,8 @@ import (
 type ButtonColor struct {
 	Solid    color.Solid    // Solid is a color.Solid
 	Gradient color.Gradient // Gradient is a color.Gradient
+	Border   color.Solid    // Border is the border color.Solid
+	Text     color.Solid    // Text is the text color.Solid
 }
 
 // ButtonHoverColors is the hover colors for a FlatButton

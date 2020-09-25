@@ -261,12 +261,13 @@ func menuStage(eng *gosge.Engine) error {
 			X: ((designResolution.Width / 2) - (measure.Width / 2)) * gameScale.Point.X,
 			Y: ((designResolution.Height - 210) - (measure.Height / 2)) * gameScale.Point.Y,
 		},
-		shapes.SolidBox{
+		shapes.Box{
 			Size: geometry.Size{
 				Width:  measure.Width,
 				Height: measure.Height,
 			},
-			Scale: gameScale.Max,
+			Scale:     gameScale.Max,
+			Thickness: int32(2 * gameScale.Max),
 		},
 		ui.Text{
 			String:     "Play!",
@@ -275,9 +276,13 @@ func menuStage(eng *gosge.Engine) error {
 			VAlignment: ui.MiddleVAlignment,
 			HAlignment: ui.CenterHAlignment,
 		},
-		color.Gradient{
-			From: color.Blue,
-			To:   color.SkyBlue,
+		ui.ButtonColor{
+			Gradient: color.Gradient{
+				From: color.Blue,
+				To:   color.SkyBlue,
+			},
+			Border: color.White,
+			Text:   color.White,
 		},
 		effects.Layer{Depth: 0},
 	)
@@ -297,12 +302,13 @@ func menuStage(eng *gosge.Engine) error {
 			X: ((designResolution.Width / 2) - (measure.Width / 2)) * gameScale.Point.X,
 			Y: ((designResolution.Height - 80) - (measure.Height / 2)) * gameScale.Point.Y,
 		},
-		shapes.SolidBox{
+		shapes.Box{
 			Size: geometry.Size{
 				Width:  measure.Width,
 				Height: measure.Height,
 			},
-			Scale: gameScale.Max,
+			Scale:     gameScale.Max,
+			Thickness: int32(2 * gameScale.Max),
 		},
 		ui.Text{
 			String:     "Exit",
@@ -311,9 +317,13 @@ func menuStage(eng *gosge.Engine) error {
 			VAlignment: ui.MiddleVAlignment,
 			HAlignment: ui.CenterHAlignment,
 		},
-		color.Gradient{
-			From: color.Blue,
-			To:   color.SkyBlue,
+		ui.ButtonColor{
+			Gradient: color.Gradient{
+				From: color.Blue,
+				To:   color.SkyBlue,
+			},
+			Border: color.White,
+			Text:   color.White,
 		},
 		effects.Layer{Depth: 0},
 	)

@@ -74,17 +74,24 @@ func (uim uiManager) flatButtons(world *goecs.World) {
 		ent := it.Value()
 		// calculate state if is not done yet
 		if ent.NotContains(ui.TYPE.ButtonHoverColors) {
+			clr := ui.Get.ButtonColor(ent)
 			bcl := ui.ButtonHoverColors{}
-			if ent.Contains(color.TYPE.Solid) {
-				bcl.Hover.Solid = color.Get.Solid(ent)
-				bcl.Normal.Solid = color.Get.Solid(ent).Blend(color.Black, normalColorDarkenFactor)
-			} else if ent.Contains(color.TYPE.Gradient) {
-				gra := color.Get.Gradient(ent)
-				bcl.Hover.Gradient = gra
+
+			bcl.Hover.Border = clr.Border
+			bcl.Normal.Border = clr.Border.Blend(color.Black, normalColorDarkenFactor)
+
+			bcl.Hover.Text = clr.Text
+			bcl.Normal.Text = clr.Text.Blend(color.Black, normalColorDarkenFactor)
+
+			if clr.Gradient.From.Equals(clr.Gradient.To) {
+				bcl.Hover.Solid = clr.Solid
+				bcl.Normal.Solid = clr.Solid.Blend(color.Black, normalColorDarkenFactor)
+			} else {
+				bcl.Hover.Gradient = clr.Gradient
 				bcl.Normal.Gradient = color.Gradient{
-					From:      gra.From.Blend(color.Black, normalColorDarkenFactor),
-					To:        gra.To.Blend(color.Black, normalColorDarkenFactor),
-					Direction: gra.Direction,
+					From:      clr.Gradient.From.Blend(color.Black, normalColorDarkenFactor),
+					To:        clr.Gradient.To.Blend(color.Black, normalColorDarkenFactor),
+					Direction: clr.Gradient.Direction,
 				}
 			}
 			ent.Set(bcl)
@@ -93,39 +100,26 @@ func (uim uiManager) flatButtons(world *goecs.World) {
 }
 
 func (uim uiManager) flatButtonsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
-	for it := world.Iterator(ui.TYPE.FlatButton, ui.TYPE.ButtonHoverColors, geometry.TYPE.Point, shapes.TYPE.SolidBox); it != nil; it = it.Next() {
+	for it := world.Iterator(ui.TYPE.FlatButton, ui.TYPE.ButtonHoverColors, geometry.TYPE.Point,
+		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		bcl := ui.Get.ButtonHoverColors(ent)
 		pos := geometry.Get.Point(ent)
-		box := shapes.Get.SolidBox(ent)
-
-		var clr interface{} = color.White
-
+		box := shapes.Get.Box(ent)
 		if box.Contains(pos, mme.Point) {
-			if ent.Contains(color.TYPE.Solid) {
-				clr = bcl.Hover.Solid
-			} else if ent.Contains(color.TYPE.Gradient) {
-				clr = bcl.Hover.Gradient
-			}
+			ent.Set(bcl.Hover)
 		} else {
-			if ent.Contains(color.TYPE.Solid) {
-				clr = bcl.Normal.Solid
-			} else if ent.Contains(color.TYPE.Gradient) {
-				clr = bcl.Normal.Gradient
-			}
+			ent.Set(bcl.Normal)
 		}
-		ent.Set(clr)
 	}
 }
 
 func (uim uiManager) flatButtonsMouseUp(world *goecs.World, mue events.MouseUpEvent) error {
-	for it := world.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.SolidBox); it != nil; it = it.Next() {
+	for it := world.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		btn := ui.Get.FlatButton(ent)
-
 		pos := geometry.Get.Point(ent)
-		box := shapes.Get.SolidBox(ent)
-
+		box := shapes.Get.Box(ent)
 		if box.Contains(pos, mue.Point) {
 			if btn.Sound != "" {
 				if err := world.Signal(events.PlaySoundEvent{Name: btn.Sound, Volume: btn.Volume}); err != nil {
@@ -176,15 +170,11 @@ func (uim uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseM
 			bcl := ui.Get.ProgressBarHoverColor(ent)
 			pos := geometry.Get.Point(ent)
 			box := shapes.Get.Box(ent)
-
-			var clr interface{} = color.White
-
 			if box.Contains(pos, mme.Point) {
 				ent.Set(bcl.Hover)
 			} else {
 				ent.Set(bcl.Normal)
 			}
-			ent.Set(clr)
 		}
 	}
 }

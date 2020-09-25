@@ -97,25 +97,30 @@ func (rdm renderingManager) renderLine(ent *goecs.Entity) error {
 
 func (rdm renderingManager) renderFlatButton(ent *goecs.Entity) error {
 	pos := geometry.Get.Point(ent)
-	box := shapes.Get.SolidBox(ent)
+	box := shapes.Get.Box(ent)
 	fb := ui.Get.FlatButton(ent)
+	clr := ui.Get.ButtonColor(ent)
 
+	sb := shapes.SolidBox{
+		Size:  box.Size,
+		Scale: box.Scale,
+	}
+
+	// draw shadow
 	if fb.Shadow.Width > 0 || fb.Shadow.Height > 0 {
 		shadowPos := geometry.Point{
 			X: pos.X + fb.Shadow.Width,
 			Y: pos.Y + fb.Shadow.Height,
 		}
 		sc := color.Gray.Alpha(127)
-		rdm.dm.DrawSolidBox(shadowPos, box, sc)
+		rdm.dm.DrawSolidBox(shadowPos, sb, sc)
 	}
 
-	// draw the box
-	if ent.Contains(color.TYPE.Solid) {
-		clr := color.Get.Solid(ent)
-		rdm.dm.DrawSolidBox(pos, box, clr)
-	} else if ent.Contains(color.TYPE.Gradient) {
-		gra := color.Get.Gradient(ent)
-		rdm.dm.DrawGradientBox(pos, box, gra)
+	// draw border
+	if clr.Gradient.From.Equals(clr.Gradient.To) {
+		rdm.dm.DrawSolidBox(pos, sb, clr.Solid)
+	} else {
+		rdm.dm.DrawGradientBox(pos, sb, clr.Gradient)
 	}
 
 	// if contains a text component
@@ -129,27 +134,17 @@ func (rdm renderingManager) renderFlatButton(ent *goecs.Entity) error {
 			Y: pos.Y + ((box.Size.Height / 2) * box.Scale),
 		}
 
-		// default color white
-		colorCmp := color.White
-
-		// if the button has a solid color
-		if ent.Contains(color.TYPE.Solid) {
-			// text color is inverse
-			colorCmp = color.Get.Solid(ent).Inverse()
-			// if is has a gradient color
-		} else if ent.Contains(color.TYPE.Gradient) {
-			// get the gradient
-			gra := color.Get.Gradient(ent)
-			// text color if the inverse of the from
-			colorCmp = gra.From.Inverse()
-		}
-
 		if ftd, err := rdm.sm.GetFontDef(textCmp.Font); err == nil {
 			// draw the text
-			rdm.dm.DrawText(ftd, textCmp, textPos, colorCmp)
+			rdm.dm.DrawText(ftd, textCmp, textPos, clr.Text)
 		} else {
 			return err
 		}
+	}
+
+	// draw border
+	if box.Thickness > 0 {
+		rdm.dm.DrawBox(pos, box, clr.Border)
 	}
 
 	return nil
