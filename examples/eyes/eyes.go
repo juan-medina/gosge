@@ -53,7 +53,6 @@ var (
 	leftExterior  *goecs.Entity
 	rightExterior *goecs.Entity
 	dizzyBar      *goecs.Entity
-	dizzyBarEmpty *goecs.Entity
 	dizzyText     *goecs.Entity
 
 	// designResolution is how our game is designed
@@ -76,7 +75,7 @@ const (
 	fontName        = "resources/go_regular.fnt"
 	textSmallSize   = 60
 	textBigSize     = 100
-	dizzyBarHeight  = 100
+	dizzyBarHeight  = 110
 	dizzyBarGap     = 50
 	maxDizzy        = 2.5
 	dizzyGainRate   = 1.0
@@ -189,15 +188,6 @@ func loadGame(eng *gosge.Engine) error {
 
 	dizzyBarWith = ss.Width / gameScale.Max * 0.75
 
-	// our bar shape
-	box := shapes.SolidBox{
-		Size: geometry.Size{
-			Width:  dizzyBarWith,
-			Height: dizzyBarHeight,
-		},
-		Scale: gameScale.Max,
-	}
-
 	// Point of the bar
 	dizzyBarPoint := geometry.Point{
 		X: ((designResolution.Width * gameScale.Point.X) - (dizzyBarWith * gameScale.Max)) / 2,
@@ -210,18 +200,35 @@ func loadGame(eng *gosge.Engine) error {
 		Y: (dizzyBarGap + (dizzyBarHeight / 2)) * gameScale.Max,
 	}
 
-	// Add the dizzy bar
+	// add the bar
 	dizzyBar = world.AddEntity(
-		color.Gradient{From: color.Green, To: color.Red},
-		box,
+		ui.ProgressBar{
+			Min:     0,
+			Max:     maxDizzy,
+			Current: maxDizzy,
+			Shadow: geometry.Size{
+				Width:  5 * gameScale.Max,
+				Height: 5 * gameScale.Max,
+			},
+		},
 		dizzyBarPoint,
-	)
-
-	// Add the empty dizzy bar
-	dizzyBarEmpty = world.AddEntity(
-		color.LightGray,
-		box,
-		dizzyBarPoint,
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  dizzyBarWith,
+				Height: dizzyBarHeight,
+			},
+			Scale:     gameScale.Max,
+			Thickness: int32(2 * gameScale.Max),
+		},
+		ui.ProgressBarColor{
+			Gradient: color.Gradient{
+				From:      color.Green,
+				To:        color.Red,
+				Direction: color.GradientHorizontal,
+			},
+			Border: color.White,
+			Empty:  color.Black,
+		},
 	)
 
 	// add the dizzy text
@@ -316,21 +323,12 @@ func decreaseDizzySystem(_ *goecs.World, delta float32) error {
 }
 
 func updateDizzyBarSystem(_ *goecs.World, _ float32) error {
+	bar := ui.Get.ProgressBar(dizzyBar)
+	bar.Current = dizzy
+	dizzyBar.Set(bar)
+
 	// calculate how dizzy we are in 0..1
 	percent := 1 - (dizzy / maxDizzy)
-
-	// get the Point of the regular dizzy bar
-	dizzyBarPoint := geometry.Get.Point(dizzyBar)
-	// get the Point
-	box := shapes.Get.SolidBox(dizzyBar)
-
-	// calculate Point and width
-	box.Size.Width = box.Size.Width * percent
-	dizzyBarPoint.X = dizzyBarPoint.X - (dizzyBarWith * box.Scale * (percent - 1))
-
-	// set components
-	dizzyBarEmpty.Set(dizzyBarPoint)
-	dizzyBarEmpty.Set(box)
 
 	// make the dizzy text color change from green to blend depending on how dizzy we are
 	cl := color.Green.Blend(color.Red, 1-percent)

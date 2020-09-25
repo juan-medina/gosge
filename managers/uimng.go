@@ -171,18 +171,21 @@ func (uim uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseM
 	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
-		bcl := ui.Get.ProgressBarHoverColor(ent)
-		pos := geometry.Get.Point(ent)
-		box := shapes.Get.Box(ent)
+		bar := ui.Get.ProgressBar(ent)
+		if bar.Event != nil {
+			bcl := ui.Get.ProgressBarHoverColor(ent)
+			pos := geometry.Get.Point(ent)
+			box := shapes.Get.Box(ent)
 
-		var clr interface{} = color.White
+			var clr interface{} = color.White
 
-		if box.Contains(pos, mme.Point) {
-			ent.Set(bcl.Hover)
-		} else {
-			ent.Set(bcl.Normal)
+			if box.Contains(pos, mme.Point) {
+				ent.Set(bcl.Hover)
+			} else {
+				ent.Set(bcl.Normal)
+			}
+			ent.Set(clr)
 		}
-		ent.Set(clr)
 	}
 }
 
