@@ -56,6 +56,12 @@ func (dmi DeviceManagerImpl) PlayMusic(musicDef components.MusicDef, volume floa
 	rl.SetMusicVolume(rlMusic, volume)
 }
 
+// ChangeMusicVolume change the given components.MusicDef volume
+func (dmi DeviceManagerImpl) ChangeMusicVolume(musicDef components.MusicDef, volume float32) {
+	rlMusic := musicDef.Data.(rl.Music)
+	rl.SetMusicVolume(rlMusic, volume)
+}
+
 // PauseMusic pauses the given components.MusicDef
 func (dmi DeviceManagerImpl) PauseMusic(musicDef components.MusicDef) {
 	rl.PauseMusicStream(musicDef.Data.(rl.Music))

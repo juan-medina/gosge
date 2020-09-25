@@ -71,14 +71,23 @@ const (
 	gopherDanceFrames       = 24                           // number of frames for the gopher dance animation
 	gopherFrameDelay        = 0.100                        // delay between frames for the gopher animations
 	danceAnimSpeedIncrease  = 0.20                         // how much more faster will dance the gopher on click
+	barWith                 = 300                          // our bars width
+	barHeight               = 40                           // our bars height
 )
 
 var (
 	playButton  *goecs.Entity // the play button entity
+	stopButton  *goecs.Entity // the stop button
 	gopher      *goecs.Entity // the gopher sprite entity
 	geng        *gosge.Engine // the game engine
 	masterLabel *goecs.Entity // the master volume label
-	masterBar   *goecs.Entity // the progress bar
+	masterBar   *goecs.Entity // the master progress bar
+	musicLabel  *goecs.Entity // the music volume label
+	musicBar    *goecs.Entity // the music progress bar
+	soundLabel  *goecs.Entity // the sound volume label
+	soundBar    *goecs.Entity // the sound progress bar
+	musicVolume float32       // the current music volume
+	soundVolume float32       // the current sound volume
 )
 
 var (
@@ -92,12 +101,29 @@ func main() {
 	}
 }
 
+// BarType is the bar that we click
+type BarType int
+
+// BarType for each bar
+const (
+	MasterBar = BarType(iota) // our master bar
+	MusicBar                  // our music bar
+	SoundBar                  // our sound bar
+)
+
 // BarClickEvent is trigger when the bar is clicked
-type BarClickEvent struct{}
+type BarClickEvent struct {
+	Type BarType
+}
 
 func loadGame(eng *gosge.Engine) error {
 	geng = eng
 	var err error
+
+	// set initial values
+	musicVolume = 1
+	soundVolume = 1
+
 	// Preload font
 	if err = eng.LoadFont(fontName); err != nil {
 		return err
@@ -166,10 +192,10 @@ func loadGame(eng *gosge.Engine) error {
 			Hover:  playButtonHoverSprite,
 			Scale:  gameScale.Max * spriteScale,
 			Sound:  clickSound,
-			Volume: 1,
+			Volume: soundVolume,
 			Event: events.PlayMusicEvent{ // on click send a event to play the music
 				Name:   musicFile,
-				Volume: 1,
+				Volume: musicVolume,
 			},
 		},
 		geometry.Point{
@@ -180,14 +206,14 @@ func loadGame(eng *gosge.Engine) error {
 	)
 
 	// add the stop button
-	world.AddEntity(
+	stopButton = world.AddEntity(
 		ui.SpriteButton{
 			Sheet:  spriteSheet,
 			Normal: stopButtonNormalSprite,
 			Hover:  stopButtonHoverSprite,
 			Scale:  gameScale.Max * spriteScale,
 			Sound:  clickSound,
-			Volume: 1,
+			Volume: soundVolume,
 			Event: events.StopMusicEvent{ // on click send a event to stop the music
 				Name: musicFile,
 			},
@@ -235,12 +261,59 @@ func loadGame(eng *gosge.Engine) error {
 		Y: (designResolution.Height / 2) * gameScale.Point.Y,
 	}
 
+	var textSize geometry.Size
+	if textSize, err = eng.MeasureText(fontName, "Master Volume: 100%", fontSmall); err != nil {
+		return err
+	}
+
+	// master bar
 	textPos.Y += spriteSize.Height * gameScale.Max
 
-	// add the master volume label
-	masterLabel = world.AddEntity(
+	barPos := textPos
+	barPos.Y += textSize.Height * gameScale.Max * 0.5
+	barPos.X -= barWith * gameScale.Max * 0.5
+
+	masterLabel, masterBar = createBar(world, "Master Volume : 100%", textPos, barPos, gameScale, MasterBar)
+
+	// music bar
+	textPos.Y = barPos.Y + (barHeight * 2 * gameScale.Max)
+
+	barPos = textPos
+	barPos.Y += textSize.Height * gameScale.Max * 0.5
+	barPos.X -= barWith * gameScale.Max * 0.5
+
+	musicLabel, musicBar = createBar(world, "Music Volume : 100%", textPos, barPos, gameScale, MusicBar)
+
+	// sound bar
+	textPos.Y = barPos.Y + (barHeight * 2 * gameScale.Max)
+
+	barPos = textPos
+	barPos.Y += textSize.Height * gameScale.Max * 0.5
+	barPos.X -= barWith * gameScale.Max * 0.5
+
+	soundLabel, soundBar = createBar(world, "Sound Volume : 100%", textPos, barPos, gameScale, SoundBar)
+
+	// add the listener for mouse clicks
+	world.AddListener(mouseListener)
+	// add the listener to update the ui when music status change
+	world.AddListener(musicStateListener)
+
+	// listen on bar clicks
+	world.AddListener(barClickListener)
+
+	textPos.Y += barHeight * gameScale.Max
+
+	// set the master volume
+	return world.Signal(events.ChangeMasterVolumeEvent{Volume: 1})
+}
+
+func createBar(world *goecs.World, text string, textPos, barPos geometry.Point, scale geometry.Scale,
+	barType BarType) (label, bar *goecs.Entity) {
+
+	// add the label
+	label = world.AddEntity(
 		ui.Text{
-			String:     "Master Volume: 100%",
+			String:     text,
 			Size:       fontSmall,
 			Font:       fontName,
 			VAlignment: ui.MiddleVAlignment,
@@ -250,37 +323,30 @@ func loadGame(eng *gosge.Engine) error {
 		color.White,
 	)
 
-	var textSize geometry.Size
-	if textSize, err = eng.MeasureText(fontName, "Master Volume: 100%", fontSmall); err != nil {
-		return err
-	}
-
-	barPos := textPos
-	barPos.Y += textSize.Height * gameScale.Max * 0.5
-	barPos.X -= 150 * gameScale.Max
-
-	// add a master volume bar
-	masterBar = world.AddEntity(
+	// add the bar
+	bar = world.AddEntity(
 		ui.ProgressBar{
 			Min:     0,
 			Max:     100,
 			Current: 100,
 			Shadow: geometry.Size{
-				Width:  5 * gameScale.Max,
-				Height: 5 * gameScale.Max,
+				Width:  5 * scale.Max,
+				Height: 5 * scale.Max,
 			},
 			Sound:  clickSound,
-			Volume: 1,
-			Event:  BarClickEvent{},
+			Volume: soundVolume,
+			Event: BarClickEvent{
+				Type: barType,
+			},
 		},
 		barPos,
 		shapes.Box{
 			Size: geometry.Size{
-				Width:  150 * gameScale.Max,
-				Height: 20 * gameScale.Max,
+				Width:  barWith,
+				Height: barHeight,
 			},
-			Scale:     gameScale.Max,
-			Thickness: int32(2 * gameScale.Max),
+			Scale:     scale.Max,
+			Thickness: int32(2 * scale.Max),
 		},
 		ui.ProgressBarColor{
 			Gradient: color.Gradient{
@@ -293,28 +359,73 @@ func loadGame(eng *gosge.Engine) error {
 		},
 	)
 
-	// add the listener for mouse clicks
-	world.AddListener(mouseListener)
-	// add the listener to update the ui when music status change
-	world.AddListener(musicStateListener)
-
-	// listen on bar clicks
-	world.AddListener(barClickListener)
-
-	// set the master volume
-	return world.Signal(events.ChangeMasterVolumeEvent{Volume: 1})
+	return
 }
 
 func barClickListener(world *goecs.World, signal interface{}, _ float32) error {
-	switch signal.(type) {
+	switch e := signal.(type) {
 	case BarClickEvent:
-		bar := ui.Get.ProgressBar(masterBar)
-		text := ui.Get.Text(masterLabel)
-		text.String = fmt.Sprintf("Master Volume : %d%%", int(bar.Current))
-		masterLabel.Set(text)
-		return world.Signal(events.ChangeMasterVolumeEvent{Volume: bar.Current / 100})
+		switch e.Type {
+		case MasterBar:
+			bar := ui.Get.ProgressBar(masterBar)
+			text := ui.Get.Text(masterLabel)
+			text.String = fmt.Sprintf("Master Volume : %d%%", int(bar.Current))
+			masterLabel.Set(text)
+			updateUIVolume()
+			return world.Signal(events.ChangeMasterVolumeEvent{Volume: bar.Current / 100})
+		case MusicBar:
+			bar := ui.Get.ProgressBar(musicBar)
+			text := ui.Get.Text(musicLabel)
+			text.String = fmt.Sprintf("Music Volume : %d%%", int(bar.Current))
+			musicVolume = bar.Current / 100
+			musicLabel.Set(text)
+			updateUIVolume()
+			return world.Signal(events.ChangeMusicVolumeEvent{
+				Name:   musicFile,
+				Volume: musicVolume,
+			})
+		case SoundBar:
+			bar := ui.Get.ProgressBar(soundBar)
+			text := ui.Get.Text(soundLabel)
+			text.String = fmt.Sprintf("Sound Volume : %d%%", int(bar.Current))
+			soundVolume = bar.Current / 100
+			soundLabel.Set(text)
+			updateUIVolume()
+		}
 	}
 	return nil
+}
+
+func updateUIVolume() {
+	btn := ui.Get.SpriteButton(playButton)
+	btn.Volume = soundVolume
+	playButton.Set(btn)
+
+	btn = ui.Get.SpriteButton(stopButton)
+	btn.Volume = soundVolume
+	stopButton.Set(btn)
+
+	bar := ui.Get.ProgressBar(masterBar)
+	bar.Volume = soundVolume
+	masterBar.Set(bar)
+
+	bar = ui.Get.ProgressBar(musicBar)
+	bar.Volume = soundVolume
+	musicBar.Set(bar)
+
+	bar = ui.Get.ProgressBar(soundBar)
+	bar.Volume = soundVolume
+	soundBar.Set(bar)
+
+	sb := ui.Get.SpriteButton(playButton)
+	switch sb.Event.(type) {
+	case events.PlayMusicEvent:
+		sb.Event = events.PlayMusicEvent{
+			Name:   musicFile,
+			Volume: musicVolume,
+		}
+		playButton.Set(sb)
+	}
 }
 
 func mouseListener(world *goecs.World, event interface{}, _ float32) error {
@@ -334,7 +445,7 @@ func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 			}
 			gopher.Set(anim)
 			// play the gopher sound
-			return world.Signal(events.PlaySoundEvent{Name: gopherSound, Volume: 1})
+			return world.Signal(events.PlaySoundEvent{Name: gopherSound, Volume: soundVolume})
 		}
 	}
 	return nil
@@ -365,7 +476,7 @@ func musicStateListener(_ *goecs.World, event interface{}, _ float32) error {
 			sb.Hover = playButtonHoverSprite
 			sb.Event = events.PlayMusicEvent{ // on click send a event to play the music
 				Name:   e.Name,
-				Volume: 1,
+				Volume: musicVolume,
 			}
 			anim.Current = idleAnim
 			anim.Speed = 1.0

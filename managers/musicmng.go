@@ -69,6 +69,8 @@ func (mm musicManager) Listener(world *goecs.World, event interface{}, _ float32
 		return mm.pauseMusicEvent(world, e)
 	case events.ResumeMusicEvent:
 		return mm.resumeMusicEvent(world, e)
+	case events.ChangeMusicVolumeEvent:
+		return mm.changeVolume(world, e)
 	}
 	return nil
 }
@@ -161,6 +163,18 @@ func (mm musicManager) sendMusicStateChangeEvent(world *goecs.World, name string
 		Old:  old,
 		New:  new,
 	})
+}
+
+func (mm musicManager) changeVolume(world *goecs.World, cmv events.ChangeMusicVolumeEvent) error {
+	if def, err := mm.sm.GetMusicDef(cmv.Name); err == nil {
+		if ent := mm.findMusicEnt(world, cmv.Name); ent != nil {
+			state := audio.Get.MusicState(ent)
+			if state.PlayingState == audio.StatePlaying || state.PlayingState == audio.StatePaused {
+				mm.dm.ChangeMusicVolume(def, cmv.Volume)
+			}
+		}
+	}
+	return nil
 }
 
 // Music returns a managers.WithSystemAndListener that handle music stream

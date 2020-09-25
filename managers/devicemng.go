@@ -96,6 +96,8 @@ type DeviceManager interface {
 	ResumeMusic(musicDef components.MusicDef)
 	// UpdateMusic update the stream of the given components.MusicDef
 	UpdateMusic(musicDef components.MusicDef)
+	// ChangeMusicVolume change the given components.MusicDef volume
+	ChangeMusicVolume(musicDef components.MusicDef, volume float32)
 	// LoadSound giving it file name into memory
 	LoadSound(fileName string) (components.SoundDef, error)
 	// UnloadSound giving it file from memory

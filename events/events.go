@@ -92,6 +92,12 @@ type ResumeMusicEvent struct {
 	Name string
 }
 
+// ChangeMusicVolumeEvent is an event to change the volume of a music stream
+type ChangeMusicVolumeEvent struct {
+	Name   string
+	Volume float32
+}
+
 // MusicStateChangeEvent is a event trigger when a music state change
 type MusicStateChangeEvent struct {
 	Name string                  // Name of the music
