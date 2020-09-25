@@ -159,8 +159,10 @@ func loadGame(eng *gosge.Engine) error {
 			Hover:  playButtonHoverSprite,
 			Scale:  gameScale.Max * spriteScale,
 			Sound:  clickSound,
+			Volume: 1,
 			Event: events.PlayMusicEvent{ // on click send a event to play the music
-				Name: musicFile,
+				Name:   musicFile,
+				Volume: 1,
 			},
 		},
 		geometry.Point{
@@ -178,6 +180,7 @@ func loadGame(eng *gosge.Engine) error {
 			Hover:  stopButtonHoverSprite,
 			Scale:  gameScale.Max * spriteScale,
 			Sound:  clickSound,
+			Volume: 1,
 			Event: events.StopMusicEvent{ // on click send a event to stop the music
 				Name: musicFile,
 			},
@@ -224,7 +227,9 @@ func loadGame(eng *gosge.Engine) error {
 	world.AddListener(mouseListener)
 	// add the listener to update the ui when music status change
 	world.AddListener(musicStateListener)
-	return err
+
+	// set the master volume
+	return world.Signal(events.ChangeMasterVolumeEvent{Volume: 1})
 }
 
 func mouseListener(world *goecs.World, event interface{}, _ float32) error {
@@ -244,7 +249,7 @@ func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 			}
 			gopher.Set(anim)
 			// play the gopher sound
-			return world.Signal(events.PlaySoundEvent{Name: gopherSound})
+			return world.Signal(events.PlaySoundEvent{Name: gopherSound, Volume: 1})
 		}
 	}
 	return nil
@@ -274,7 +279,8 @@ func musicStateListener(_ *goecs.World, event interface{}, _ float32) error {
 			sb.Normal = playButtonNormalSprite
 			sb.Hover = playButtonHoverSprite
 			sb.Event = events.PlayMusicEvent{ // on click send a event to play the music
-				Name: e.Name,
+				Name:   e.Name,
+				Volume: 1,
 			}
 			anim.Current = idleAnim
 			anim.Speed = 1.0

@@ -92,7 +92,7 @@ func (mm musicManager) playMusicEvent(world *goecs.World, pme events.PlayMusicEv
 			old := state.PlayingState
 			state.PlayingState = audio.StatePlaying
 			ent.Set(state)
-			mm.dm.PlayMusic(def)
+			mm.dm.PlayMusic(def, pme.Volume)
 			return mm.sendMusicStateChangeEvent(world, pme.Name, old, state.PlayingState)
 		}
 	} else {

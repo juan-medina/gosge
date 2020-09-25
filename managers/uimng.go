@@ -123,7 +123,7 @@ func (uim uiManager) flatButtonsMouseUp(world *goecs.World, mue events.MouseUpEv
 
 		if box.Contains(pos, mue.Point) {
 			if btn.Sound != "" {
-				if err := world.Signal(events.PlaySoundEvent{Name: btn.Sound}); err != nil {
+				if err := world.Signal(events.PlaySoundEvent{Name: btn.Sound, Volume: btn.Volume}); err != nil {
 					return err
 				}
 			}
@@ -184,7 +184,7 @@ func (uim uiManager) spriteButtonsMouseUp(world *goecs.World, mue events.MouseUp
 
 		if uim.cm.SpriteAtContains(spr, pos, mue.Point) {
 			if sbn.Sound != "" {
-				if err := world.Signal(events.PlaySoundEvent{Name: sbn.Sound}); err != nil {
+				if err := world.Signal(events.PlaySoundEvent{Name: sbn.Sound, Volume: sbn.Volume}); err != nil {
 					return err
 				}
 			}

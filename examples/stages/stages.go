@@ -158,6 +158,7 @@ func mainStage(eng *gosge.Engine) error {
 			Hover:  buttonExitHoverSprite,
 			Scale:  gameScale.Max * spriteScale,
 			Sound:  clickSound,
+			Volume: 1,
 			Event: events.DelaySignal{
 				Signal: events.ChangeGameStage{Stage: "menu"},
 				Time:   0.15,
@@ -250,6 +251,7 @@ func menuStage(eng *gosge.Engine) error {
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
 			Sound:  clickSound,
+			Volume: 1,
 			Event: events.DelaySignal{
 				Signal: events.ChangeGameStage{Stage: "main"},
 				Time:   0.15,
@@ -285,6 +287,7 @@ func menuStage(eng *gosge.Engine) error {
 		ui.FlatButton{
 			Shadow: geometry.Size{Width: shadowExtraWidth, Height: shadowExtraHeight},
 			Sound:  clickSound,
+			Volume: 1,
 			Event: events.DelaySignal{
 				Signal: events.GameCloseEvent{},
 				Time:   0.15,

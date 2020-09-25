@@ -36,10 +36,12 @@ func (sm soundManager) Listener(_ *goecs.World, event interface{}, _ float32) er
 	switch e := event.(type) {
 	case events.PlaySoundEvent:
 		if def, err := sm.sm.GetSoundDef(e.Name); err == nil {
-			sm.dm.PlaySound(def)
+			sm.dm.PlaySound(def, e.Volume)
 		} else {
 			return err
 		}
+	case events.ChangeMasterVolumeEvent:
+		sm.dm.SetMasterVolume(e.Volume)
 	}
 	return nil
 }

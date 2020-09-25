@@ -42,7 +42,8 @@ type ButtonHoverColors struct {
 // FlatButton is a UI element for displaying a button
 type FlatButton struct {
 	Shadow geometry.Size // Shadow is the offset of the shadow on the ui.FlatButton
-	Sound  string        // Sound is the click sound for this FlatButton
+	Sound  string        // Sound is the click sound
+	Volume float32       // Volume is the volume for click Sound
 	Event  interface{}   // Event is the event that will be trigger when this button is click
 }
 
@@ -52,6 +53,7 @@ type SpriteButton struct {
 	Normal string      // Normal is the sprite on normal state
 	Hover  string      // Hover is the  sprite on hover state
 	Scale  float32     // Scale is the Sprite scale
-	Sound  string      // Sound is the click sound for this SpriteButton
+	Sound  string      // Sound is the click sound
+	Volume float32     // Volume is the volume for click Sound
 	Event  interface{} // Event is the event that will be trigger when this button is click
 }

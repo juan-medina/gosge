@@ -83,7 +83,7 @@ type DeviceManager interface {
 	// UnloadMusic giving it file from memory
 	UnloadMusic(musicDef components.MusicDef)
 	// PlayMusic plays the given components.MusicDef
-	PlayMusic(musicDef components.MusicDef)
+	PlayMusic(musicDef components.MusicDef, volume float32)
 	// PauseMusic pauses the given components.MusicDef
 	PauseMusic(musicDef components.MusicDef)
 	// StopMusic stop the given components.MusicDef
@@ -97,7 +97,9 @@ type DeviceManager interface {
 	// UnloadSound giving it file from memory
 	UnloadSound(soundDef components.SoundDef)
 	// PlaySound plays the given components.SoundDef
-	PlaySound(soundDef components.SoundDef)
+	PlaySound(soundDef components.SoundDef, volume float32)
+	// SetMasterVolume change the master volume
+	SetMasterVolume(volume float32)
 	// StopAllSounds currently playing
 	StopAllSounds()
 

@@ -73,7 +73,8 @@ type KeyDownEvent struct {
 
 // PlayMusicEvent is an event to play a music stream
 type PlayMusicEvent struct {
-	Name string
+	Name   string
+	Volume float32
 }
 
 // StopMusicEvent is an event to play a music stream
@@ -100,7 +101,13 @@ type MusicStateChangeEvent struct {
 
 // PlaySoundEvent is an event to play a sound wave
 type PlaySoundEvent struct {
-	Name string
+	Name   string
+	Volume float32
+}
+
+// ChangeMasterVolumeEvent to a given Volume
+type ChangeMasterVolumeEvent struct {
+	Volume float32 // Volume to be set
 }
 
 // DelaySignal is a signal that will happen after a time

@@ -50,9 +50,10 @@ func (dmi DeviceManagerImpl) UnloadMusic(musicDef components.MusicDef) {
 }
 
 // PlayMusic plays the given components.MusicDef
-func (dmi DeviceManagerImpl) PlayMusic(musicDef components.MusicDef) {
+func (dmi DeviceManagerImpl) PlayMusic(musicDef components.MusicDef, volume float32) {
 	rlMusic := musicDef.Data.(rl.Music)
 	rl.PlayMusicStream(rlMusic)
+	rl.SetMusicVolume(rlMusic, volume)
 }
 
 // PauseMusic pauses the given components.MusicDef
@@ -96,11 +97,18 @@ func (dmi *DeviceManagerImpl) UnloadSound(soundDef components.SoundDef) {
 }
 
 // PlaySound plays the given components.SoundDef
-func (dmi *DeviceManagerImpl) PlaySound(soundDef components.SoundDef) {
-	rl.PlaySoundMulti(soundDef.Data.(rl.Sound))
+func (dmi *DeviceManagerImpl) PlaySound(soundDef components.SoundDef, volume float32) {
+	rlSound := soundDef.Data.(rl.Sound)
+	rl.SetSoundVolume(rlSound, volume)
+	rl.PlaySoundMulti(rlSound)
 }
 
 // StopAllSounds currently playing
 func (dmi *DeviceManagerImpl) StopAllSounds() {
 	rl.StopSoundMulti()
+}
+
+// SetMasterVolume change the master volume
+func (dmi *DeviceManagerImpl) SetMasterVolume(volume float32) {
+	rl.SetMasterVolume(volume)
 }
