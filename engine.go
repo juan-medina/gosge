@@ -50,7 +50,7 @@ const (
 	lastPriority = int32(-1000)
 	lowPriority  = int32(-500)
 	highPriority = int32(500)
-	gosgeVersion = "v0.1.10"
+	gosgeVersion = "v0.1.11"
 )
 
 // InitFunc is a function that will get call for our game to load
@@ -225,12 +225,15 @@ func (e *Engine) Run() error {
 			err = e.running()
 		}
 	}
-	if err == nil && e.status == statusEnding {
-		_ = e.end()
+	if err == nil {
+		if e.status == statusEnding {
+			_ = e.end()
+		}
+		if err = e.opt.Save(); err != nil {
+			return err
+		}
 	}
-	if err = e.opt.Save(); err != nil {
-		return err
-	}
+
 	return err
 }
 
