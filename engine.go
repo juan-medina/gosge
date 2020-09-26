@@ -49,6 +49,7 @@ const (
 	lastPriority = int32(-1000)
 	lowPriority  = int32(-500)
 	highPriority = int32(500)
+	gosgeVersion = "v0.1.9"
 )
 
 // InitFunc is a function that will get call for our game to load
@@ -206,6 +207,10 @@ func (e *Engine) end() error {
 // Run a game within the engine
 func (e *Engine) Run() error {
 	var err error = nil
+	if err = e.opt.Load(); err != nil {
+		return err
+	}
+	e.opt.SetString("GOSGE", gosgeVersion)
 	for e.status != statusEnding && err == nil {
 		e.frameTime = e.dm.GetFrameTime()
 		switch e.status {
@@ -221,6 +226,9 @@ func (e *Engine) Run() error {
 	}
 	if err == nil && e.status == statusEnding {
 		_ = e.end()
+	}
+	if err = e.opt.Save(); err != nil {
+		return err
 	}
 	return err
 }
@@ -305,6 +313,11 @@ func (e Engine) GeTiledMapSize(name string) (size geometry.Size, err error) {
 		size = def.Size
 	}
 	return
+}
+
+// GetSettings return the in game settings
+func (e Engine) GetSettings() options.Settings {
+	return &e.opt
 }
 
 // New return a Engine

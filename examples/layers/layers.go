@@ -17,7 +17,7 @@ import (
 
 // game options
 var opt = options.Options{
-	Title:      "Layers Game",
+	Title:      "GOSGE Layers Game",
 	BackGround: color.Black,
 	Icon:       "resources/icon.png",
 	// Uncomment this for using windowed mode

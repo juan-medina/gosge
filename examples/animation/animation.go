@@ -41,7 +41,7 @@ import (
 
 // Game options
 var opt = options.Options{
-	Title:      "Animation Game",
+	Title:      "GOSGE Animation Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
 	// Uncomment this for using windowed mode

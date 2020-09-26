@@ -39,7 +39,7 @@ import (
 
 // our game options
 var opt = options.Options{
-	Title:      "Eyes Game",
+	Title:      "GOSGE Eyes Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
 	// Uncomment this for using windowed mode

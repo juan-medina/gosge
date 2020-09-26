@@ -40,7 +40,7 @@ import (
 )
 
 var opt = options.Options{
-	Title:      "Tiled Game",
+	Title:      "GOSGE Tiled Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
 	// Uncomment this for using windowed mode

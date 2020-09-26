@@ -36,7 +36,7 @@ import (
 )
 
 var opt = options.Options{
-	Title:      "Stages Game",
+	Title:      "GOSGE Stages Game",
 	BackGround: color.Black,
 	Icon:       "resources/icon.png",
 	// Uncomment this for using windowed mode

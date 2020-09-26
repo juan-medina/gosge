@@ -38,7 +38,7 @@ import (
 )
 
 var opt = options.Options{
-	Title:      "Collision Game",
+	Title:      "GOSGE Collision Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
 	// Uncomment this for using windowed mode

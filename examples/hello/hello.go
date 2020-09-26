@@ -33,7 +33,7 @@ import (
 )
 
 var opt = options.Options{
-	Title:      "Hello Game",
+	Title:      "GOSGE Hello Game",
 	BackGround: color.Gopher,
 	Icon:       "resources/icon.png",
 	// Uncomment this for using windowed mode
