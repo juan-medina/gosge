@@ -27,6 +27,7 @@ import (
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components"
 	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/events"
@@ -318,6 +319,16 @@ func (e Engine) GeTiledMapSize(name string) (size geometry.Size, err error) {
 // GetSettings return the in game settings
 func (e Engine) GetSettings() options.Settings {
 	return &e.opt
+}
+
+// SetExitKey will set the exit key
+func (e Engine) SetExitKey(key device.Key) {
+	e.dm.SetExitKey(key)
+}
+
+// DisableExitKey will disable the exit key
+func (e Engine) DisableExitKey() {
+	e.dm.DisableExitKey()
 }
 
 // New return a Engine

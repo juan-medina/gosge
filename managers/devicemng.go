@@ -46,10 +46,10 @@ type DeviceManager interface {
 	EndFrame()
 	// ShouldClose returns if th engine should close
 	ShouldClose() bool
-	// BeginScissor start a scissor draw (define screen area for following drawing)
-	BeginScissor(from geometry.Point, size geometry.Size)
-	// EndScissor end the current scissor
-	EndScissor()
+	// SetExitKey will set the exit key
+	SetExitKey(key device.Key)
+	// DisableExitKey will disable the exit key
+	DisableExitKey()
 
 	// GetScreenSize get the current screen size
 	GetScreenSize() geometry.Size
@@ -126,6 +126,10 @@ type DeviceManager interface {
 	MeasureText(fnt components.FontDef, str string, size float32) geometry.Size
 	// DrawLine between from and to with a given thickness and color.Solid
 	DrawLine(from, to geometry.Point, thickness float32, color color.Solid)
+	// BeginScissor start a scissor draw (define screen area for following drawing)
+	BeginScissor(from geometry.Point, size geometry.Size)
+	// EndScissor end the current scissor
+	EndScissor()
 }
 
 // Device return the DeviceManager

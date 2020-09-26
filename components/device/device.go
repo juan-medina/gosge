@@ -48,5 +48,7 @@ const (
 	KeyCtrlLeft              // KeyCtrlLeft if the left control key
 	KeyAltRight              // KeyAltRight if the right alt key
 	KeyCtrlRight             // KeyCtrlRight if the right control key
+	KeyEscape                // KeyEscape is the escape key
+	KeyReturn                // KeyReturn is the return key
 	TotalKeys                // TotalKeys is the total number of keys
 )

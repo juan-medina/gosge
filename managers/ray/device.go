@@ -110,6 +110,8 @@ var engineKeyToRayKey = map[device.Key]int32{
 	device.KeyCtrlLeft:  rl.KeyLeftControl,
 	device.KeyAltRight:  rl.KeyRightAlt,
 	device.KeyCtrlRight: rl.KeyRightControl,
+	device.KeyEscape:    rl.KeyEscape,
+	device.KeyReturn:    rl.KeyEnter,
 }
 
 // IsKeyPressed returns if given device.Key is pressed
@@ -126,4 +128,14 @@ func (dmi DeviceManagerImpl) IsKeyReleased(key device.Key) bool {
 		return rl.IsKeyReleased(v)
 	}
 	return false
+}
+
+// SetExitKey will set the exit key
+func (dmi DeviceManagerImpl) SetExitKey(key device.Key) {
+	rl.SetExitKey(engineKeyToRayKey[key])
+}
+
+// DisableExitKey will disable the exit key
+func (dmi DeviceManagerImpl) DisableExitKey() {
+	rl.SetExitKey(0)
 }

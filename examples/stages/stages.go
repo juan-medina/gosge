@@ -23,8 +23,10 @@
 package main
 
 import (
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge"
 	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/effects"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/shapes"
@@ -82,6 +84,8 @@ const (
 
 func mainStage(eng *gosge.Engine) error {
 	var err error
+
+	eng.DisableExitKey()
 
 	// Preload font
 	if err = eng.LoadFont(fontName); err != nil {
@@ -171,11 +175,25 @@ func mainStage(eng *gosge.Engine) error {
 		effects.Layer{Depth: 0},
 	)
 
+	world.AddListener(mainStageKeyListener)
+
+	return nil
+}
+
+func mainStageKeyListener(world *goecs.World, signal interface{}, _ float32) error {
+	switch e := signal.(type) {
+	case events.KeyUpEvent:
+		if e.Key == device.KeyEscape {
+			return world.Signal(events.ChangeGameStage{Stage: "menu"})
+		}
+	}
 	return nil
 }
 
 func menuStage(eng *gosge.Engine) error {
 	var err error
+
+	eng.SetExitKey(device.KeyEscape)
 
 	// Preload font
 	if err = eng.LoadFont(fontName); err != nil {
@@ -328,5 +346,17 @@ func menuStage(eng *gosge.Engine) error {
 		effects.Layer{Depth: 0},
 	)
 
+	world.AddListener(menuStageKeyListener)
+
+	return nil
+}
+
+func menuStageKeyListener(world *goecs.World, signal interface{}, _ float32) error {
+	switch e := signal.(type) {
+	case events.KeyUpEvent:
+		if e.Key == device.KeyReturn {
+			return world.Signal(events.ChangeGameStage{Stage: "main"})
+		}
+	}
 	return nil
 }
