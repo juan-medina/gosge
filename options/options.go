@@ -229,9 +229,8 @@ func (o Options) doConfigExist() (bool, error) {
 	if _, err = os.Stat(filePath); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
-		} else {
-			return false, err
 		}
+		return false, err
 	}
 
 	return true, nil
