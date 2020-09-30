@@ -97,6 +97,7 @@ $ make run example=tiled
 $ make run example=draw
 $ make run example=draw
 $ make run example=collision
+$ make run example=ui
 ```
 
 Alternatively you could run them with :
@@ -111,6 +112,7 @@ $ go run examples/audio/audio.go
 $ go run examples/tiled/tiled.go
 $ go run examples/draw/draw.go
 $ go run examples/collision/collision.go
+$ go run examples/ui/ui.go
 ```
 
 ## Requirements
