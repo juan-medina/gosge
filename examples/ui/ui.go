@@ -48,6 +48,8 @@ const (
 	fontName  = "resources/go_regular.fnt"
 	fontSmall = 30
 	fontBig   = 60
+	columnGap = 350
+	rowGap    = 50
 )
 
 var (
@@ -73,20 +75,22 @@ func loadGame(eng *gosge.Engine) error {
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
-	// label pos
-	labelPos := geometry.Point{
+	// element pos
+	pos := geometry.Point{
 		X: 10 * gameScale.Max,
 		Y: 10 * gameScale.Max,
 	}
 
-	// control pos
-	controlPos := geometry.Point{
-		X: labelPos.X + (135 * gameScale.Max),
-		Y: labelPos.Y,
-	}
-
 	// add the flat button
-	addFlatButton(world, gameScale, labelPos, controlPos)
+	addFlatButton(world, gameScale, pos, false)
+	pos.Y += rowGap * gameScale.Max
+	addFlatButton(world, gameScale, pos, true)
+
+	// add the progress bar
+	pos.Y += rowGap * gameScale.Max
+	addProgressBar(world, gameScale, pos, false)
+	pos.Y += rowGap * gameScale.Max
+	addProgressBar(world, gameScale, pos, true)
 
 	// add the bottom text
 	message = world.AddEntity(
@@ -112,11 +116,34 @@ func loadGame(eng *gosge.Engine) error {
 	return nil
 }
 
-func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, controlPos geometry.Point) {
+func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
+	// control pos
+	controlPos := geometry.Point{
+		X: labelPos.X + (columnGap * gameScale.Max),
+		Y: labelPos.Y,
+	}
+
+	text := "FlatButton [Solid]"
+
+	clr := ui.ButtonColor{
+		Solid:  color.SkyBlue,
+		Border: color.White,
+		Text:   color.White,
+	}
+
+	if gradient {
+		clr.Gradient = color.Gradient{
+			From:      color.SkyBlue,
+			To:        color.DarkBlue,
+			Direction: color.GradientHorizontal,
+		}
+		text = "FlatButton [Gradient]"
+	}
+
 	// add a label
 	world.AddEntity(
 		ui.Text{
-			String:     "FlatButton:",
+			String:     text,
 			HAlignment: ui.LeftHAlignment,
 			VAlignment: ui.TopVAlignment,
 			Font:       fontName,
@@ -133,13 +160,9 @@ func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geomet
 				Width:  2 * gameScale.Max,
 				Height: 2 * gameScale.Max,
 			},
-			Event: uiDemoEvent{Message: "flat button click"},
+			Event: uiDemoEvent{Message: text + " clicked"},
 		},
-		ui.ButtonColor{
-			Solid:  color.Red,
-			Border: color.White,
-			Text:   color.White,
-		},
+		clr,
 		ui.Text{
 			String:     "Click Me",
 			HAlignment: ui.CenterHAlignment,
@@ -155,6 +178,66 @@ func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geomet
 			Scale:     gameScale.Max,
 			Thickness: int32(2 * gameScale.Max),
 		},
+		controlPos,
+	)
+}
+
+func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
+	// control pos
+	controlPos := geometry.Point{
+		X: labelPos.X + (columnGap * gameScale.Max),
+		Y: labelPos.Y,
+	}
+
+	text := "ProgressBar [Solid]"
+
+	clr := ui.ProgressBarColor{
+		Solid:  color.SkyBlue,
+		Border: color.White,
+	}
+
+	if gradient {
+		clr.Gradient = color.Gradient{
+			From:      color.SkyBlue,
+			To:        color.DarkBlue,
+			Direction: color.GradientHorizontal,
+		}
+		text = "ProgressBar [Gradient]"
+	}
+
+	// add a label
+	world.AddEntity(
+		ui.Text{
+			String:     text,
+			HAlignment: ui.LeftHAlignment,
+			VAlignment: ui.TopVAlignment,
+			Font:       fontName,
+			Size:       fontSmall * gameScale.Max,
+		},
+		labelPos,
+		color.White,
+	)
+
+	world.AddEntity(
+		ui.ProgressBar{
+			Min:     0,
+			Max:     100,
+			Current: 50,
+			Shadow: geometry.Size{
+				Width:  2 * gameScale.Max,
+				Height: 2 * gameScale.Max,
+			},
+			Event: uiDemoEvent{Message: text + " clicked"},
+		},
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  200 * gameScale.Max,
+				Height: 20 * gameScale.Max,
+			},
+			Scale:     gameScale.Max,
+			Thickness: int32(2 * gameScale.Max),
+		},
+		clr,
 		controlPos,
 	)
 }
