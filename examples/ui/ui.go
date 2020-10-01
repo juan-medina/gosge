@@ -23,10 +23,12 @@
 package main
 
 import (
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge"
 	"github.com/juan-medina/gosge/components/color"
 	"github.com/juan-medina/gosge/components/effects"
 	"github.com/juan-medina/gosge/components/geometry"
+	"github.com/juan-medina/gosge/components/shapes"
 	"github.com/juan-medina/gosge/components/ui"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
@@ -44,12 +46,14 @@ var opt = options.Options{
 
 const (
 	fontName  = "resources/go_regular.fnt"
-	fontSmall = 60
+	fontSmall = 30
+	fontBig   = 60
 )
 
 var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
+	message          *goecs.Entity
 )
 
 func main() {
@@ -59,7 +63,6 @@ func main() {
 }
 
 func loadGame(eng *gosge.Engine) error {
-
 	// Preload font
 	if err := eng.LoadFont(fontName); err != nil {
 		return err
@@ -70,14 +73,29 @@ func loadGame(eng *gosge.Engine) error {
 	// gameScale has a geometry.Scale from the real screen size to our designResolution
 	gameScale := eng.GetScreenSize().CalculateScale(designResolution)
 
+	// label pos
+	labelPos := geometry.Point{
+		X: 10 * gameScale.Max,
+		Y: 10 * gameScale.Max,
+	}
+
+	// control pos
+	controlPos := geometry.Point{
+		X: labelPos.X + (135 * gameScale.Max),
+		Y: labelPos.Y,
+	}
+
+	// add the flat button
+	addFlatButton(world, gameScale, labelPos, controlPos)
+
 	// add the bottom text
-	world.AddEntity(
+	message = world.AddEntity(
 		ui.Text{
 			String:     "press <ESC> to close",
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
-			Size:       fontSmall * gameScale.Max,
+			Size:       fontBig * gameScale.Max,
 		},
 		geometry.Point{
 			X: designResolution.Width / 2 * gameScale.Point.X,
@@ -89,5 +107,68 @@ func loadGame(eng *gosge.Engine) error {
 			To:   color.White.Alpha(0),
 		},
 	)
+
+	world.AddListener(uiEvents)
 	return nil
+}
+
+func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, controlPos geometry.Point) {
+	// add a label
+	world.AddEntity(
+		ui.Text{
+			String:     "FlatButton:",
+			HAlignment: ui.LeftHAlignment,
+			VAlignment: ui.TopVAlignment,
+			Font:       fontName,
+			Size:       fontSmall * gameScale.Max,
+		},
+		labelPos,
+		color.White,
+	)
+
+	// add a control : flat button
+	world.AddEntity(
+		ui.FlatButton{
+			Shadow: geometry.Size{
+				Width:  2 * gameScale.Max,
+				Height: 2 * gameScale.Max,
+			},
+			Event: uiDemoEvent{Message: "flat button click"},
+		},
+		ui.ButtonColor{
+			Solid:  color.Red,
+			Border: color.White,
+			Text:   color.White,
+		},
+		ui.Text{
+			String:     "Click Me",
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.MiddleVAlignment,
+			Font:       fontName,
+			Size:       fontSmall * gameScale.Max,
+		},
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  60 * gameScale.Max,
+				Height: 20 * gameScale.Max,
+			},
+			Scale:     gameScale.Max,
+			Thickness: int32(2 * gameScale.Max),
+		},
+		controlPos,
+	)
+}
+
+func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
+	switch e := signal.(type) {
+	case uiDemoEvent:
+		text := ui.Get.Text(message)
+		text.String = e.Message + ", press <ESC> to close"
+		message.Set(text)
+	}
+	return nil
+}
+
+type uiDemoEvent struct {
+	Message string
 }
