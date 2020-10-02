@@ -1,0 +1,115 @@
+{
+  "frames": [
+    {
+      "filename": "click.png",
+      "frame": {
+        "x": 5,
+        "y": 5,
+        "w": 427,
+        "h": 190
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 427,
+        "h": 190
+      },
+      "sourceSize": {
+        "w": 427,
+        "h": 190
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "locked.png",
+      "frame": {
+        "x": 442,
+        "y": 5,
+        "w": 427,
+        "h": 190
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 427,
+        "h": 190
+      },
+      "sourceSize": {
+        "w": 427,
+        "h": 190
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "normal.png",
+      "frame": {
+        "x": 879,
+        "y": 5,
+        "w": 427,
+        "h": 190
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 427,
+        "h": 190
+      },
+      "sourceSize": {
+        "w": 427,
+        "h": 190
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "hover.png",
+      "frame": {
+        "x": 1316,
+        "y": 5,
+        "w": 426,
+        "h": 190
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 426,
+        "h": 190
+      },
+      "sourceSize": {
+        "w": 426,
+        "h": 190
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.6",
+    "image": "ui.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1747,
+      "h": 200
+    },
+    "scale": 1
+  }
+}

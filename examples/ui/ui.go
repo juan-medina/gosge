@@ -45,17 +45,20 @@ var opt = options.Options{
 }
 
 const (
-	fontName  = "resources/go_regular.fnt"
-	fontSmall = 30
-	fontBig   = 60
-	columnGap = 350
-	rowGap    = 50
+	fontName    = "resources/go_regular.fnt"
+	fontSmall   = 30
+	fontBig     = 60
+	columnGap   = 350
+	rowGap      = 50
+	spriteSheet = "resources/ui.json"
+	spriteScale = 0.25
 )
 
 var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
 	message          *goecs.Entity
+	gEng             *gosge.Engine
 )
 
 func main() {
@@ -65,8 +68,15 @@ func main() {
 }
 
 func loadGame(eng *gosge.Engine) error {
+	gEng = eng
+
 	// Preload font
 	if err := eng.LoadFont(fontName); err != nil {
+		return err
+	}
+
+	// Preload sprite sheet
+	if err := eng.LoadSpriteSheet(spriteSheet); err != nil {
 		return err
 	}
 
@@ -91,6 +101,12 @@ func loadGame(eng *gosge.Engine) error {
 	addProgressBar(world, gameScale, pos, false)
 	pos.Y += rowGap * gameScale.Max
 	addProgressBar(world, gameScale, pos, true)
+
+	// add sprite button
+	pos.Y += rowGap * gameScale.Max
+	if err := addSpriteButton(world, gameScale, pos); err != nil {
+		return err
+	}
 
 	// add the bottom text
 	message = world.AddEntity(
@@ -240,6 +256,47 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 		clr,
 		controlPos,
 	)
+}
+
+func addSpriteButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point) error {
+	text := "SpriteButton"
+
+	// add a label
+	world.AddEntity(
+		ui.Text{
+			String:     text,
+			HAlignment: ui.LeftHAlignment,
+			VAlignment: ui.TopVAlignment,
+			Font:       fontName,
+			Size:       fontSmall * gameScale.Max,
+		},
+		labelPos,
+		color.White,
+	)
+	var err error
+	var size geometry.Size
+	if size, err = gEng.GetSpriteSize(spriteSheet, "normal.png"); err != nil {
+		return err
+	}
+
+	// control pos
+	controlPos := geometry.Point{
+		X: labelPos.X + (columnGap * gameScale.Max) + (size.Width * 0.5 * gameScale.Max * spriteScale),
+		Y: labelPos.Y + (size.Height * 0.5 * gameScale.Max * spriteScale),
+	}
+
+	// add the sprite button
+	world.AddEntity(
+		ui.SpriteButton{
+			Sheet:  spriteSheet,
+			Normal: "normal.png",
+			Hover:  "hover.png",
+			Scale:  gameScale.Max * spriteScale,
+			Event:  uiDemoEvent{Message: text + " clicked"},
+		},
+		controlPos,
+	)
+	return nil
 }
 
 func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {

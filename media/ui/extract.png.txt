@@ -1,0 +1,1 @@
+extract_01.png.png 64 52, extract_02.png.png 521 52, extract_03.png.png 977 52, extract_04.png.png 1433 52.
