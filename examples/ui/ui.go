@@ -23,6 +23,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge"
 	"github.com/juan-medina/gosge/components/color"
@@ -234,17 +235,18 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 		color.White,
 	)
 
-	world.AddEntity(
-		ui.ProgressBar{
-			Min:     0,
-			Max:     100,
-			Current: 50,
-			Shadow: geometry.Size{
-				Width:  2 * gameScale.Max,
-				Height: 2 * gameScale.Max,
-			},
-			Event: uiDemoEvent{Message: text + " clicked"},
+	bar := ui.ProgressBar{
+		Min:     0,
+		Max:     100,
+		Current: 50,
+		Shadow: geometry.Size{
+			Width:  2 * gameScale.Max,
+			Height: 2 * gameScale.Max,
 		},
+	}
+
+	barEnt := world.AddEntity(
+		bar,
 		shapes.Box{
 			Size: geometry.Size{
 				Width:  200 * gameScale.Max,
@@ -256,6 +258,27 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 		clr,
 		controlPos,
 	)
+
+	controlPos.X += 410 * gameScale.Max
+
+	valueEnt := world.AddEntity(
+		ui.Text{
+			String:     "50",
+			Size:       fontSmall * gameScale.Max,
+			Font:       fontName,
+			VAlignment: ui.TopVAlignment,
+			HAlignment: ui.LeftHAlignment,
+		},
+		controlPos,
+		color.White,
+	)
+
+	bar.Event = progressBarEvent{
+		barEnt:   barEnt,
+		valueEnt: valueEnt,
+	}
+
+	barEnt.Set(bar)
 }
 
 func addSpriteButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point) error {
@@ -305,10 +328,20 @@ func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
 		text := ui.Get.Text(message)
 		text.String = e.Message + ", press <ESC> to close"
 		message.Set(text)
+	case progressBarEvent:
+		bar := ui.Get.ProgressBar(e.barEnt)
+		text := ui.Get.Text(e.valueEnt)
+		text.String = fmt.Sprintf("%d", int(bar.Current))
+		e.valueEnt.Set(text)
 	}
 	return nil
 }
 
 type uiDemoEvent struct {
 	Message string
+}
+
+type progressBarEvent struct {
+	barEnt   *goecs.Entity
+	valueEnt *goecs.Entity
 }
