@@ -190,12 +190,13 @@ func loadGame(eng *gosge.Engine) error {
 	// add the play button
 	playButton = world.AddEntity(
 		ui.SpriteButton{
-			Sheet:  spriteSheet,
-			Normal: playButtonNormalSprite,
-			Hover:  playButtonHoverSprite,
-			Scale:  gameScale.Max * spriteScale,
-			Sound:  clickSound,
-			Volume: soundVolume,
+			Sheet:   spriteSheet,
+			Normal:  playButtonNormalSprite,
+			Hover:   playButtonHoverSprite,
+			Clicked: playButtonNormalSprite,
+			Scale:   gameScale.Max * spriteScale,
+			Sound:   clickSound,
+			Volume:  soundVolume,
 			Event: events.PlayMusicEvent{ // on click send a event to play the music
 				Name:   musicFile,
 				Volume: musicVolume,
@@ -211,12 +212,13 @@ func loadGame(eng *gosge.Engine) error {
 	// add the stop button
 	stopButton = world.AddEntity(
 		ui.SpriteButton{
-			Sheet:  spriteSheet,
-			Normal: stopButtonNormalSprite,
-			Hover:  stopButtonHoverSprite,
-			Scale:  gameScale.Max * spriteScale,
-			Sound:  clickSound,
-			Volume: soundVolume,
+			Sheet:   spriteSheet,
+			Normal:  stopButtonNormalSprite,
+			Hover:   stopButtonHoverSprite,
+			Clicked: stopButtonNormalSprite,
+			Scale:   gameScale.Max * spriteScale,
+			Sound:   clickSound,
+			Volume:  soundVolume,
 			Event: events.StopMusicEvent{ // on click send a event to stop the music
 				Name: musicFile,
 			},
@@ -503,6 +505,7 @@ func musicStateListener(_ *goecs.World, event interface{}, _ float32) error {
 			// update the play button hover and normal sprites pause sprites
 			sb.Normal = pauseButtonNormalSprite
 			sb.Hover = pauseButtonHoverSprite
+			sb.Clicked = pauseButtonNormalSprite
 			sb.Event = events.PauseMusicEvent{ // on click send an event to pause the music
 				Name: e.Name,
 			}
@@ -514,6 +517,7 @@ func musicStateListener(_ *goecs.World, event interface{}, _ float32) error {
 			// update the play button hover and normal sprites with play sprites
 			sb.Normal = playButtonNormalSprite
 			sb.Hover = playButtonHoverSprite
+			sb.Clicked = playButtonNormalSprite
 			sb.Event = events.PlayMusicEvent{ // on click send a event to play the music
 				Name:   e.Name,
 				Volume: musicVolume,
@@ -525,6 +529,7 @@ func musicStateListener(_ *goecs.World, event interface{}, _ float32) error {
 			// update the play button hover an normal sprites with play sprites
 			sb.Normal = playButtonNormalSprite
 			sb.Hover = playButtonHoverSprite
+			sb.Clicked = playButtonNormalSprite
 			sb.Event = events.ResumeMusicEvent{
 				Name: e.Name,
 			}

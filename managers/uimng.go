@@ -66,6 +66,9 @@ func (uim *uiManager) Listener(world *goecs.World, event interface{}, _ float32)
 		if err := uim.progressBarsMouseDown(world, v); err != nil {
 			return err
 		}
+		if err := uim.spriteButtonsMouseDown(world, v); err != nil {
+			return err
+		}
 	case events.MouseUpEvent:
 		if err := uim.flatButtonsMouseUp(world, v); err != nil {
 			return err
@@ -356,37 +359,42 @@ func (uim uiManager) spriteButtons(world *goecs.World) {
 				Scale: sb.Scale,
 			}
 			ent.Set(spr)
-		} else {
-			spr := sprite.Get(ent)
-			// if the sprite button has change
-			if !(spr.Name == sb.Normal || spr.Name == sb.Hover) {
-				uim.refreshButtonOnPoint(ent, uim.dm.GetMousePoint())
-			}
 		}
 	}
 }
 
-func (uim uiManager) refreshButtonOnPoint(ent *goecs.Entity, pnt geometry.Point) {
+func (uim uiManager) refreshSpriteButton(ent *goecs.Entity) {
 	spr := sprite.Get(ent)
-	pos := geometry.Get.Point(ent)
 	sbn := ui.Get.SpriteButton(ent)
 
-	if uim.cm.SpriteAtContains(spr, pos, pnt) {
+	if sbn.State.Clicked {
+		spr.Name = sbn.Clicked
+	} else if sbn.State.Hover {
 		spr.Name = sbn.Hover
 	} else {
 		spr.Name = sbn.Normal
 	}
+
+	ent.Set(sbn)
 	ent.Set(spr)
 }
 
-func (uim uiManager) spriteButtonsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
+func (uim *uiManager) spriteButtonsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
+	if uim.clicked != nil {
+		return
+	}
 	for it := world.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
-		uim.refreshButtonOnPoint(ent, mme.Point)
+		pos := geometry.Get.Point(ent)
+		sbn := ui.Get.SpriteButton(ent)
+		spr := sprite.Get(ent)
+		sbn.State.Hover = uim.cm.SpriteAtContains(spr, pos, mme.Point)
+		ent.Set(sbn)
+		uim.refreshSpriteButton(ent)
 	}
 }
 
-func (uim uiManager) spriteButtonsMouseUp(world *goecs.World, mue events.MouseUpEvent) error {
+func (uim *uiManager) spriteButtonsMouseDown(world *goecs.World, mde events.MouseDownEvent) error {
 	for it := world.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
 		if ent.Contains(effects.TYPE.Hide) {
@@ -396,7 +404,28 @@ func (uim uiManager) spriteButtonsMouseUp(world *goecs.World, mue events.MouseUp
 		pos := geometry.Get.Point(ent)
 		sbn := ui.Get.SpriteButton(ent)
 
-		if uim.cm.SpriteAtContains(spr, pos, mue.Point) {
+		if uim.cm.SpriteAtContains(spr, pos, mde.Point) {
+			uim.clicked = ent
+			sbn.State.Clicked = true
+			ent.Set(sbn)
+			uim.refreshSpriteButton(ent)
+		}
+	}
+	return nil
+}
+
+func (uim *uiManager) spriteButtonsMouseUp(world *goecs.World, _ events.MouseUpEvent) error {
+	for it := world.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
+		ent := it.Value()
+		if ent.Contains(effects.TYPE.Hide) {
+			continue
+		}
+		sbn := ui.Get.SpriteButton(ent)
+		if sbn.State.Clicked {
+			uim.clicked = nil
+			sbn.State.Clicked = false
+			ent.Set(sbn)
+			uim.refreshSpriteButton(ent)
 			if sbn.Sound != "" {
 				if err := world.Signal(events.PlaySoundEvent{Name: sbn.Sound, Volume: sbn.Volume}); err != nil {
 					return err

@@ -342,11 +342,12 @@ func addSpriteButton(world *goecs.World, gameScale geometry.Scale, labelPos geom
 	// add the sprite button
 	world.AddEntity(
 		ui.SpriteButton{
-			Sheet:  spriteSheet,
-			Normal: "normal.png",
-			Hover:  "hover.png",
-			Scale:  gameScale.Max * spriteScale,
-			Event:  uiDemoEvent{Message: text + " clicked"},
+			Sheet:   spriteSheet,
+			Normal:  "normal.png",
+			Hover:   "hover.png",
+			Clicked: "click.png",
+			Scale:   gameScale.Max * spriteScale,
+			Event:   uiDemoEvent{Message: text + " clicked"},
 		},
 		controlPos,
 	)

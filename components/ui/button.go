@@ -53,11 +53,13 @@ type FlatButton struct {
 
 // SpriteButton is a UI element for displaying a image base button
 type SpriteButton struct {
-	Sheet  string      // Sheet is the Sprite sheet
-	Normal string      // Normal is the sprite on normal state
-	Hover  string      // Hover is the  sprite on hover state
-	Scale  float32     // Scale is the Sprite scale
-	Sound  string      // Sound is the click sound
-	Volume float32     // Volume is the volume for click Sound
-	Event  interface{} // Event is the event that will be trigger when this button is click
+	Sheet   string       // Sheet is the Sprite sheet
+	Normal  string       // Normal is the sprite on normal state
+	Hover   string       // Hover is the sprite on hover state
+	Clicked string       // Clicked is the sprite on clicked state
+	State   ControlState // State is the ui.SpriteButton ui.ControlState
+	Scale   float32      // Scale is the Sprite scale
+	Sound   string       // Sound is the click sound
+	Volume  float32      // Volume is the volume for click Sound
+	Event   interface{}  // Event is the event that will be trigger when this button is click
 }

@@ -157,12 +157,13 @@ func mainStage(eng *gosge.Engine) error {
 
 	world.AddEntity(
 		ui.SpriteButton{
-			Sheet:  spriteSheetName,
-			Normal: buttonExitNormalSprite,
-			Hover:  buttonExitHoverSprite,
-			Scale:  gameScale.Max * spriteScale,
-			Sound:  clickSound,
-			Volume: 1,
+			Sheet:   spriteSheetName,
+			Normal:  buttonExitNormalSprite,
+			Hover:   buttonExitHoverSprite,
+			Clicked: buttonExitNormalSprite,
+			Scale:   gameScale.Max * spriteScale,
+			Sound:   clickSound,
+			Volume:  1,
 			Event: events.DelaySignal{
 				Signal: events.ChangeGameStage{Stage: "menu"},
 				Time:   0.15,
