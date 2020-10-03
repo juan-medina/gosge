@@ -194,6 +194,9 @@ func (uim *uiManager) flatButtonsMouseUp(world *goecs.World, _ events.MouseUpEve
 		}
 		btn := ui.Get.FlatButton(ent)
 		if btn.State.Clicked {
+			if btn.CheckBox {
+				btn.State.Checked = !btn.State.Checked
+			}
 			btn.State.Clicked = false
 			if btn.Sound != "" {
 				if err := world.Signal(events.PlaySoundEvent{Name: btn.Sound, Volume: btn.Volume}); err != nil {

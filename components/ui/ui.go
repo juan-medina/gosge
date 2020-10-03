@@ -33,6 +33,7 @@ type ControlState struct {
 	Hover    bool
 	Clicked  bool
 	Disabled bool
+	Checked  bool
 }
 
 type types struct {

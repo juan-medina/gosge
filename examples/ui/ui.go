@@ -100,6 +100,12 @@ func loadGame(eng *gosge.Engine) error {
 	pos.Y += rowGap * gameScale.Max
 	addFlatButton(world, gameScale, pos, true)
 
+	// add check boxes
+	pos.Y += rowGap * gameScale.Max
+	addCheckBox(world, gameScale, pos, false)
+	pos.Y += rowGap * gameScale.Max
+	addCheckBox(world, gameScale, pos, true)
+
 	// add the progress bar
 	pos.Y += rowGap * gameScale.Max
 	addProgressBar(world, gameScale, pos, false)
@@ -186,6 +192,96 @@ func hideUnhide(world *goecs.World) {
 			}
 		}
 	}
+}
+
+func addCheckBox(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
+	// control pos
+	controlPos := geometry.Point{
+		X: labelPos.X + (columnGap * gameScale.Max),
+		Y: labelPos.Y,
+	}
+
+	text := "Check [Solid]"
+
+	clr := ui.ButtonColor{
+		Solid:  color.SkyBlue,
+		Border: color.White,
+		Text:   color.White,
+	}
+
+	if gradient {
+		clr.Gradient = color.Gradient{
+			From:      color.SkyBlue,
+			To:        color.DarkBlue,
+			Direction: color.GradientHorizontal,
+		}
+		text = "Check [Gradient]"
+	}
+
+	// add a label
+	world.AddEntity(
+		ui.Text{
+			String:     text,
+			HAlignment: ui.LeftHAlignment,
+			VAlignment: ui.TopVAlignment,
+			Font:       fontName,
+			Size:       fontSmall * gameScale.Max,
+		},
+		labelPos,
+		color.White,
+	)
+
+	check := ui.FlatButton{
+		Shadow: geometry.Size{
+			Width:  2 * gameScale.Max,
+			Height: 2 * gameScale.Max,
+		},
+		CheckBox: true,
+	}
+
+	// add a control : flat button with checkbox
+	checkEnt := world.AddEntity(
+		check,
+		clr,
+		ui.Text{
+			String:     "   Check",
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.MiddleVAlignment,
+			Font:       fontName,
+			Size:       fontSmall * gameScale.Max,
+		},
+		shapes.Box{
+			Size: geometry.Size{
+				Width:  70 * gameScale.Max,
+				Height: 20 * gameScale.Max,
+			},
+			Scale:     gameScale.Max,
+			Thickness: int32(2 * gameScale.Max),
+		},
+		controlPos,
+	)
+
+	controlPos.X += 410 * gameScale.Max
+
+	valueEnt := world.AddEntity(
+		ui.Text{
+			String:     "Not checked",
+			Size:       fontSmall * gameScale.Max,
+			Font:       fontName,
+			VAlignment: ui.TopVAlignment,
+			HAlignment: ui.LeftHAlignment,
+		},
+		controlPos,
+		color.White,
+	)
+
+	check.Event = checkBoxEvent{
+		checkEnt: checkEnt,
+		valueEnt: valueEnt,
+		Message:  text + " clicked",
+	}
+
+	checkEnt.Set(check)
 }
 
 func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
@@ -332,6 +428,7 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 	bar.Event = progressBarEvent{
 		barEnt:   barEnt,
 		valueEnt: valueEnt,
+		Message:  text + " clicked",
 	}
 
 	barEnt.Set(bar)
@@ -388,9 +485,24 @@ func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
 		message.Set(text)
 	case progressBarEvent:
 		bar := ui.Get.ProgressBar(e.barEnt)
-		text := ui.Get.Text(e.valueEnt)
-		text.String = fmt.Sprintf("%d", int(bar.Current))
-		e.valueEnt.Set(text)
+		label := ui.Get.Text(e.valueEnt)
+		label.String = fmt.Sprintf("%d", int(bar.Current))
+		e.valueEnt.Set(label)
+		text := ui.Get.Text(message)
+		text.String = e.Message + ", " + hint
+		message.Set(text)
+	case checkBoxEvent:
+		check := ui.Get.FlatButton(e.checkEnt)
+		label := ui.Get.Text(e.valueEnt)
+		if check.State.Checked {
+			label.String = "Checked"
+		} else {
+			label.String = "Not checked"
+		}
+		e.valueEnt.Set(label)
+		text := ui.Get.Text(message)
+		text.String = e.Message + ", " + hint
+		message.Set(text)
 	}
 	return nil
 }
@@ -400,6 +512,13 @@ type uiDemoEvent struct {
 }
 
 type progressBarEvent struct {
+	Message  string
 	barEnt   *goecs.Entity
+	valueEnt *goecs.Entity
+}
+
+type checkBoxEvent struct {
+	Message  string
+	checkEnt *goecs.Entity
 	valueEnt *goecs.Entity
 }

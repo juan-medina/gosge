@@ -116,11 +116,38 @@ func (rdm renderingManager) renderFlatButton(ent *goecs.Entity) error {
 		rdm.dm.DrawSolidBox(shadowPos, sb, sc)
 	}
 
-	// draw border
+	// draw background
 	if clr.Gradient.From.Equals(clr.Gradient.To) {
 		rdm.dm.DrawSolidBox(pos, sb, clr.Solid)
 	} else {
 		rdm.dm.DrawGradientBox(pos, sb, clr.Gradient)
+	}
+
+	// draw check box if it has one
+	if fb.CheckBox {
+		checkSize := geometry.Size{
+			Height: box.Size.Height * 0.6,
+			Width:  box.Size.Height * 0.6,
+		}
+		checkPos := geometry.Point{
+			X: pos.X + (box.Size.Height - (checkSize.Height)),
+			Y: pos.Y + (box.Size.Height - (checkSize.Height)),
+		}
+
+		if fb.State.Checked {
+			checkBox := shapes.SolidBox{
+				Size:  checkSize,
+				Scale: box.Scale,
+			}
+			rdm.dm.DrawSolidBox(checkPos, checkBox, clr.Border)
+		} else {
+			checkBox := shapes.Box{
+				Size:      checkSize,
+				Scale:     box.Scale,
+				Thickness: box.Thickness,
+			}
+			rdm.dm.DrawBox(checkPos, checkBox, clr.Border)
+		}
 	}
 
 	// if contains a text component
