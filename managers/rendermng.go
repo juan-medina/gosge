@@ -224,7 +224,7 @@ func (rdm renderingManager) renderText(v *goecs.Entity) error {
 }
 
 func (rdm renderingManager) isRenderable(ent *goecs.Entity) bool {
-	return ent.Contains(geometry.TYPE.Point) &&
+	return ent.Contains(geometry.TYPE.Point) && ent.NotContains(effects.TYPE.Hide) &&
 		(ent.Contains(sprite.TYPE) || ent.Contains(ui.TYPE.Text) || ent.Contains(shapes.TYPE.Box) ||
 			ent.Contains(shapes.TYPE.SolidBox) || ent.Contains(ui.TYPE.FlatButton) ||
 			ent.Contains(ui.TYPE.ProgressBar) || ent.Contains(shapes.TYPE.Line))

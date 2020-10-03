@@ -25,6 +25,7 @@ package managers
 import (
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/effects"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/shapes"
 	"github.com/juan-medina/gosge/components/sprite"
@@ -117,6 +118,9 @@ func (uim uiManager) flatButtonsMouseMove(world *goecs.World, mme events.MouseMo
 func (uim uiManager) flatButtonsMouseUp(world *goecs.World, mue events.MouseUpEvent) error {
 	for it := world.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
+		if ent.Contains(effects.TYPE.Hide) {
+			continue
+		}
 		btn := ui.Get.FlatButton(ent)
 		pos := geometry.Get.Point(ent)
 		box := shapes.Get.Box(ent)
@@ -183,6 +187,9 @@ func (uim uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUpE
 	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
+		if ent.Contains(effects.TYPE.Hide) {
+			continue
+		}
 		bar := ui.Get.ProgressBar(ent)
 
 		pos := geometry.Get.Point(ent)
@@ -255,6 +262,9 @@ func (uim uiManager) spriteButtonsMouseMove(world *goecs.World, mme events.Mouse
 func (uim uiManager) spriteButtonsMouseUp(world *goecs.World, mue events.MouseUpEvent) error {
 	for it := world.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
+		if ent.Contains(effects.TYPE.Hide) {
+			continue
+		}
 		spr := sprite.Get(ent)
 		pos := geometry.Get.Point(ent)
 		sbn := ui.Get.SpriteButton(ent)

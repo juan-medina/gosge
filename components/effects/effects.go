@@ -50,6 +50,9 @@ type Layer struct {
 	Depth float32 // Depth is the screen depth for this effects.Layer
 }
 
+// Hide indicates that this entity should be not draw
+type Hide struct{}
+
 type types struct {
 	// AlternateColorState is the reflect.Type for effects.AlternateColorState
 	AlternateColorState reflect.Type
@@ -57,6 +60,8 @@ type types struct {
 	AlternateColor reflect.Type
 	// Layer is the reflect.Type for effects.Layer
 	Layer reflect.Type
+	// Hide is the reflect.Type for effects.Hide
+	Hide reflect.Type
 }
 
 // TYPE hold the reflect.Type for our effects components
@@ -64,6 +69,7 @@ var TYPE = types{
 	AlternateColorState: reflect.TypeOf(AlternateColorState{}),
 	AlternateColor:      reflect.TypeOf(AlternateColor{}),
 	Layer:               reflect.TypeOf(Layer{}),
+	Hide:                reflect.TypeOf(Hide{}),
 }
 
 type gets struct {
@@ -73,6 +79,8 @@ type gets struct {
 	AlternateColor func(e *goecs.Entity) AlternateColor
 	// Layer gets a Layer from a goecs.Entity
 	Layer func(e *goecs.Entity) Layer
+	// Hide gets a Hide from a goecs.Entity
+	Hide func(e *goecs.Entity) Hide
 }
 
 // Get effect component
@@ -88,5 +96,9 @@ var Get = gets{
 	// Layer gets a Layer from a goecs.Entity
 	Layer: func(e *goecs.Entity) Layer {
 		return e.Get(TYPE.Layer).(Layer)
+	},
+	// HIde gets a Hide from a goecs.Entity
+	Hide: func(e *goecs.Entity) Hide {
+		return e.Get(TYPE.Hide).(Hide)
 	},
 }

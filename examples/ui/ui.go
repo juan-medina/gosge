@@ -27,10 +27,12 @@ import (
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge"
 	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/effects"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/shapes"
 	"github.com/juan-medina/gosge/components/ui"
+	"github.com/juan-medina/gosge/events"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
 )
@@ -48,11 +50,12 @@ var opt = options.Options{
 const (
 	fontName    = "resources/go_regular.fnt"
 	fontSmall   = 30
-	fontBig     = 60
+	fontBig     = 50
 	columnGap   = 350
 	rowGap      = 50
 	spriteSheet = "resources/ui.json"
 	spriteScale = 0.25
+	hint        = "press <SPACE> to hide all, <ESC> to close"
 )
 
 var (
@@ -112,7 +115,7 @@ func loadGame(eng *gosge.Engine) error {
 	// add the bottom text
 	message = world.AddEntity(
 		ui.Text{
-			String:     "press <ESC> to close",
+			String:     hint,
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
 			Font:       fontName,
@@ -129,8 +132,36 @@ func loadGame(eng *gosge.Engine) error {
 		},
 	)
 
+	// listen tu ui events
 	world.AddListener(uiEvents)
+
+	// listen to keys
+	world.AddListener(keyEvents)
+
 	return nil
+}
+
+func keyEvents(world *goecs.World, signal interface{}, _ float32) error {
+	switch e := signal.(type) {
+	case events.KeyUpEvent:
+		if e.Key == device.KeySpace {
+			hideUnhide(world)
+		}
+	}
+	return nil
+}
+
+func hideUnhide(world *goecs.World) {
+	for it := world.Iterator(geometry.TYPE.Point); it != nil; it = it.Next() {
+		ent := it.Value()
+		if ent.ID() != message.ID() {
+			if ent.Contains(effects.TYPE.Hide) {
+				ent.Remove(effects.TYPE.Hide)
+			} else {
+				ent.Add(effects.Hide{})
+			}
+		}
+	}
 }
 
 func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
@@ -326,7 +357,7 @@ func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
 	switch e := signal.(type) {
 	case uiDemoEvent:
 		text := ui.Get.Text(message)
-		text.String = e.Message + ", press <ESC> to close"
+		text.String = e.Message + ", " + hint
 		message.Set(text)
 	case progressBarEvent:
 		bar := ui.Get.ProgressBar(e.barEnt)
