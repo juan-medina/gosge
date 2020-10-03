@@ -35,6 +35,7 @@ import (
 	"github.com/juan-medina/gosge/events"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
+	"strconv"
 )
 
 var opt = options.Options{
@@ -49,9 +50,10 @@ var opt = options.Options{
 
 const (
 	fontName    = "resources/go_regular.fnt"
-	fontSmall   = 30
+	fontSmall   = 25
 	fontBig     = 40
 	columnGap   = 350
+	finalColumn = 900
 	rowGap      = 50
 	spriteSheet = "resources/ui.json"
 	spriteScale = 0.25
@@ -105,6 +107,12 @@ func loadGame(eng *gosge.Engine) error {
 	addCheckBox(world, gameScale, pos, false)
 	pos.Y += rowGap * gameScale.Max
 	addCheckBox(world, gameScale, pos, true)
+
+	// add option group
+	pos.Y += rowGap * gameScale.Max
+	addOptionGroup(world, gameScale, pos, false)
+	pos.Y += rowGap * gameScale.Max
+	addOptionGroup(world, gameScale, pos, true)
 
 	// add the progress bar
 	pos.Y += rowGap * gameScale.Max
@@ -194,6 +202,109 @@ func hideUnhide(world *goecs.World) {
 	}
 }
 
+func addOptionGroup(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
+	// control pos
+	controlPos := geometry.Point{
+		X: labelPos.X + (columnGap * gameScale.Max),
+		Y: labelPos.Y,
+	}
+
+	text := "Group [Solid]"
+	group := "A"
+
+	clr := ui.ButtonColor{
+		Solid:  color.SkyBlue,
+		Border: color.White,
+		Text:   color.White,
+	}
+
+	if gradient {
+		clr.Gradient = color.Gradient{
+			From:      color.SkyBlue,
+			To:        color.DarkBlue,
+			Direction: color.GradientHorizontal,
+		}
+		text = "Group [Gradient]"
+		group = "B"
+	}
+
+	// add a label
+	world.AddEntity(
+		ui.Text{
+			String:     text,
+			HAlignment: ui.LeftHAlignment,
+			VAlignment: ui.TopVAlignment,
+			Font:       fontName,
+			Size:       fontSmall * gameScale.Max,
+		},
+		labelPos,
+		color.White,
+	)
+
+	valuePos := geometry.Point{
+		X: finalColumn * gameScale.Max,
+		Y: controlPos.Y,
+	}
+
+	valueEnt := world.AddEntity(
+		ui.Text{
+			String:     group + " 1",
+			Size:       fontSmall * gameScale.Max,
+			Font:       fontName,
+			VAlignment: ui.TopVAlignment,
+			HAlignment: ui.LeftHAlignment,
+		},
+		valuePos,
+		color.White,
+	)
+
+	for c := 0; c < 3; c++ {
+		checked := c == 0
+		check := ui.FlatButton{
+			Shadow: geometry.Size{
+				Width:  2 * gameScale.Max,
+				Height: 2 * gameScale.Max,
+			},
+			CheckBox: true,
+			State: ui.ControlState{
+				Checked: checked,
+			},
+			Group: group,
+		}
+
+		// add a control : flat button with checkbox
+		checkEnt := world.AddEntity(
+			check,
+			clr,
+			ui.Text{
+				String:     "   " + group + "  " + strconv.Itoa(c+1),
+				HAlignment: ui.CenterHAlignment,
+				VAlignment: ui.MiddleVAlignment,
+				Font:       fontName,
+				Size:       fontSmall * gameScale.Max,
+			},
+			shapes.Box{
+				Size: geometry.Size{
+					Width:  70 * gameScale.Max,
+					Height: 20 * gameScale.Max,
+				},
+				Scale:     gameScale.Max,
+				Thickness: int32(2 * gameScale.Max),
+			},
+			controlPos,
+		)
+
+		check.Event = optionEvent{
+			valueEnt: valueEnt,
+			Message:  text + " clicked",
+			value:    group + " " + strconv.Itoa(c+1),
+		}
+
+		checkEnt.Set(check)
+		controlPos.X += 150 * gameScale.Max
+	}
+}
+
 func addCheckBox(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
 	// control pos
 	controlPos := geometry.Point{
@@ -261,7 +372,7 @@ func addCheckBox(world *goecs.World, gameScale geometry.Scale, labelPos geometry
 		controlPos,
 	)
 
-	controlPos.X += 410 * gameScale.Max
+	controlPos.X = finalColumn * gameScale.Max
 
 	valueEnt := world.AddEntity(
 		ui.Text{
@@ -340,7 +451,7 @@ func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geomet
 		},
 		shapes.Box{
 			Size: geometry.Size{
-				Width:  60 * gameScale.Max,
+				Width:  70 * gameScale.Max,
 				Height: 20 * gameScale.Max,
 			},
 			Scale:     gameScale.Max,
@@ -401,7 +512,7 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 		bar,
 		shapes.Box{
 			Size: geometry.Size{
-				Width:  200 * gameScale.Max,
+				Width:  220 * gameScale.Max,
 				Height: 20 * gameScale.Max,
 			},
 			Scale:     gameScale.Max,
@@ -411,7 +522,7 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 		controlPos,
 	)
 
-	controlPos.X += 410 * gameScale.Max
+	controlPos.X = finalColumn * gameScale.Max
 
 	valueEnt := world.AddEntity(
 		ui.Text{
@@ -503,6 +614,14 @@ func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
 		text := ui.Get.Text(message)
 		text.String = e.Message + ", " + hint
 		message.Set(text)
+	case optionEvent:
+		label := ui.Get.Text(e.valueEnt)
+		label.String = e.value
+
+		e.valueEnt.Set(label)
+		text := ui.Get.Text(message)
+		text.String = e.Message + ", " + hint
+		message.Set(text)
 	}
 	return nil
 }
@@ -520,5 +639,11 @@ type progressBarEvent struct {
 type checkBoxEvent struct {
 	Message  string
 	checkEnt *goecs.Entity
+	valueEnt *goecs.Entity
+}
+
+type optionEvent struct {
+	Message  string
+	value    string
 	valueEnt *goecs.Entity
 }

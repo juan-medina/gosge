@@ -48,6 +48,7 @@ type FlatButton struct {
 	Shadow   geometry.Size // Shadow is the offset of the shadow on the ui.FlatButton
 	State    ControlState  // State is this ui.FlatButton ui.ControlState
 	CheckBox bool          // CheckBox indicates if this is a checkbox
+	Group    string        // Group indicates if this has a option group
 	Sound    string        // Sound is the click sound
 	Volume   float32       // Volume is the volume for click Sound
 	Event    interface{}   // Event is the event that will be trigger when this button is click

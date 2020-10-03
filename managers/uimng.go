@@ -194,24 +194,51 @@ func (uim *uiManager) flatButtonsMouseUp(world *goecs.World, _ events.MouseUpEve
 		}
 		btn := ui.Get.FlatButton(ent)
 		if btn.State.Clicked {
+			trigger := true
 			if btn.CheckBox {
-				btn.State.Checked = !btn.State.Checked
+				if btn.Group == "" {
+					btn.State.Checked = !btn.State.Checked
+				} else {
+					if !btn.State.Checked {
+						uim.uncheckGroup(world, btn.Group)
+						btn.State.Checked = true
+					} else {
+						trigger = false
+					}
+				}
 			}
 			btn.State.Clicked = false
-			if btn.Sound != "" {
-				if err := world.Signal(events.PlaySoundEvent{Name: btn.Sound, Volume: btn.Volume}); err != nil {
+			if trigger {
+				if btn.Sound != "" {
+					if err := world.Signal(events.PlaySoundEvent{Name: btn.Sound, Volume: btn.Volume}); err != nil {
+						return err
+					}
+				}
+				if err := world.Signal(btn.Event); err != nil {
 					return err
 				}
 			}
-			if err := world.Signal(btn.Event); err != nil {
-				return err
-			}
+
 			uim.clicked = nil
 		}
 		uim.flatButtonsColors(ent, btn)
 		ent.Set(btn)
 	}
 	return nil
+}
+
+func (uim *uiManager) uncheckGroup(world *goecs.World, group string) {
+	for it := world.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
+		ent := it.Value()
+		if ent.Contains(effects.TYPE.Hide) {
+			continue
+		}
+		btn := ui.Get.FlatButton(ent)
+		if btn.Group == group {
+			btn.State.Checked = false
+			ent.Set(btn)
+		}
+	}
 }
 
 func (uim uiManager) progressBars(world *goecs.World) {

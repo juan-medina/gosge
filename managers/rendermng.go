@@ -129,9 +129,14 @@ func (rdm renderingManager) renderFlatButton(ent *goecs.Entity) error {
 			Height: box.Size.Height * 0.6,
 			Width:  box.Size.Height * 0.6,
 		}
+
+		gap := box.Size.Height / 2
+		gap -= checkSize.Height / 2
+		gap *= box.Scale
+
 		checkPos := geometry.Point{
-			X: pos.X + (box.Size.Height - (checkSize.Height)),
-			Y: pos.Y + (box.Size.Height - (checkSize.Height)),
+			X: pos.X + gap,
+			Y: pos.Y + gap,
 		}
 
 		if fb.State.Checked {
