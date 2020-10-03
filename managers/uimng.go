@@ -55,10 +55,15 @@ func (uim *uiManager) Listener(world *goecs.World, event interface{}, _ float32)
 	switch v := event.(type) {
 	case events.MouseMoveEvent:
 		uim.flatButtonsMouseMove(world, v)
-		uim.progressBarsMouseMove(world, v)
+		if err := uim.progressBarsMouseMove(world, v); err != nil {
+			return err
+		}
 		uim.spriteButtonsMouseMove(world, v)
 	case events.MouseDownEvent:
 		if err := uim.flatButtonsMouseDown(world, v); err != nil {
+			return err
+		}
+		if err := uim.progressBarsMouseDown(world, v); err != nil {
 			return err
 		}
 	case events.MouseUpEvent:
@@ -192,46 +197,71 @@ func (uim uiManager) progressBars(world *goecs.World) {
 			clr := ui.Get.ProgressBarColor(ent)
 			phc := ui.ProgressBarHoverColor{}
 
-			phc.Hover.Empty = clr.Empty
-			phc.Hover.Border = clr.Border
+			phc.Hover.Empty = clr.Empty.Blend(color.Black, hoverColorDarkenFactor)
+			phc.Hover.Border = clr.Border.Blend(color.Black, hoverColorDarkenFactor)
 			phc.Normal.Empty = clr.Empty.Blend(color.Black, normalColorDarkenFactor)
 			phc.Normal.Border = clr.Border.Blend(color.Black, normalColorDarkenFactor)
+			phc.Clicked.Empty = clr.Empty
+			phc.Clicked.Border = clr.Border
 
 			if clr.Gradient.From.Equals(clr.Gradient.To) {
-				phc.Hover.Solid = clr.Solid
+				phc.Hover.Solid = clr.Solid.Blend(color.Black, hoverColorDarkenFactor)
 				phc.Normal.Solid = clr.Solid.Blend(color.Black, normalColorDarkenFactor)
+				phc.Clicked.Solid = clr.Solid
 			} else {
-				phc.Hover.Gradient = clr.Gradient
+				phc.Hover.Gradient = color.Gradient{
+					From:      clr.Gradient.From.Blend(color.Black, hoverColorDarkenFactor),
+					To:        clr.Gradient.To.Blend(color.Black, hoverColorDarkenFactor),
+					Direction: clr.Gradient.Direction,
+				}
 				phc.Normal.Gradient = color.Gradient{
 					From:      clr.Gradient.From.Blend(color.Black, normalColorDarkenFactor),
 					To:        clr.Gradient.To.Blend(color.Black, normalColorDarkenFactor),
 					Direction: clr.Gradient.Direction,
 				}
+				phc.Clicked.Gradient = clr.Gradient
 			}
 			ent.Set(phc)
 		}
 	}
 }
 
-func (uim uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
+func (uim uiManager) progressBarsColors(ent *goecs.Entity, bar ui.ProgressBar) {
+	bcl := ui.Get.ProgressBarHoverColor(ent)
+	if bar.State.Clicked {
+		ent.Set(bcl.Clicked)
+	} else if bar.State.Hover {
+		ent.Set(bcl.Hover)
+	} else {
+		ent.Set(bcl.Normal)
+	}
+}
+
+func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseMoveEvent) error {
+	if uim.clicked != nil {
+		if uim.clicked.Contains(ui.TYPE.ProgressBar) {
+			if err := uim.calculateBarCurrent(world, uim.clicked, mme.Point); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		bar := ui.Get.ProgressBar(ent)
 		if bar.Event != nil {
-			bcl := ui.Get.ProgressBarHoverColor(ent)
 			pos := geometry.Get.Point(ent)
 			box := shapes.Get.Box(ent)
-			if box.Contains(pos, mme.Point) {
-				ent.Set(bcl.Hover)
-			} else {
-				ent.Set(bcl.Normal)
-			}
+			bar.State.Hover = box.Contains(pos, mme.Point)
+			uim.progressBarsColors(ent, bar)
+			ent.Set(bar)
 		}
 	}
+	return nil
 }
 
-func (uim uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUpEvent) error {
+func (uim *uiManager) progressBarsMouseDown(world *goecs.World, mde events.MouseDownEvent) error {
 	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
@@ -242,24 +272,73 @@ func (uim uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUpE
 
 		pos := geometry.Get.Point(ent)
 		box := shapes.Get.Box(ent)
-
-		if box.Contains(pos, mue.Point) {
-			total := box.Size.Width * box.Scale
-			max := pos.X + total
-			cur := max - mue.Point.X
-			per := 1 - (cur / total)
-
-			diff := bar.Max - bar.Min
-			bar.Current = diff * per
+		if box.Contains(pos, mde.Point) {
+			bar.State.Clicked = true
+			uim.clicked = ent
+			uim.progressBarsColors(ent, bar)
 			ent.Set(bar)
+		}
+	}
+	return nil
+}
+
+func (uim uiManager) calculateBarCurrent(world *goecs.World, ent *goecs.Entity, mouse geometry.Point) error {
+	bar := ui.Get.ProgressBar(ent)
+	previous := bar.Current
+	pos := geometry.Get.Point(ent)
+	box := shapes.Get.Box(ent)
+
+	total := box.Size.Width * box.Scale
+	max := pos.X + total
+	cur := max - mouse.X
+	per := 1 - (cur / total)
+
+	diff := bar.Max - bar.Min
+	bar.Current = diff * per
+	if bar.Current < bar.Min {
+		bar.Current = bar.Min
+	}
+	if bar.Current > bar.Max {
+		bar.Current = bar.Max
+	}
+
+	if previous != bar.Current {
+		ent.Set(bar)
+		if bar.Event != nil {
+			if err := world.Signal(bar.Event); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (uim *uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUpEvent) error {
+	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
+		shapes.TYPE.Box); it != nil; it = it.Next() {
+		ent := it.Value()
+		if ent.Contains(effects.TYPE.Hide) {
+			continue
+		}
+		bar := ui.Get.ProgressBar(ent)
+
+		if bar.State.Clicked {
+			bar.State.Clicked = false
+			uim.clicked = nil
+			ent.Set(bar)
+
+			if err := uim.calculateBarCurrent(world, ent, mue.Point); err != nil {
+				return err
+			}
+
 			if bar.Sound != "" {
 				if err := world.Signal(events.PlaySoundEvent{Name: bar.Sound, Volume: bar.Volume}); err != nil {
 					return err
 				}
 			}
-			if bar.Event != nil {
-				return world.Signal(bar.Event)
-			}
+
+			uim.progressBarsColors(ent, bar)
 		}
 	}
 	return nil

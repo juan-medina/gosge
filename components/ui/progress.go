@@ -32,6 +32,7 @@ type ProgressBar struct {
 	Min     float32       // Min is the minimum value for the ui.ProgressBar
 	Max     float32       // Max is the maximum value for the ui.ProgressBar
 	Current float32       // Current is the current value for the ui.ProgressBar
+	State   ControlState  // State is this ui.ProgressBar ui.ControlState
 	Shadow  geometry.Size // Shadow is the offset of the shadow on the ui.ProgressBar
 	Sound   string        // Sound is the click sound
 	Volume  float32       // Volume is the volume for click Sound
@@ -48,6 +49,7 @@ type ProgressBarColor struct {
 
 // ProgressBarHoverColor is the hover colors for a ui.ProgressBar
 type ProgressBarHoverColor struct {
-	Normal ProgressBarColor // Normal is the ui.ProgressBarColor on normal state
-	Hover  ProgressBarColor // Hover is the  ui.ProgressBarColor on hover state
+	Normal  ProgressBarColor // Normal is the ui.ProgressBarColor on normal state
+	Hover   ProgressBarColor // Hover is the  ui.ProgressBarColor on hover state
+	Clicked ProgressBarColor // Clicked is the  ui.ProgressBarColor on clicked state
 }
