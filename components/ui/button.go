@@ -37,13 +37,15 @@ type ButtonColor struct {
 
 // ButtonHoverColors is the hover colors for a FlatButton
 type ButtonHoverColors struct {
-	Normal ButtonColor // Normal is the ui.ButtonColor on normal state
-	Hover  ButtonColor // Hover is the  ui.ButtonColor on hover state
+	Normal  ButtonColor // Normal is the ui.ButtonColor on normal state
+	Hover   ButtonColor // Hover is the  ui.ButtonColor on hover state
+	Clicked ButtonColor // Clicked is the  ui.ButtonColor on clicked state
 }
 
 // FlatButton is a UI element for displaying a button
 type FlatButton struct {
 	Shadow geometry.Size // Shadow is the offset of the shadow on the ui.FlatButton
+	State  ControlState  // State is this ui.FlatButton ui.ControlState
 	Sound  string        // Sound is the click sound
 	Volume float32       // Volume is the volume for click Sound
 	Event  interface{}   // Event is the event that will be trigger when this button is click

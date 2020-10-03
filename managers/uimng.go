@@ -34,28 +34,33 @@ import (
 )
 
 const (
-	// normalColorDarkenFactor is how much dark the color will be on normal (not hover)
-	normalColorDarkenFactor = 0.25
+	normalColorDarkenFactor = 0.25 // normalColorDarkenFactor is how much dark the color will be on normal
+	hoverColorDarkenFactor  = 0.10 // hoverColorDarkenFactor is how much dark the color will be on hover
 )
 
 type uiManager struct {
-	dm DeviceManager
-	cm *CollisionManager
+	dm      DeviceManager
+	cm      *CollisionManager
+	clicked *goecs.Entity
 }
 
-func (uim uiManager) System(world *goecs.World, _ float32) error {
+func (uim *uiManager) System(world *goecs.World, _ float32) error {
 	uim.flatButtons(world)
 	uim.progressBars(world)
 	uim.spriteButtons(world)
 	return nil
 }
 
-func (uim uiManager) Listener(world *goecs.World, event interface{}, _ float32) error {
+func (uim *uiManager) Listener(world *goecs.World, event interface{}, _ float32) error {
 	switch v := event.(type) {
 	case events.MouseMoveEvent:
 		uim.flatButtonsMouseMove(world, v)
 		uim.progressBarsMouseMove(world, v)
 		uim.spriteButtonsMouseMove(world, v)
+	case events.MouseDownEvent:
+		if err := uim.flatButtonsMouseDown(world, v); err != nil {
+			return err
+		}
 	case events.MouseUpEvent:
 		if err := uim.flatButtonsMouseUp(world, v); err != nil {
 			return err
@@ -70,7 +75,7 @@ func (uim uiManager) Listener(world *goecs.World, event interface{}, _ float32) 
 	return nil
 }
 
-func (uim uiManager) flatButtons(world *goecs.World) {
+func (uim *uiManager) flatButtons(world *goecs.World) {
 	for it := world.Iterator(ui.TYPE.FlatButton); it != nil; it = it.Next() {
 		ent := it.Value()
 		// calculate state if is not done yet
@@ -78,44 +83,64 @@ func (uim uiManager) flatButtons(world *goecs.World) {
 			clr := ui.Get.ButtonColor(ent)
 			bcl := ui.ButtonHoverColors{}
 
-			bcl.Hover.Border = clr.Border
+			bcl.Hover.Border = clr.Border.Blend(color.Black, hoverColorDarkenFactor)
 			bcl.Normal.Border = clr.Border.Blend(color.Black, normalColorDarkenFactor)
+			bcl.Clicked.Border = clr.Border
 
-			bcl.Hover.Text = clr.Text
+			bcl.Hover.Text = clr.Text.Blend(color.Black, hoverColorDarkenFactor)
 			bcl.Normal.Text = clr.Text.Blend(color.Black, normalColorDarkenFactor)
+			bcl.Clicked.Text = clr.Text
 
 			if clr.Gradient.From.Equals(clr.Gradient.To) {
-				bcl.Hover.Solid = clr.Solid
+				bcl.Hover.Solid = clr.Solid.Blend(color.Black, hoverColorDarkenFactor)
 				bcl.Normal.Solid = clr.Solid.Blend(color.Black, normalColorDarkenFactor)
+				bcl.Clicked.Solid = clr.Solid
 			} else {
-				bcl.Hover.Gradient = clr.Gradient
-				bcl.Normal.Gradient = color.Gradient{
-					From:      clr.Gradient.From.Blend(color.Black, normalColorDarkenFactor),
+				bcl.Hover.Gradient = color.Gradient{
+					From:      clr.Gradient.From.Blend(color.Black, hoverColorDarkenFactor),
 					To:        clr.Gradient.To.Blend(color.Black, normalColorDarkenFactor),
 					Direction: clr.Gradient.Direction,
 				}
+				bcl.Normal.Gradient = color.Gradient{
+					From:      clr.Gradient.From.Blend(color.Black, hoverColorDarkenFactor),
+					To:        clr.Gradient.To.Blend(color.Black, normalColorDarkenFactor),
+					Direction: clr.Gradient.Direction,
+				}
+				bcl.Clicked.Gradient = clr.Gradient
 			}
 			ent.Set(bcl)
 		}
 	}
 }
 
-func (uim uiManager) flatButtonsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
-	for it := world.Iterator(ui.TYPE.FlatButton, ui.TYPE.ButtonHoverColors, geometry.TYPE.Point,
-		shapes.TYPE.Box); it != nil; it = it.Next() {
-		ent := it.Value()
-		bcl := ui.Get.ButtonHoverColors(ent)
-		pos := geometry.Get.Point(ent)
-		box := shapes.Get.Box(ent)
-		if box.Contains(pos, mme.Point) {
-			ent.Set(bcl.Hover)
-		} else {
-			ent.Set(bcl.Normal)
-		}
+func (uim uiManager) flatButtonsColors(ent *goecs.Entity, btn ui.FlatButton) {
+	bcl := ui.Get.ButtonHoverColors(ent)
+	if btn.State.Clicked {
+		ent.Set(bcl.Clicked)
+	} else if btn.State.Hover {
+		ent.Set(bcl.Hover)
+	} else {
+		ent.Set(bcl.Normal)
 	}
 }
 
-func (uim uiManager) flatButtonsMouseUp(world *goecs.World, mue events.MouseUpEvent) error {
+func (uim *uiManager) flatButtonsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
+	if uim.clicked != nil {
+		return
+	}
+	for it := world.Iterator(ui.TYPE.FlatButton, ui.TYPE.ButtonHoverColors, geometry.TYPE.Point,
+		shapes.TYPE.Box); it != nil; it = it.Next() {
+		ent := it.Value()
+		pos := geometry.Get.Point(ent)
+		box := shapes.Get.Box(ent)
+		btn := ui.Get.FlatButton(ent)
+		btn.State.Hover = box.Contains(pos, mme.Point)
+		uim.flatButtonsColors(ent, btn)
+		ent.Set(btn)
+	}
+}
+
+func (uim *uiManager) flatButtonsMouseDown(world *goecs.World, mde events.MouseDownEvent) error {
 	for it := world.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		if ent.Contains(effects.TYPE.Hide) {
@@ -124,14 +149,37 @@ func (uim uiManager) flatButtonsMouseUp(world *goecs.World, mue events.MouseUpEv
 		btn := ui.Get.FlatButton(ent)
 		pos := geometry.Get.Point(ent)
 		box := shapes.Get.Box(ent)
-		if box.Contains(pos, mue.Point) {
+		if box.Contains(pos, mde.Point) {
+			btn.State.Clicked = true
+			uim.clicked = ent
+		}
+		uim.flatButtonsColors(ent, btn)
+		ent.Set(btn)
+	}
+	return nil
+}
+
+func (uim *uiManager) flatButtonsMouseUp(world *goecs.World, _ events.MouseUpEvent) error {
+	for it := world.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
+		ent := it.Value()
+		if ent.Contains(effects.TYPE.Hide) {
+			continue
+		}
+		btn := ui.Get.FlatButton(ent)
+		if btn.State.Clicked {
+			btn.State.Clicked = false
 			if btn.Sound != "" {
 				if err := world.Signal(events.PlaySoundEvent{Name: btn.Sound, Volume: btn.Volume}); err != nil {
 					return err
 				}
 			}
-			return world.Signal(btn.Event)
+			if err := world.Signal(btn.Event); err != nil {
+				return err
+			}
+			uim.clicked = nil
 		}
+		uim.flatButtonsColors(ent, btn)
+		ent.Set(btn)
 	}
 	return nil
 }
@@ -283,5 +331,5 @@ func (uim uiManager) spriteButtonsMouseUp(world *goecs.World, mue events.MouseUp
 
 // UI returns a managers.WithSystemAndListener that handle ui components
 func UI(dm DeviceManager, cm *CollisionManager) WithSystemAndListener {
-	return &uiManager{dm: dm, cm: cm}
+	return &uiManager{dm: dm, cm: cm, clicked: nil}
 }

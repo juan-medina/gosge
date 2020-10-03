@@ -28,6 +28,13 @@ import (
 	"reflect"
 )
 
+// ControlState is the state of UI element
+type ControlState struct {
+	Hover    bool
+	Clicked  bool
+	Disabled bool
+}
+
 type types struct {
 	// FlatButton is the reflect.Type for ui.FlatButton
 	FlatButton reflect.Type
