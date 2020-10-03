@@ -49,7 +49,8 @@ type ProgressBarColor struct {
 
 // ProgressBarHoverColor is the hover colors for a ui.ProgressBar
 type ProgressBarHoverColor struct {
-	Normal  ProgressBarColor // Normal is the ui.ProgressBarColor on normal state
-	Hover   ProgressBarColor // Hover is the  ui.ProgressBarColor on hover state
-	Clicked ProgressBarColor // Clicked is the  ui.ProgressBarColor on clicked state
+	Normal   ProgressBarColor // Normal is the ui.ProgressBarColor on normal state
+	Hover    ProgressBarColor // Hover is the  ui.ProgressBarColor on hover state
+	Clicked  ProgressBarColor // Clicked is the  ui.ProgressBarColor on clicked state
+	Disabled ProgressBarColor // Disabled is the  ui.ProgressBarColor on disabled state
 }

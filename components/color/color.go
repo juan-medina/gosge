@@ -76,6 +76,16 @@ func (rc Solid) Inverse() Solid {
 	return Solid{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
+// GrayScale converts a color.Solid to gray scale
+func (rc Solid) GrayScale() Solid {
+	r := float64(rc.R) * 0.2989
+	g := float64(rc.G) * 0.5870
+	b := float64(rc.B) * 0.1140
+	gray := uint8(r + g + b)
+
+	return Solid{R: gray, G: gray, B: gray, A: rc.A}
+}
+
 // Equals returns if two color.Solid are equal
 func (rc Solid) Equals(other Solid) bool {
 	return rc.R == other.R && rc.G == other.G && rc.B == other.B && rc.A == other.A

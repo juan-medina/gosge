@@ -94,15 +94,18 @@ func (uim *uiManager) flatButtons(world *goecs.World) {
 			bcl.Hover.Border = clr.Border.Blend(color.Black, hoverColorDarkenFactor)
 			bcl.Normal.Border = clr.Border.Blend(color.Black, normalColorDarkenFactor)
 			bcl.Clicked.Border = clr.Border
+			bcl.Disabled.Border = clr.Border.GrayScale().Blend(color.Black, normalColorDarkenFactor)
 
 			bcl.Hover.Text = clr.Text.Blend(color.Black, hoverColorDarkenFactor)
 			bcl.Normal.Text = clr.Text.Blend(color.Black, normalColorDarkenFactor)
 			bcl.Clicked.Text = clr.Text
+			bcl.Disabled.Text = clr.Text.GrayScale().Blend(color.Black, normalColorDarkenFactor)
 
 			if clr.Gradient.From.Equals(clr.Gradient.To) {
 				bcl.Hover.Solid = clr.Solid.Blend(color.Black, hoverColorDarkenFactor)
 				bcl.Normal.Solid = clr.Solid.Blend(color.Black, normalColorDarkenFactor)
 				bcl.Clicked.Solid = clr.Solid
+				bcl.Disabled.Solid = clr.Solid.GrayScale().Blend(color.Black, normalColorDarkenFactor)
 			} else {
 				bcl.Hover.Gradient = color.Gradient{
 					From:      clr.Gradient.From.Blend(color.Black, hoverColorDarkenFactor),
@@ -115,15 +118,25 @@ func (uim *uiManager) flatButtons(world *goecs.World) {
 					Direction: clr.Gradient.Direction,
 				}
 				bcl.Clicked.Gradient = clr.Gradient
+				bcl.Disabled.Gradient = color.Gradient{
+					From:      clr.Gradient.From.GrayScale().Blend(color.Black, normalColorDarkenFactor),
+					To:        clr.Gradient.To.GrayScale().Blend(color.Black, normalColorDarkenFactor),
+					Direction: clr.Gradient.Direction,
+				}
 			}
 			ent.Set(bcl)
+		} else {
+			btn := ui.Get.FlatButton(ent)
+			uim.flatButtonsColors(ent, btn)
 		}
 	}
 }
 
 func (uim uiManager) flatButtonsColors(ent *goecs.Entity, btn ui.FlatButton) {
 	bcl := ui.Get.ButtonHoverColors(ent)
-	if btn.State.Clicked {
+	if btn.State.Disabled {
+		ent.Set(bcl.Disabled)
+	} else if btn.State.Clicked {
 		ent.Set(bcl.Clicked)
 	} else if btn.State.Hover {
 		ent.Set(bcl.Hover)
@@ -139,9 +152,12 @@ func (uim *uiManager) flatButtonsMouseMove(world *goecs.World, mme events.MouseM
 	for it := world.Iterator(ui.TYPE.FlatButton, ui.TYPE.ButtonHoverColors, geometry.TYPE.Point,
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
+		btn := ui.Get.FlatButton(ent)
+		if btn.State.Disabled {
+			continue
+		}
 		pos := geometry.Get.Point(ent)
 		box := shapes.Get.Box(ent)
-		btn := ui.Get.FlatButton(ent)
 		btn.State.Hover = box.Contains(pos, mme.Point)
 		uim.flatButtonsColors(ent, btn)
 		ent.Set(btn)
@@ -155,6 +171,9 @@ func (uim *uiManager) flatButtonsMouseDown(world *goecs.World, mde events.MouseD
 			continue
 		}
 		btn := ui.Get.FlatButton(ent)
+		if btn.State.Disabled {
+			continue
+		}
 		pos := geometry.Get.Point(ent)
 		box := shapes.Get.Box(ent)
 		if box.Contains(pos, mde.Point) {
@@ -202,15 +221,21 @@ func (uim uiManager) progressBars(world *goecs.World) {
 
 			phc.Hover.Empty = clr.Empty.Blend(color.Black, hoverColorDarkenFactor)
 			phc.Hover.Border = clr.Border.Blend(color.Black, hoverColorDarkenFactor)
+
 			phc.Normal.Empty = clr.Empty.Blend(color.Black, normalColorDarkenFactor)
 			phc.Normal.Border = clr.Border.Blend(color.Black, normalColorDarkenFactor)
+
 			phc.Clicked.Empty = clr.Empty
 			phc.Clicked.Border = clr.Border
+
+			phc.Disabled.Empty = clr.Empty.GrayScale().Blend(color.Black, normalColorDarkenFactor)
+			phc.Disabled.Border = clr.Border.GrayScale().Blend(color.Black, normalColorDarkenFactor)
 
 			if clr.Gradient.From.Equals(clr.Gradient.To) {
 				phc.Hover.Solid = clr.Solid.Blend(color.Black, hoverColorDarkenFactor)
 				phc.Normal.Solid = clr.Solid.Blend(color.Black, normalColorDarkenFactor)
 				phc.Clicked.Solid = clr.Solid
+				phc.Disabled.Solid = clr.Solid.GrayScale().Blend(color.Black, normalColorDarkenFactor)
 			} else {
 				phc.Hover.Gradient = color.Gradient{
 					From:      clr.Gradient.From.Blend(color.Black, hoverColorDarkenFactor),
@@ -223,15 +248,25 @@ func (uim uiManager) progressBars(world *goecs.World) {
 					Direction: clr.Gradient.Direction,
 				}
 				phc.Clicked.Gradient = clr.Gradient
+				phc.Disabled.Gradient = color.Gradient{
+					From:      clr.Gradient.From.GrayScale().Blend(color.Black, normalColorDarkenFactor),
+					To:        clr.Gradient.To.GrayScale().Blend(color.Black, normalColorDarkenFactor),
+					Direction: clr.Gradient.Direction,
+				}
 			}
 			ent.Set(phc)
+		} else {
+			bar := ui.Get.ProgressBar(ent)
+			uim.progressBarsColors(ent, bar)
 		}
 	}
 }
 
 func (uim uiManager) progressBarsColors(ent *goecs.Entity, bar ui.ProgressBar) {
 	bcl := ui.Get.ProgressBarHoverColor(ent)
-	if bar.State.Clicked {
+	if bar.State.Disabled {
+		ent.Set(bcl.Disabled)
+	} else if bar.State.Clicked {
 		ent.Set(bcl.Clicked)
 	} else if bar.State.Hover {
 		ent.Set(bcl.Hover)
@@ -243,8 +278,11 @@ func (uim uiManager) progressBarsColors(ent *goecs.Entity, bar ui.ProgressBar) {
 func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseMoveEvent) error {
 	if uim.clicked != nil {
 		if uim.clicked.Contains(ui.TYPE.ProgressBar) {
-			if err := uim.calculateBarCurrent(world, uim.clicked, mme.Point); err != nil {
-				return err
+			bar := ui.Get.ProgressBar(uim.clicked)
+			if !bar.State.Disabled {
+				if err := uim.calculateBarCurrent(world, uim.clicked, mme.Point); err != nil {
+					return err
+				}
 			}
 		}
 		return nil
@@ -253,7 +291,7 @@ func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.Mouse
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		bar := ui.Get.ProgressBar(ent)
-		if bar.Event != nil {
+		if bar.Event != nil && !bar.State.Disabled {
 			pos := geometry.Get.Point(ent)
 			box := shapes.Get.Box(ent)
 			bar.State.Hover = box.Contains(pos, mme.Point)
@@ -272,7 +310,9 @@ func (uim *uiManager) progressBarsMouseDown(world *goecs.World, mde events.Mouse
 			continue
 		}
 		bar := ui.Get.ProgressBar(ent)
-
+		if bar.State.Disabled {
+			continue
+		}
 		pos := geometry.Get.Point(ent)
 		box := shapes.Get.Box(ent)
 		if box.Contains(pos, mde.Point) {
@@ -359,6 +399,8 @@ func (uim uiManager) spriteButtons(world *goecs.World) {
 				Scale: sb.Scale,
 			}
 			ent.Set(spr)
+		} else {
+			uim.refreshSpriteButton(ent)
 		}
 	}
 }
@@ -367,7 +409,9 @@ func (uim uiManager) refreshSpriteButton(ent *goecs.Entity) {
 	spr := sprite.Get(ent)
 	sbn := ui.Get.SpriteButton(ent)
 
-	if sbn.State.Clicked {
+	if sbn.State.Disabled {
+		spr.Name = sbn.Disabled
+	} else if sbn.State.Clicked {
 		spr.Name = sbn.Clicked
 	} else if sbn.State.Hover {
 		spr.Name = sbn.Hover
@@ -385,8 +429,11 @@ func (uim *uiManager) spriteButtonsMouseMove(world *goecs.World, mme events.Mous
 	}
 	for it := world.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
-		pos := geometry.Get.Point(ent)
 		sbn := ui.Get.SpriteButton(ent)
+		if sbn.State.Disabled {
+			continue
+		}
+		pos := geometry.Get.Point(ent)
 		spr := sprite.Get(ent)
 		sbn.State.Hover = uim.cm.SpriteAtContains(spr, pos, mme.Point)
 		ent.Set(sbn)
@@ -400,9 +447,12 @@ func (uim *uiManager) spriteButtonsMouseDown(world *goecs.World, mde events.Mous
 		if ent.Contains(effects.TYPE.Hide) {
 			continue
 		}
+		sbn := ui.Get.SpriteButton(ent)
+		if sbn.State.Disabled {
+			continue
+		}
 		spr := sprite.Get(ent)
 		pos := geometry.Get.Point(ent)
-		sbn := ui.Get.SpriteButton(ent)
 
 		if uim.cm.SpriteAtContains(spr, pos, mde.Point) {
 			uim.clicked = ent

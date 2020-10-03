@@ -50,12 +50,12 @@ var opt = options.Options{
 const (
 	fontName    = "resources/go_regular.fnt"
 	fontSmall   = 30
-	fontBig     = 50
+	fontBig     = 40
 	columnGap   = 350
 	rowGap      = 50
 	spriteSheet = "resources/ui.json"
 	spriteScale = 0.25
-	hint        = "press <SPACE> to hide all, <ESC> to close"
+	hint        = "press <SPACE> to hide/unhide, <ENTER> to disable/enable, <ESC> to close"
 )
 
 var (
@@ -144,11 +144,35 @@ func loadGame(eng *gosge.Engine) error {
 func keyEvents(world *goecs.World, signal interface{}, _ float32) error {
 	switch e := signal.(type) {
 	case events.KeyUpEvent:
-		if e.Key == device.KeySpace {
+		switch e.Key {
+		case device.KeySpace:
 			hideUnhide(world)
+		case device.KeyReturn:
+			disableEnable(world)
 		}
 	}
 	return nil
+}
+
+func disableEnable(world *goecs.World) {
+	for it := world.Iterator(geometry.TYPE.Point); it != nil; it = it.Next() {
+		ent := it.Value()
+		if ent.ID() != message.ID() {
+			if ent.Contains(ui.TYPE.FlatButton) {
+				fbt := ui.Get.FlatButton(ent)
+				fbt.State.Disabled = !fbt.State.Disabled
+				ent.Set(fbt)
+			} else if ent.Contains(ui.TYPE.ProgressBar) {
+				bar := ui.Get.ProgressBar(ent)
+				bar.State.Disabled = !bar.State.Disabled
+				ent.Set(bar)
+			} else if ent.Contains(ui.TYPE.SpriteButton) {
+				sbt := ui.Get.SpriteButton(ent)
+				sbt.State.Disabled = !sbt.State.Disabled
+				ent.Set(sbt)
+			}
+		}
+	}
 }
 
 func hideUnhide(world *goecs.World) {
@@ -242,6 +266,7 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 	clr := ui.ProgressBarColor{
 		Solid:  color.SkyBlue,
 		Border: color.White,
+		Empty:  color.Blue.Blend(color.White, 0.65),
 	}
 
 	if gradient {
@@ -342,12 +367,13 @@ func addSpriteButton(world *goecs.World, gameScale geometry.Scale, labelPos geom
 	// add the sprite button
 	world.AddEntity(
 		ui.SpriteButton{
-			Sheet:   spriteSheet,
-			Normal:  "normal.png",
-			Hover:   "hover.png",
-			Clicked: "click.png",
-			Scale:   gameScale.Max * spriteScale,
-			Event:   uiDemoEvent{Message: text + " clicked"},
+			Sheet:    spriteSheet,
+			Normal:   "normal.png",
+			Hover:    "hover.png",
+			Clicked:  "click.png",
+			Disabled: "locked.png",
+			Scale:    gameScale.Max * spriteScale,
+			Event:    uiDemoEvent{Message: text + " clicked"},
 		},
 		controlPos,
 	)
