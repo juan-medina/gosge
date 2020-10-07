@@ -30,6 +30,7 @@ import (
 	"github.com/juan-medina/gosge/components/shapes"
 	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/components/ui"
+	"runtime"
 )
 
 type renderingManager struct {
@@ -204,31 +205,61 @@ func (rdm renderingManager) renderProgressBar(v *goecs.Entity) error {
 		rdm.dm.DrawSolidBox(shadowPos, sb, sc)
 	}
 
-	// draw background
-	rdm.dm.DrawSolidBox(pos, sb, clr.Empty)
-
 	total := pro.Max - pro.Min
 	per := pro.Current / total
 
-	// if we need to fill anything
-	if per > 0 {
-		// if we need scissor
-		if per < 1 {
-			size := box.Size.Scale(box.Scale)
-			size.Width = size.Width * per
-			rdm.dm.BeginScissor(pos, size)
-		}
+	// Don't use scissor on OSX until this is fix https://github.com/raysan5/raylib/issues/1281
+	useScissor := runtime.GOOS != "darwin"
 
-		// draw fill
-		if clr.Gradient.From.Equals(clr.Gradient.To) {
-			rdm.dm.DrawSolidBox(pos, sb, clr.Solid)
-		} else {
-			rdm.dm.DrawGradientBox(pos, sb, clr.Gradient)
-		}
+	if useScissor {
+		// draw background
+		rdm.dm.DrawSolidBox(pos, sb, clr.Empty)
 
-		// if we need scissor
+		// if we need to fill anything
+		if per > 0 {
+			// if we need scissor
+			if per < 1 {
+				size := box.Size.Scale(box.Scale)
+				size.Width = size.Width * per
+				rdm.dm.BeginScissor(pos, size)
+			}
+
+			// draw fill
+			if clr.Gradient.From.Equals(clr.Gradient.To) {
+				rdm.dm.DrawSolidBox(pos, sb, clr.Solid)
+			} else {
+				rdm.dm.DrawGradientBox(pos, sb, clr.Gradient)
+			}
+
+			// if we need scissor
+			if per < 1 {
+				rdm.dm.EndScissor()
+			}
+		}
+	} else {
+		// if we have any to fill
+		if per > 0 {
+			// draw fill
+			if clr.Gradient.From.Equals(clr.Gradient.To) {
+				rdm.dm.DrawSolidBox(pos, sb, clr.Solid)
+			} else {
+				rdm.dm.DrawGradientBox(pos, sb, clr.Gradient)
+			}
+		}
+		// if we need to hide anything of the bar
 		if per < 1 {
-			rdm.dm.EndScissor()
+			invPer := 1 - per
+			boxToHide := shapes.SolidBox{
+				Size:  box.Size.Scale(box.Scale),
+				Scale: 1,
+			}
+			boxToHide.Size.Width = boxToHide.Size.Width * invPer
+			shift := box.Size.Width * box.Scale * per
+			hidePos := geometry.Point{
+				X: pos.X + shift,
+				Y: pos.Y,
+			}
+			rdm.dm.DrawSolidBox(hidePos, boxToHide, clr.Empty)
 		}
 	}
 

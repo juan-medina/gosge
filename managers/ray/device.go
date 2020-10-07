@@ -29,7 +29,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"os"
 	"runtime"
-	"strings"
 )
 
 // Init the rendering device
@@ -69,7 +68,7 @@ func (dmi *DeviceManagerImpl) Init(opt options.Options) {
 	if !opt.Windowed {
 		// TODO: Open a Issue in raylib repo
 		// rl.ToggleFullscreen does not work ok on linux
-		if !strings.Contains(runtime.GOOS, "linux") {
+		if runtime.GOOS != "linux" {
 			rl.ToggleFullscreen()
 			rl.SetWindowMonitor(opt.Monitor)
 		}
