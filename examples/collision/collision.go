@@ -227,7 +227,7 @@ func loadGame(eng *gosge.Engine) error {
 	world.AddSystem(updateAreasSystem)
 
 	// add the key listener
-	world.AddListener(keyListener)
+	world.AddListener(keyListener, events.TYPE.KeyDownEvent, events.TYPE.KeyUpEvent)
 
 	return nil
 }

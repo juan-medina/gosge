@@ -5,6 +5,7 @@ import (
 	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/events"
+	"reflect"
 )
 
 /*
@@ -34,14 +35,18 @@ type eventManager struct {
 	dm  DeviceManager
 }
 
+func (em eventManager) Signals() []reflect.Type {
+	return []reflect.Type{events.TYPE.DelaySignal}
+}
+
 func (em eventManager) Listener(world *goecs.World, signal interface{}, delta float32) error {
 	switch e := signal.(type) {
 	case events.DelaySignal:
 		e.Time -= delta
 		if e.Time <= 0 {
-			return world.Signal(e.Signal)
+			world.Signal(e.Signal)
 		}
-		return world.Signal(e)
+		world.Signal(e)
 	}
 	return nil
 }
@@ -52,86 +57,66 @@ var (
 	}
 )
 
-func (em eventManager) sendGameClose(world *goecs.World) error {
-	return world.Signal(events.GameCloseEvent{})
+func (em eventManager) sendGameClose(world *goecs.World) {
+	world.Signal(events.GameCloseEvent{})
 }
 
-func (em eventManager) sendMouseMove(world *goecs.World) error {
-	return world.Signal(em.mme)
+func (em eventManager) sendMouseMove(world *goecs.World) {
+	world.Signal(em.mme)
 }
 
-func (em eventManager) sendMouseRelease(world *goecs.World, button device.MouseButton) error {
-	return world.Signal(events.MouseUpEvent{Point: em.mme.Point, MouseButton: button})
+func (em eventManager) sendMouseRelease(world *goecs.World, button device.MouseButton) {
+	world.Signal(events.MouseUpEvent{Point: em.mme.Point, MouseButton: button})
 }
 
-func (em eventManager) sendMousePressed(world *goecs.World, button device.MouseButton) error {
-	return world.Signal(events.MouseDownEvent{Point: em.mme.Point, MouseButton: button})
+func (em eventManager) sendMousePressed(world *goecs.World, button device.MouseButton) {
+	world.Signal(events.MouseDownEvent{Point: em.mme.Point, MouseButton: button})
 }
 
-func (em eventManager) sendKeyDownEvent(world *goecs.World, key device.Key) error {
-	return world.Signal(events.KeyDownEvent{Key: key})
+func (em eventManager) sendKeyDownEvent(world *goecs.World, key device.Key) {
+	world.Signal(events.KeyDownEvent{Key: key})
 }
 
-func (em eventManager) sendKeyUpEvent(world *goecs.World, key device.Key) error {
-	return world.Signal(events.KeyUpEvent{Key: key})
+func (em eventManager) sendKeyUpEvent(world *goecs.World, key device.Key) {
+	world.Signal(events.KeyUpEvent{Key: key})
 }
 
 func (em *eventManager) System(world *goecs.World, _ float32) error {
 	if em.dm.ShouldClose() {
-		if err := em.sendGameClose(world); err != nil {
-			return err
-		}
+		em.sendGameClose(world)
 	} else {
-		if err := em.handleMouse(world); err != nil {
-			return err
-		}
-
-		if err := em.handleKeys(world); err != nil {
-			return err
-		}
+		em.handleMouse(world)
+		em.handleKeys(world)
 	}
 	return nil
 }
 
-func (em eventManager) handleMouse(world *goecs.World) error {
+func (em eventManager) handleMouse(world *goecs.World) {
 	mp := em.dm.GetMousePoint()
 	if em.mme.Point != mp {
 		em.mme.Point = mp
-		if err := em.sendMouseMove(world); err != nil {
-			return err
-		}
+		em.sendMouseMove(world)
 	}
 
 	for _, button := range mouseButtonsTocCheck {
 		if em.dm.IsMouseRelease(button) {
-			if err := em.sendMouseRelease(world, button); err != nil {
-				return err
-			}
+			em.sendMouseRelease(world, button)
 		}
 		if em.dm.IsMousePressed(button) {
-			if err := em.sendMousePressed(world, button); err != nil {
-				return err
-			}
+			em.sendMousePressed(world, button)
 		}
 	}
-
-	return nil
 }
 
-func (em eventManager) handleKeys(world *goecs.World) error {
+func (em eventManager) handleKeys(world *goecs.World) {
 	for key := device.FirstKey + 1; key < device.TotalKeys; key++ {
 		if em.dm.IsKeyReleased(key) {
-			if err := em.sendKeyUpEvent(world, key); err != nil {
-				return err
-			}
+			em.sendKeyUpEvent(world, key)
 		}
 		if em.dm.IsKeyPressed(key) {
-			if err := em.sendKeyDownEvent(world, key); err != nil {
-				return err
-			}
+			em.sendKeyDownEvent(world, key)
 		}
 	}
-	return nil
 }
 
 // Events returns a managers.WithSystem that will handle signals

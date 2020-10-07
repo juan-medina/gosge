@@ -27,6 +27,7 @@ import (
 	"github.com/juan-medina/gosge/components/audio"
 	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/geometry"
+	"reflect"
 )
 
 // GameCloseEvent is an event that indicates that game need to close
@@ -120,4 +121,59 @@ type ChangeMasterVolumeEvent struct {
 type DelaySignal struct {
 	Signal interface{} // Signal that will be emitted after the Time
 	Time   float32     // Time to this Signal to be emitted, in seconds
+}
+
+type types struct {
+	// GameCloseEvent is the reflect.Type for events.GameCloseEvent
+	GameCloseEvent reflect.Type
+	// ChangeGameStage is the reflect.Type for events.ChangeGameStage
+	ChangeGameStage reflect.Type
+	// DelaySignal is the reflect.Type for events.DelaySignal
+	DelaySignal reflect.Type
+	// PlaySoundEvent is the reflect.Type for events.PlaySoundEvent
+	PlaySoundEvent reflect.Type
+	// ChangeMasterVolumeEvent is the reflect.Type for events.ChangeMasterVolumeEvent
+	ChangeMasterVolumeEvent reflect.Type
+	// PlayMusicEvent is the reflect.Type for events.PlayMusicEvent
+	PlayMusicEvent reflect.Type
+	// StopMusicEvent is the reflect.Type for events.StopMusicEvent
+	StopMusicEvent reflect.Type
+	// PauseMusicEvent is the reflect.Type for events.PauseMusicEvent
+	PauseMusicEvent reflect.Type
+	// ResumeMusicEvent is the reflect.Type for events.ResumeMusicEvent
+	ResumeMusicEvent reflect.Type
+	// ChangeMusicVolumeEvent is the reflect.Type for events.ChangeMusicVolumeEvent
+	ChangeMusicVolumeEvent reflect.Type
+	// MouseMoveEvent is the reflect.Type for events.MouseMoveEvent
+	MouseMoveEvent reflect.Type
+	// MouseDownEvent is the reflect.Type for events.MouseDownEvent
+	MouseDownEvent reflect.Type
+	// MouseUpEvent is the reflect.Type for events.MouseUpEvent
+	MouseUpEvent reflect.Type
+	// KeyDownEvent is the reflect.Type for events.KeyDownEvent
+	KeyDownEvent reflect.Type
+	// KeyUpEvent is the reflect.Type for events.KeyUpEvent
+	KeyUpEvent reflect.Type
+	// MusicStateChangeEvent is the reflect.Type for events.MusicStateChangeEvent
+	MusicStateChangeEvent reflect.Type
+}
+
+// TYPE hold the reflect.Type for our events
+var TYPE = types{
+	GameCloseEvent:          reflect.TypeOf(GameCloseEvent{}),
+	ChangeGameStage:         reflect.TypeOf(ChangeGameStage{}),
+	DelaySignal:             reflect.TypeOf(DelaySignal{}),
+	PlaySoundEvent:          reflect.TypeOf(PlaySoundEvent{}),
+	ChangeMasterVolumeEvent: reflect.TypeOf(ChangeMasterVolumeEvent{}),
+	PlayMusicEvent:          reflect.TypeOf(PlayMusicEvent{}),
+	StopMusicEvent:          reflect.TypeOf(StopMusicEvent{}),
+	PauseMusicEvent:         reflect.TypeOf(PauseMusicEvent{}),
+	ResumeMusicEvent:        reflect.TypeOf(ResumeMusicEvent{}),
+	ChangeMusicVolumeEvent:  reflect.TypeOf(ChangeMusicVolumeEvent{}),
+	MouseMoveEvent:          reflect.TypeOf(MouseMoveEvent{}),
+	MouseDownEvent:          reflect.TypeOf(MouseDownEvent{}),
+	MouseUpEvent:            reflect.TypeOf(MouseUpEvent{}),
+	KeyDownEvent:            reflect.TypeOf(KeyDownEvent{}),
+	KeyUpEvent:              reflect.TypeOf(KeyUpEvent{}),
+	MusicStateChangeEvent:   reflect.TypeOf(MusicStateChangeEvent{}),
 }

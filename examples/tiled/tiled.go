@@ -197,9 +197,9 @@ func loadGame(eng *gosge.Engine) error {
 	)
 
 	// add our key listener
-	world.AddListener(keyListener)
+	world.AddListener(keyListener, events.TYPE.KeyDownEvent, events.TYPE.KeyUpEvent)
 	// add our mouse listener
-	world.AddListener(mouseListener)
+	world.AddListener(mouseListener, events.TYPE.MouseUpEvent)
 	// add our move system
 	world.AddSystem(moveSystem)
 

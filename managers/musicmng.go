@@ -26,11 +26,22 @@ import (
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components/audio"
 	"github.com/juan-medina/gosge/events"
+	"reflect"
 )
 
 type musicManager struct {
 	dm DeviceManager
 	sm *StorageManager
+}
+
+func (mm musicManager) Signals() []reflect.Type {
+	return []reflect.Type{
+		events.TYPE.PlayMusicEvent,
+		events.TYPE.StopMusicEvent,
+		events.TYPE.PauseMusicEvent,
+		events.TYPE.ResumeMusicEvent,
+		events.TYPE.ChangeMusicVolumeEvent,
+	}
 }
 
 func (mm musicManager) System(world *goecs.World, _ float32) error {
@@ -95,7 +106,7 @@ func (mm musicManager) playMusicEvent(world *goecs.World, pme events.PlayMusicEv
 			state.PlayingState = audio.StatePlaying
 			ent.Set(state)
 			mm.dm.PlayMusic(def, pme.Volume)
-			return mm.sendMusicStateChangeEvent(world, pme.Name, old, state.PlayingState)
+			mm.sendMusicStateChangeEvent(world, pme.Name, old, state.PlayingState)
 		}
 	} else {
 		return err
@@ -112,7 +123,7 @@ func (mm musicManager) stopMusicEvent(world *goecs.World, sme events.StopMusicEv
 				state.PlayingState = audio.StateStopped
 				ent.Set(state)
 				mm.dm.StopMusic(def)
-				return mm.sendMusicStateChangeEvent(world, sme.Name, old, state.PlayingState)
+				mm.sendMusicStateChangeEvent(world, sme.Name, old, state.PlayingState)
 			}
 		}
 	} else {
@@ -130,7 +141,7 @@ func (mm musicManager) pauseMusicEvent(world *goecs.World, pme events.PauseMusic
 				state.PlayingState = audio.StatePaused
 				ent.Set(state)
 				mm.dm.PauseMusic(def)
-				return mm.sendMusicStateChangeEvent(world, pme.Name, old, state.PlayingState)
+				mm.sendMusicStateChangeEvent(world, pme.Name, old, state.PlayingState)
 			}
 		}
 	} else {
@@ -148,7 +159,7 @@ func (mm musicManager) resumeMusicEvent(world *goecs.World, rme events.ResumeMus
 				state.PlayingState = audio.StatePlaying
 				ent.Set(state)
 				mm.dm.ResumeMusic(def)
-				return mm.sendMusicStateChangeEvent(world, rme.Name, old, state.PlayingState)
+				mm.sendMusicStateChangeEvent(world, rme.Name, old, state.PlayingState)
 			}
 		}
 	} else {
@@ -157,8 +168,8 @@ func (mm musicManager) resumeMusicEvent(world *goecs.World, rme events.ResumeMus
 	return nil
 }
 
-func (mm musicManager) sendMusicStateChangeEvent(world *goecs.World, name string, old audio.MusicPlayingState, new audio.MusicPlayingState) error {
-	return world.Signal(events.MusicStateChangeEvent{
+func (mm musicManager) sendMusicStateChangeEvent(world *goecs.World, name string, old audio.MusicPlayingState, new audio.MusicPlayingState) {
+	world.Signal(events.MusicStateChangeEvent{
 		Name: name,
 		Old:  old,
 		New:  new,

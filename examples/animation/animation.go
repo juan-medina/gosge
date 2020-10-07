@@ -191,7 +191,7 @@ func loadGame(eng *gosge.Engine) error {
 	world.AddSystem(robotMoveSystem)
 
 	// listen to keys
-	world.AddListener(keysListener)
+	world.AddListener(keysListener, events.TYPE.KeyUpEvent, events.TYPE.KeyDownEvent)
 
 	return nil
 }

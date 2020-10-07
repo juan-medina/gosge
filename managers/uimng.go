@@ -31,6 +31,7 @@ import (
 	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/components/ui"
 	"github.com/juan-medina/gosge/events"
+	"reflect"
 )
 
 const (
@@ -44,6 +45,14 @@ type uiManager struct {
 	clicked *goecs.Entity
 }
 
+func (uim *uiManager) Signals() []reflect.Type {
+	return []reflect.Type{
+		events.TYPE.MouseMoveEvent,
+		events.TYPE.MouseDownEvent,
+		events.TYPE.MouseUpEvent,
+	}
+}
+
 func (uim *uiManager) System(world *goecs.World, _ float32) error {
 	uim.flatButtons(world)
 	uim.progressBars(world)
@@ -55,30 +64,16 @@ func (uim *uiManager) Listener(world *goecs.World, event interface{}, _ float32)
 	switch v := event.(type) {
 	case events.MouseMoveEvent:
 		uim.flatButtonsMouseMove(world, v)
-		if err := uim.progressBarsMouseMove(world, v); err != nil {
-			return err
-		}
+		uim.progressBarsMouseMove(world, v)
 		uim.spriteButtonsMouseMove(world, v)
 	case events.MouseDownEvent:
-		if err := uim.flatButtonsMouseDown(world, v); err != nil {
-			return err
-		}
-		if err := uim.progressBarsMouseDown(world, v); err != nil {
-			return err
-		}
-		if err := uim.spriteButtonsMouseDown(world, v); err != nil {
-			return err
-		}
+		uim.flatButtonsMouseDown(world, v)
+		uim.progressBarsMouseDown(world, v)
+		uim.spriteButtonsMouseDown(world, v)
 	case events.MouseUpEvent:
-		if err := uim.flatButtonsMouseUp(world, v); err != nil {
-			return err
-		}
-		if err := uim.progressBarsMouseUp(world, v); err != nil {
-			return err
-		}
-		if err := uim.spriteButtonsMouseUp(world, v); err != nil {
-			return err
-		}
+		uim.flatButtonsMouseUp(world, v)
+		uim.progressBarsMouseUp(world, v)
+		uim.spriteButtonsMouseUp(world, v)
 	}
 	return nil
 }
@@ -164,7 +159,7 @@ func (uim *uiManager) flatButtonsMouseMove(world *goecs.World, mme events.MouseM
 	}
 }
 
-func (uim *uiManager) flatButtonsMouseDown(world *goecs.World, mde events.MouseDownEvent) error {
+func (uim *uiManager) flatButtonsMouseDown(world *goecs.World, mde events.MouseDownEvent) {
 	for it := world.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		if ent.Contains(effects.TYPE.Hide) {
@@ -183,10 +178,9 @@ func (uim *uiManager) flatButtonsMouseDown(world *goecs.World, mde events.MouseD
 		uim.flatButtonsColors(ent, btn)
 		ent.Set(btn)
 	}
-	return nil
 }
 
-func (uim *uiManager) flatButtonsMouseUp(world *goecs.World, _ events.MouseUpEvent) error {
+func (uim *uiManager) flatButtonsMouseUp(world *goecs.World, _ events.MouseUpEvent) {
 	for it := world.Iterator(ui.TYPE.FlatButton, geometry.TYPE.Point, shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		if ent.Contains(effects.TYPE.Hide) {
@@ -210,13 +204,9 @@ func (uim *uiManager) flatButtonsMouseUp(world *goecs.World, _ events.MouseUpEve
 			btn.State.Clicked = false
 			if trigger {
 				if btn.Sound != "" {
-					if err := world.Signal(events.PlaySoundEvent{Name: btn.Sound, Volume: btn.Volume}); err != nil {
-						return err
-					}
+					world.Signal(events.PlaySoundEvent{Name: btn.Sound, Volume: btn.Volume})
 				}
-				if err := world.Signal(btn.Event); err != nil {
-					return err
-				}
+				world.Signal(btn.Event)
 			}
 
 			uim.clicked = nil
@@ -224,7 +214,6 @@ func (uim *uiManager) flatButtonsMouseUp(world *goecs.World, _ events.MouseUpEve
 		uim.flatButtonsColors(ent, btn)
 		ent.Set(btn)
 	}
-	return nil
 }
 
 func (uim *uiManager) uncheckGroup(world *goecs.World, group string) {
@@ -305,17 +294,15 @@ func (uim uiManager) progressBarsColors(ent *goecs.Entity, bar ui.ProgressBar) {
 	}
 }
 
-func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseMoveEvent) error {
+func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
 	if uim.clicked != nil {
 		if uim.clicked.Contains(ui.TYPE.ProgressBar) {
 			bar := ui.Get.ProgressBar(uim.clicked)
 			if !bar.State.Disabled {
-				if err := uim.calculateBarCurrent(world, uim.clicked, mme.Point); err != nil {
-					return err
-				}
+				uim.calculateBarCurrent(world, uim.clicked, mme.Point)
 			}
 		}
-		return nil
+		return
 	}
 	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
 		shapes.TYPE.Box); it != nil; it = it.Next() {
@@ -329,10 +316,10 @@ func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.Mouse
 			ent.Set(bar)
 		}
 	}
-	return nil
+	return
 }
 
-func (uim *uiManager) progressBarsMouseDown(world *goecs.World, mde events.MouseDownEvent) error {
+func (uim *uiManager) progressBarsMouseDown(world *goecs.World, mde events.MouseDownEvent) {
 	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
@@ -352,10 +339,9 @@ func (uim *uiManager) progressBarsMouseDown(world *goecs.World, mde events.Mouse
 			ent.Set(bar)
 		}
 	}
-	return nil
 }
 
-func (uim uiManager) calculateBarCurrent(world *goecs.World, ent *goecs.Entity, mouse geometry.Point) error {
+func (uim uiManager) calculateBarCurrent(world *goecs.World, ent *goecs.Entity, mouse geometry.Point) {
 	bar := ui.Get.ProgressBar(ent)
 	previous := bar.Current
 	pos := geometry.Get.Point(ent)
@@ -378,16 +364,12 @@ func (uim uiManager) calculateBarCurrent(world *goecs.World, ent *goecs.Entity, 
 	if previous != bar.Current {
 		ent.Set(bar)
 		if bar.Event != nil {
-			if err := world.Signal(bar.Event); err != nil {
-				return err
-			}
+			world.Signal(bar.Event)
 		}
 	}
-
-	return nil
 }
 
-func (uim *uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUpEvent) error {
+func (uim *uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUpEvent) {
 	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
@@ -401,20 +383,15 @@ func (uim *uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUp
 			uim.clicked = nil
 			ent.Set(bar)
 
-			if err := uim.calculateBarCurrent(world, ent, mue.Point); err != nil {
-				return err
-			}
+			uim.calculateBarCurrent(world, ent, mue.Point)
 
 			if bar.Sound != "" {
-				if err := world.Signal(events.PlaySoundEvent{Name: bar.Sound, Volume: bar.Volume}); err != nil {
-					return err
-				}
+				world.Signal(events.PlaySoundEvent{Name: bar.Sound, Volume: bar.Volume})
 			}
 
 			uim.progressBarsColors(ent, bar)
 		}
 	}
-	return nil
 }
 
 func (uim uiManager) spriteButtons(world *goecs.World) {
@@ -471,7 +448,7 @@ func (uim *uiManager) spriteButtonsMouseMove(world *goecs.World, mme events.Mous
 	}
 }
 
-func (uim *uiManager) spriteButtonsMouseDown(world *goecs.World, mde events.MouseDownEvent) error {
+func (uim *uiManager) spriteButtonsMouseDown(world *goecs.World, mde events.MouseDownEvent) {
 	for it := world.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
 		if ent.Contains(effects.TYPE.Hide) {
@@ -491,10 +468,9 @@ func (uim *uiManager) spriteButtonsMouseDown(world *goecs.World, mde events.Mous
 			uim.refreshSpriteButton(ent)
 		}
 	}
-	return nil
 }
 
-func (uim *uiManager) spriteButtonsMouseUp(world *goecs.World, _ events.MouseUpEvent) error {
+func (uim *uiManager) spriteButtonsMouseUp(world *goecs.World, _ events.MouseUpEvent) {
 	for it := world.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
 		if ent.Contains(effects.TYPE.Hide) {
@@ -507,14 +483,11 @@ func (uim *uiManager) spriteButtonsMouseUp(world *goecs.World, _ events.MouseUpE
 			ent.Set(sbn)
 			uim.refreshSpriteButton(ent)
 			if sbn.Sound != "" {
-				if err := world.Signal(events.PlaySoundEvent{Name: sbn.Sound, Volume: sbn.Volume}); err != nil {
-					return err
-				}
+				world.Signal(events.PlaySoundEvent{Name: sbn.Sound, Volume: sbn.Volume})
 			}
-			return world.Signal(sbn.Event)
+			world.Signal(sbn.Event)
 		}
 	}
-	return nil
 }
 
 // UI returns a managers.WithSystemAndListener that handle ui components

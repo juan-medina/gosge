@@ -25,11 +25,16 @@ package managers
 import (
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/events"
+	"reflect"
 )
 
 type soundManager struct {
 	dm DeviceManager
 	sm *StorageManager
+}
+
+func (sm soundManager) Signals() []reflect.Type {
+	return []reflect.Type{events.TYPE.PlaySoundEvent, events.TYPE.ChangeMasterVolumeEvent}
 }
 
 func (sm soundManager) Listener(_ *goecs.World, event interface{}, _ float32) error {

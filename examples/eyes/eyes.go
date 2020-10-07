@@ -244,8 +244,8 @@ func loadGame(eng *gosge.Engine) error {
 		dizzyTextPoint,
 	)
 
-	// add our look at mouse system
-	world.AddListener(mouseMoveListener)
+	// listen to mouse moves
+	world.AddListener(mouseMoveListener, events.TYPE.MouseMoveEvent)
 	// add the system that decrease how dizzy we are
 	world.AddSystem(decreaseDizzySystem)
 	// add our dizzy bar system

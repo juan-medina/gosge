@@ -34,6 +34,7 @@ import (
 	"github.com/juan-medina/gosge/managers"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
+	"reflect"
 )
 
 type engineStatus int
@@ -132,15 +133,23 @@ func (e *Engine) drawLoading() {
 	e.dm.SetBackgroundColor(clr)
 }
 
+// Signals return the signals that the engine itself listen to
+func (e Engine) Signals() []reflect.Type {
+	return []reflect.Type{
+		events.TYPE.GameCloseEvent,
+		events.TYPE.ChangeGameStage,
+	}
+}
+
 func (e *Engine) register(mng managers.Manager, priority int32) {
 	switch m := mng.(type) {
 	case managers.WithSystemAndListener:
 		e.world.AddSystemWithPriority(m.System, priority)
-		e.world.AddListenerWithPriority(m.Listener, priority)
+		e.world.AddListenerWithPriority(m.Listener, priority, m.Signals()...)
 	case managers.WithSystem:
 		e.world.AddSystemWithPriority(m.System, priority)
 	case managers.WithListener:
-		e.world.AddListenerWithPriority(m.Listener, priority)
+		e.world.AddListenerWithPriority(m.Listener, priority, m.Signals()...)
 	default:
 		panic("can not register manager")
 	}

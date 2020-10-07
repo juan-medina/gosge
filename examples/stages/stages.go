@@ -62,7 +62,8 @@ func loadGame(eng *gosge.Engine) error {
 	eng.AddGameStage("menu", menuStage)
 	eng.AddGameStage("main", mainStage)
 
-	return eng.World().Signal(events.ChangeGameStage{Stage: "menu"})
+	eng.World().Signal(events.ChangeGameStage{Stage: "menu"})
+	return nil
 }
 
 // game constants
@@ -176,7 +177,7 @@ func mainStage(eng *gosge.Engine) error {
 		effects.Layer{Depth: 0},
 	)
 
-	world.AddListener(mainStageKeyListener)
+	world.AddListener(mainStageKeyListener, events.TYPE.KeyUpEvent)
 
 	return nil
 }
@@ -185,7 +186,7 @@ func mainStageKeyListener(world *goecs.World, signal interface{}, _ float32) err
 	switch e := signal.(type) {
 	case events.KeyUpEvent:
 		if e.Key == device.KeyEscape {
-			return world.Signal(events.ChangeGameStage{Stage: "menu"})
+			world.Signal(events.ChangeGameStage{Stage: "menu"})
 		}
 	}
 	return nil
@@ -347,7 +348,7 @@ func menuStage(eng *gosge.Engine) error {
 		effects.Layer{Depth: 0},
 	)
 
-	world.AddListener(menuStageKeyListener)
+	world.AddListener(menuStageKeyListener, events.TYPE.KeyUpEvent)
 
 	return nil
 }
@@ -356,7 +357,7 @@ func menuStageKeyListener(world *goecs.World, signal interface{}, _ float32) err
 	switch e := signal.(type) {
 	case events.KeyUpEvent:
 		if e.Key == device.KeyReturn {
-			return world.Signal(events.ChangeGameStage{Stage: "main"})
+			world.Signal(events.ChangeGameStage{Stage: "main"})
 		}
 	}
 	return nil

@@ -37,6 +37,7 @@ import (
 	"github.com/juan-medina/gosge/events"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
+	"reflect"
 )
 
 var opt = options.Options{
@@ -116,6 +117,9 @@ const (
 type BarClickEvent struct {
 	Type BarType
 }
+
+// BarClickEventType is the reflect.Type for BarClickEvent
+var BarClickEventType = reflect.TypeOf(BarClickEvent{})
 
 func loadGame(eng *gosge.Engine) error {
 	geng = eng
@@ -299,17 +303,20 @@ func loadGame(eng *gosge.Engine) error {
 	soundLabel, soundBar = createBar(world, "Sound Volume : %d%%", textPos, barPos, gameScale, SoundBar)
 
 	// add the listener for mouse clicks
-	world.AddListener(mouseListener)
+	world.AddListener(mouseListener, events.TYPE.MouseUpEvent)
+
 	// add the listener to update the ui when music status change
-	world.AddListener(musicStateListener)
+	world.AddListener(musicStateListener, events.TYPE.MusicStateChangeEvent)
 
 	// listen on bar clicks
-	world.AddListener(barClickListener)
+	world.AddListener(barClickListener, BarClickEventType)
 
 	textPos.Y += barHeight * gameScale.Max
 
 	// set the master volume
-	return world.Signal(events.ChangeMasterVolumeEvent{Volume: masterVolume})
+	world.Signal(events.ChangeMasterVolumeEvent{Volume: masterVolume})
+
+	return nil
 }
 
 func createBar(world *goecs.World, text string, textPos, barPos geometry.Point, scale geometry.Scale,
@@ -404,7 +411,7 @@ func barClickListener(world *goecs.World, signal interface{}, _ float32) error {
 			masterVolume = float32(int(bar.Current)) / 100
 			settings.SetFloat32("masterVolume", masterVolume)
 			updateUIVolume()
-			return world.Signal(events.ChangeMasterVolumeEvent{Volume: masterVolume})
+			world.Signal(events.ChangeMasterVolumeEvent{Volume: masterVolume})
 		case MusicBar:
 			bar := ui.Get.ProgressBar(musicBar)
 			text := ui.Get.Text(musicLabel)
@@ -413,7 +420,7 @@ func barClickListener(world *goecs.World, signal interface{}, _ float32) error {
 			settings.SetFloat32("musicVolume", musicVolume)
 			musicLabel.Set(text)
 			updateUIVolume()
-			return world.Signal(events.ChangeMusicVolumeEvent{
+			world.Signal(events.ChangeMusicVolumeEvent{
 				Name:   musicFile,
 				Volume: musicVolume,
 			})
@@ -485,7 +492,7 @@ func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 			}
 			gopher.Set(anim)
 			// play the gopher sound
-			return world.Signal(events.PlaySoundEvent{Name: gopherSound, Volume: soundVolume})
+			world.Signal(events.PlaySoundEvent{Name: gopherSound, Volume: soundVolume})
 		}
 	}
 	return nil

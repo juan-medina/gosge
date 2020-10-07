@@ -10,6 +10,8 @@ github.com/gen2brain/raylib-go v0.0.0-20200905153824-5b0944b5567a h1:akS5kJf8OfF
 github.com/gen2brain/raylib-go v0.0.0-20200905153824-5b0944b5567a/go.mod h1:LUVRDQbnxUaOgzLzW5lMS+IcbqlXHIqIA9wq8wxzmcA=
 github.com/juan-medina/goecs v1.3.1 h1:jcJzkLl3w/1a6HQIviM3iC0E+sgADyKBTvY4DzHRn7I=
 github.com/juan-medina/goecs v1.3.1/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
+github.com/juan-medina/goecs v1.4.0 h1:yBRasnIxXiiTqaNoCbUVTvSh7lkM+yq+jrZHobRdE0I=
+github.com/juan-medina/goecs v1.4.0/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=

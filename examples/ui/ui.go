@@ -35,6 +35,7 @@ import (
 	"github.com/juan-medina/gosge/events"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
+	"reflect"
 	"strconv"
 )
 
@@ -147,10 +148,10 @@ func loadGame(eng *gosge.Engine) error {
 	)
 
 	// listen tu ui events
-	world.AddListener(uiEvents)
+	world.AddListener(uiEvents, uiDemoEventType, progressBarEventType, checkBoxEventType, optionEventType)
 
 	// listen to keys
-	world.AddListener(keyEvents)
+	world.AddListener(keyEvents, events.TYPE.KeyUpEvent)
 
 	return nil
 }
@@ -630,11 +631,15 @@ type uiDemoEvent struct {
 	Message string
 }
 
+var uiDemoEventType = reflect.TypeOf(uiDemoEvent{})
+
 type progressBarEvent struct {
 	Message  string
 	barEnt   *goecs.Entity
 	valueEnt *goecs.Entity
 }
+
+var progressBarEventType = reflect.TypeOf(progressBarEvent{})
 
 type checkBoxEvent struct {
 	Message  string
@@ -642,8 +647,12 @@ type checkBoxEvent struct {
 	valueEnt *goecs.Entity
 }
 
+var checkBoxEventType = reflect.TypeOf(checkBoxEvent{})
+
 type optionEvent struct {
 	Message  string
 	value    string
 	valueEnt *goecs.Entity
 }
+
+var optionEventType = reflect.TypeOf(optionEvent{})

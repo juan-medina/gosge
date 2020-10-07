@@ -103,7 +103,7 @@ func loadGame(eng *gosge.Engine) error {
 	)
 
 	// add the mouse listener
-	world.AddListener(mouseListener)
+	world.AddListener(mouseListener, events.TYPE.MouseDownEvent, events.TYPE.MouseUpEvent, events.TYPE.MouseMoveEvent)
 
 	return nil
 }
