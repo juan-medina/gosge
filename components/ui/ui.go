@@ -34,6 +34,7 @@ type ControlState struct {
 	Clicked  bool
 	Disabled bool
 	Checked  bool
+	Focused  bool
 }
 
 type types struct {

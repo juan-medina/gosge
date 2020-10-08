@@ -32,8 +32,8 @@ type CollisionManager struct {
 	sm *StorageManager
 }
 
-// getSpriteRect return a geometry.Rect for a given sprite.Sprite at a geometry.Point
-func (cm CollisionManager) getSpriteRect(spr sprite.Sprite, at geometry.Point) geometry.Rect {
+// getSpriteRectAt return a geometry.Rect for a given sprite.Sprite at a geometry.Point
+func (cm CollisionManager) getSpriteRectAt(spr sprite.Sprite, at geometry.Point) geometry.Rect {
 	def, _ := cm.sm.GetSpriteDef(spr.Sheet, spr.Name)
 	size := def.Origin.Size.Scale(spr.Scale)
 
@@ -46,8 +46,8 @@ func (cm CollisionManager) getSpriteRect(spr sprite.Sprite, at geometry.Point) g
 	}
 }
 
-// getSpriteRect return a geometry.Rect for a given sprite.Sprite at a geometry.Point with a factor
-func (cm CollisionManager) getSpriteRectFactor(spr sprite.Sprite, at geometry.Point, factor geometry.Point) geometry.Rect {
+// getSpriteRectAtFactor return a geometry.Rect for a given sprite.Sprite at a geometry.Point with a factor
+func (cm CollisionManager) getSpriteRectAtFactor(spr sprite.Sprite, at geometry.Point, factor geometry.Point) geometry.Rect {
 	def, _ := cm.sm.GetSpriteDef(spr.Sheet, spr.Name)
 	size := def.Origin.Size.ScaleXYFactor(geometry.Point{X: factor.X * spr.Scale, Y: factor.Y * spr.Scale})
 
@@ -62,13 +62,13 @@ func (cm CollisionManager) getSpriteRectFactor(spr sprite.Sprite, at geometry.Po
 
 // SpriteAtContains indicates if a sprite.Sprite at a given geometry.Point contains a geometry.Point
 func (cm CollisionManager) SpriteAtContains(spr sprite.Sprite, at geometry.Point, point geometry.Point) bool {
-	return cm.getSpriteRect(spr, at).IsPointInRect(point)
+	return cm.getSpriteRectAt(spr, at).IsPointInRect(point)
 }
 
 // SpritesCollides indicates if two sprite.Sprite collides
 func (cm CollisionManager) SpritesCollides(spr1 sprite.Sprite, at1 geometry.Point, spr2 sprite.Sprite, at2 geometry.Point) bool {
-	rec1 := cm.getSpriteRect(spr1, at1)
-	rec2 := cm.getSpriteRect(spr2, at2)
+	rec1 := cm.getSpriteRectAt(spr1, at1)
+	rec2 := cm.getSpriteRectAt(spr2, at2)
 
 	return rec1.Collides(rec2)
 }
@@ -76,8 +76,8 @@ func (cm CollisionManager) SpritesCollides(spr1 sprite.Sprite, at1 geometry.Poin
 // SpritesCollidesFactor indicates if two sprite.Sprite collides with a factor
 func (cm CollisionManager) SpritesCollidesFactor(spr1 sprite.Sprite, at1 geometry.Point, spr2 sprite.Sprite, at2 geometry.Point,
 	factor1 geometry.Point, factor2 geometry.Point) bool {
-	rec1 := cm.getSpriteRectFactor(spr1, at1, factor1)
-	rec2 := cm.getSpriteRectFactor(spr2, at2, factor2)
+	rec1 := cm.getSpriteRectAtFactor(spr1, at1, factor1)
+	rec2 := cm.getSpriteRectAtFactor(spr2, at2, factor2)
 
 	return rec1.Collides(rec2)
 }

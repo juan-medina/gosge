@@ -54,6 +54,30 @@ func (pos *Point) Clamp(min Point, max Point) {
 	}
 }
 
+// Distance is the distance between this Point and other
+func (pos Point) Distance(other Point) float32 {
+	dx := float64(pos.X - other.X)
+	dy := float64(pos.Y - other.Y)
+
+	return float32(math.Sqrt(dx*dx + dy*dy))
+}
+
+// Add other Point to this Point
+func (pos Point) Add(other Point) Point {
+	return Point{
+		X: pos.X + other.X,
+		Y: pos.Y + other.Y,
+	}
+}
+
+// Sub other Point to this Point
+func (pos Point) Sub(other Point) Point {
+	return Point{
+		X: pos.X - other.X,
+		Y: pos.Y - other.Y,
+	}
+}
+
 // Size represent the size of an object
 type Size struct {
 	Width  float32 // Width is vertical length of the size

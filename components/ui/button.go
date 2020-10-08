@@ -59,6 +59,7 @@ type SpriteButton struct {
 	Normal   string      // Normal is the sprite on normal state
 	Hover    string      // Hover is the sprite on hover state
 	Clicked  string      // Clicked is the sprite on clicked state
+	Focused  string      // Focused is the sprite on focused state
 	Disabled string      // Disable is teh sprite on disabled state
 	Scale    float32     // Scale is the Sprite scale
 	Sound    string      // Sound is the click sound

@@ -26,7 +26,7 @@
       }
     },
     {
-      "filename": "locked.png",
+      "filename": "focused.png",
       "frame": {
         "x": 442,
         "y": 5,
@@ -51,7 +51,7 @@
       }
     },
     {
-      "filename": "normal.png",
+      "filename": "locked.png",
       "frame": {
         "x": 879,
         "y": 5,
@@ -76,9 +76,34 @@
       }
     },
     {
-      "filename": "hover.png",
+      "filename": "normal.png",
       "frame": {
         "x": 1316,
+        "y": 5,
+        "w": 427,
+        "h": 190
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 427,
+        "h": 190
+      },
+      "sourceSize": {
+        "w": 427,
+        "h": 190
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "hover.png",
+      "frame": {
+        "x": 1753,
         "y": 5,
         "w": 426,
         "h": 190
@@ -107,7 +132,7 @@
     "image": "ui.png",
     "format": "RGBA8888",
     "size": {
-      "w": 1747,
+      "w": 2184,
       "h": 200
     },
     "scale": 1

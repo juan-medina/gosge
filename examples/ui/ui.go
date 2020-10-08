@@ -99,9 +99,9 @@ func loadGame(eng *gosge.Engine) error {
 	}
 
 	// add the flat button
-	addFlatButton(world, gameScale, pos, false)
+	addFlatButton(world, gameScale, pos, false, true)
 	pos.Y += rowGap * gameScale.Max
-	addFlatButton(world, gameScale, pos, true)
+	addFlatButton(world, gameScale, pos, true, false)
 
 	// add check boxes
 	pos.Y += rowGap * gameScale.Max
@@ -398,7 +398,7 @@ func addCheckBox(world *goecs.World, gameScale geometry.Scale, labelPos geometry
 	checkEnt.Set(check)
 }
 
-func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
+func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool, focus bool) {
 	// control pos
 	controlPos := geometry.Point{
 		X: labelPos.X + (columnGap * gameScale.Max),
@@ -436,7 +436,7 @@ func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geomet
 	)
 
 	// add a control : flat button
-	world.AddEntity(
+	ctl := world.AddEntity(
 		ui.FlatButton{
 			Shadow: geometry.Size{
 				Width:  2 * gameScale.Max,
@@ -462,6 +462,9 @@ func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geomet
 		},
 		controlPos,
 	)
+	if focus {
+		world.Signal(events.FocusOnControlEvent{Control: ctl})
+	}
 }
 
 func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
@@ -583,6 +586,7 @@ func addSpriteButton(world *goecs.World, gameScale geometry.Scale, labelPos geom
 			Hover:    "hover.png",
 			Clicked:  "click.png",
 			Disabled: "locked.png",
+			Focused:  "focused.png",
 			Scale:    gameScale.Max * spriteScale,
 			Event:    uiDemoEvent{Message: text + " clicked"},
 		},

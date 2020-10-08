@@ -53,15 +53,20 @@ func (b SolidBox) Contains(at geometry.Point, point geometry.Point) bool {
 	}.IsPointInRect(point)
 }
 
-// Contains return if a box at a geometry.Point contains a point
-func (b Box) Contains(at geometry.Point, point geometry.Point) bool {
+// GetReactAt return return a geometry.Rect at a given point
+func (b Box) GetReactAt(at geometry.Point) geometry.Rect {
 	return geometry.Rect{
 		From: at,
 		Size: geometry.Size{
 			Width:  b.Size.Width * b.Scale,
 			Height: b.Size.Height * b.Scale,
 		},
-	}.IsPointInRect(point)
+	}
+}
+
+// Contains return if a box at a geometry.Point contains a point
+func (b Box) Contains(at geometry.Point, point geometry.Point) bool {
+	return b.GetReactAt(at).IsPointInRect(point)
 }
 
 // Line is a component that represent a line

@@ -25,12 +25,14 @@ package managers
 import (
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components/color"
+	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/effects"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/components/shapes"
 	"github.com/juan-medina/gosge/components/sprite"
 	"github.com/juan-medina/gosge/components/ui"
 	"github.com/juan-medina/gosge/events"
+	"math"
 	"reflect"
 )
 
@@ -43,6 +45,7 @@ type uiManager struct {
 	dm      DeviceManager
 	cm      *CollisionManager
 	clicked *goecs.Entity
+	focus   *goecs.Entity
 }
 
 func (uim *uiManager) Signals() []reflect.Type {
@@ -50,6 +53,9 @@ func (uim *uiManager) Signals() []reflect.Type {
 		events.TYPE.MouseMoveEvent,
 		events.TYPE.MouseDownEvent,
 		events.TYPE.MouseUpEvent,
+		events.TYPE.FocusOnControlEvent,
+		events.TYPE.ClearFocusEvent,
+		events.TYPE.KeyUpEvent,
 	}
 }
 
@@ -74,6 +80,12 @@ func (uim *uiManager) Listener(world *goecs.World, event interface{}, _ float32)
 		uim.flatButtonsMouseUp(world, v)
 		uim.progressBarsMouseUp(world, v)
 		uim.spriteButtonsMouseUp(world, v)
+	case events.FocusOnControlEvent:
+		uim.focusControl(world, v.Control)
+	case events.ClearFocusEvent:
+		uim.clearFocus(world)
+	case events.KeyUpEvent:
+		uim.handleKey(world, v.Key)
 	}
 	return nil
 }
@@ -140,6 +152,12 @@ func (uim uiManager) flatButtonsColors(ent *goecs.Entity) {
 		ent.Set(bcl.Hover)
 	} else {
 		ent.Set(bcl.Normal)
+	}
+	if state.Focused {
+		clr := ui.Get.ButtonColor(ent)
+		clr.Border = bcl.Hover.Border
+		clr.Text = bcl.Hover.Text
+		ent.Set(clr)
 	}
 }
 
@@ -305,6 +323,11 @@ func (uim uiManager) progressBarsColors(ent *goecs.Entity) {
 	} else {
 		ent.Set(bcl.Normal)
 	}
+	if state.Focused {
+		clr := ui.Get.ProgressBarColor(ent)
+		clr.Border = bcl.Hover.Border
+		ent.Set(clr)
+	}
 }
 
 func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
@@ -437,6 +460,7 @@ func (uim uiManager) refreshSpriteButton(ent *goecs.Entity) {
 	spr := sprite.Get(ent)
 	sbn := ui.Get.SpriteButton(ent)
 	state := ui.Get.ControlState(ent)
+
 	if state.Disabled {
 		spr.Name = sbn.Disabled
 	} else if state.Clicked {
@@ -447,8 +471,10 @@ func (uim uiManager) refreshSpriteButton(ent *goecs.Entity) {
 		spr.Name = sbn.Normal
 	}
 
-	ent.Set(sbn)
-	ent.Set(state)
+	if state.Focused && !state.Clicked {
+		spr.Name = sbn.Focused
+	}
+
 	ent.Set(spr)
 }
 
@@ -516,6 +542,142 @@ func (uim *uiManager) spriteButtonsMouseUp(world *goecs.World, _ events.MouseUpE
 			world.Signal(sbn.Event)
 		}
 	}
+}
+
+func (uim *uiManager) focusControl(world *goecs.World, control *goecs.Entity) {
+	for it := world.Iterator(ui.TYPE.ControlState); it != nil; it = it.Next() {
+		ent := it.Value()
+		state := ui.Get.ControlState(ent)
+		state.Focused = ent.ID() == control.ID()
+		ent.Set(state)
+	}
+	uim.focus = control
+}
+
+func (uim *uiManager) clearFocus(world *goecs.World) {
+	for it := world.Iterator(ui.TYPE.ControlState); it != nil; it = it.Next() {
+		ent := it.Value()
+		state := ui.Get.ControlState(ent)
+		state.Focused = false
+		ent.Set(state)
+	}
+	uim.focus = nil
+}
+
+func (uim *uiManager) handleKey(world *goecs.World, key device.Key) {
+	if uim.focus == nil {
+		return
+	}
+	if key == device.KeyDown || key == device.KeyUp || key == device.KeyLeft || key == device.KeyRight {
+		focusPos := geometry.Get.Point(uim.focus)
+		focusRect := uim.getControlRect(uim.focus, focusPos)
+		smallerDiff := float32(math.MaxFloat32)
+		var possible *goecs.Entity
+		for it := world.Iterator(ui.TYPE.ControlState); it != nil; it = it.Next() {
+			ent := it.Value()
+			state := ui.Get.ControlState(ent)
+			if ent.ID() == uim.focus.ID() || ent.Contains(effects.TYPE.Hide) || state.Disabled {
+				continue
+			}
+			possiblePos := geometry.Get.Point(ent)
+			possibleRect := uim.getControlRect(ent, possiblePos)
+			distance := uim.getControlDistance(focusRect, possibleRect, key)
+
+			if distance < smallerDiff {
+				smallerDiff = distance
+				possible = ent
+			}
+		}
+		if possible != nil {
+			if possible.Contains(ui.TYPE.FlatButton) {
+				fbt := ui.Get.FlatButton(possible)
+				if fbt.Group != "" {
+					if uim.focus.Contains(ui.TYPE.FlatButton) {
+						fbtFocus := ui.Get.FlatButton(uim.focus)
+						if fbtFocus.Group != fbt.Group {
+							possible = uim.getSelectedInGroup(world, fbt.Group)
+						}
+					} else {
+						possible = uim.getSelectedInGroup(world, fbt.Group)
+					}
+				}
+			}
+			uim.focusControl(world, possible)
+		}
+	}
+}
+
+func (uim uiManager) getControlRect(control *goecs.Entity, at geometry.Point) geometry.Rect {
+	var rect geometry.Rect
+	if control.Contains(sprite.TYPE) {
+		spr := sprite.Get(control)
+		rect = uim.cm.getSpriteRectAt(spr, at)
+	} else {
+		box := shapes.Get.Box(control)
+		rect = box.GetReactAt(at)
+	}
+	return rect
+}
+
+func (uim uiManager) getControlDistance(rect1 geometry.Rect, rect2 geometry.Rect, key device.Key) float32 {
+	var point1 geometry.Point
+	var point2 geometry.Point
+
+	switch key {
+	case device.KeyUp:
+		point1.X = rect1.From.X + (rect1.Size.Width / 2)
+		point1.Y = rect1.From.Y
+
+		point2.X = rect2.From.X + (rect2.Size.Width / 2)
+		point2.Y = rect2.From.Y + (rect2.Size.Height)
+		if point1.Y <= point2.Y {
+			return math.MaxFloat32
+		}
+	case device.KeyDown:
+		point1.X = rect1.From.X + (rect1.Size.Width / 2)
+		point1.Y = rect1.From.Y + (rect1.Size.Height)
+
+		point2.X = rect2.From.X + (rect2.Size.Width / 2)
+		point2.Y = rect2.From.Y
+		if point1.Y >= point2.Y {
+			return math.MaxFloat32
+		}
+	case device.KeyLeft:
+		point1.X = rect1.From.X
+		point1.Y = rect1.From.Y + (rect1.Size.Height / 2)
+
+		point2.X = rect2.From.X + (rect2.Size.Width)
+		point2.Y = rect2.From.Y + (rect2.Size.Height / 2)
+
+		if point1.X <= point2.X {
+			return math.MaxFloat32
+		}
+	case device.KeyRight:
+		point1.X = rect1.From.X + (rect1.Size.Width)
+		point1.Y = rect1.From.Y + (rect1.Size.Height / 2)
+
+		point2.X = rect2.From.X
+		point2.Y = rect2.From.Y + (rect2.Size.Height / 2)
+
+		if point1.X >= point2.X {
+			return math.MaxFloat32
+		}
+	}
+	return rect1.From.Distance(rect2.From)
+}
+
+func (uim *uiManager) getSelectedInGroup(world *goecs.World, group string) *goecs.Entity {
+	for it := world.Iterator(ui.TYPE.FlatButton); it != nil; it = it.Next() {
+		ent := it.Value()
+		fbt := ui.Get.FlatButton(ent)
+		if fbt.Group == group {
+			state := ui.Get.ControlState(ent)
+			if state.Checked {
+				return ent
+			}
+		}
+	}
+	return nil
 }
 
 // UI returns a managers.WithSystemAndListener that handle ui components

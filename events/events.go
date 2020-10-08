@@ -24,6 +24,7 @@
 package events
 
 import (
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components/audio"
 	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/geometry"
@@ -123,6 +124,14 @@ type DelaySignal struct {
 	Time   float32     // Time to this Signal to be emitted, in seconds
 }
 
+// FocusOnControlEvent is a signal to change the focussed control
+type FocusOnControlEvent struct {
+	Control *goecs.Entity
+}
+
+// ClearFocusEvent is a signal to clear all focussed control
+type ClearFocusEvent struct{}
+
 type types struct {
 	// GameCloseEvent is the reflect.Type for events.GameCloseEvent
 	GameCloseEvent reflect.Type
@@ -156,6 +165,10 @@ type types struct {
 	KeyUpEvent reflect.Type
 	// MusicStateChangeEvent is the reflect.Type for events.MusicStateChangeEvent
 	MusicStateChangeEvent reflect.Type
+	// FocusOnControlEvent is the reflect.Type for events.FocusOnControlEvent
+	FocusOnControlEvent reflect.Type
+	// ClearFocusEvent is the reflect.Type for events.ClearFocusEvent
+	ClearFocusEvent reflect.Type
 }
 
 // TYPE hold the reflect.Type for our events
@@ -176,4 +189,6 @@ var TYPE = types{
 	KeyDownEvent:            reflect.TypeOf(KeyDownEvent{}),
 	KeyUpEvent:              reflect.TypeOf(KeyUpEvent{}),
 	MusicStateChangeEvent:   reflect.TypeOf(MusicStateChangeEvent{}),
+	FocusOnControlEvent:     reflect.TypeOf(FocusOnControlEvent{}),
+	ClearFocusEvent:         reflect.TypeOf(ClearFocusEvent{}),
 }
