@@ -82,6 +82,9 @@ func (uim *uiManager) flatButtons(world *goecs.World) {
 	for it := world.Iterator(ui.TYPE.FlatButton); it != nil; it = it.Next() {
 		ent := it.Value()
 		// calculate state if is not done yet
+		if ent.NotContains(ui.TYPE.ControlState) {
+			ent.Set(ui.ControlState{})
+		}
 		if ent.NotContains(ui.TYPE.ButtonHoverColors) {
 			clr := ui.Get.ButtonColor(ent)
 			bcl := ui.ButtonHoverColors{}
@@ -121,19 +124,19 @@ func (uim *uiManager) flatButtons(world *goecs.World) {
 			}
 			ent.Set(bcl)
 		} else {
-			btn := ui.Get.FlatButton(ent)
-			uim.flatButtonsColors(ent, btn)
+			uim.flatButtonsColors(ent)
 		}
 	}
 }
 
-func (uim uiManager) flatButtonsColors(ent *goecs.Entity, btn ui.FlatButton) {
+func (uim uiManager) flatButtonsColors(ent *goecs.Entity) {
 	bcl := ui.Get.ButtonHoverColors(ent)
-	if btn.State.Disabled {
+	state := ui.Get.ControlState(ent)
+	if state.Disabled {
 		ent.Set(bcl.Disabled)
-	} else if btn.State.Clicked {
+	} else if state.Clicked {
 		ent.Set(bcl.Clicked)
-	} else if btn.State.Hover {
+	} else if state.Hover {
 		ent.Set(bcl.Hover)
 	} else {
 		ent.Set(bcl.Normal)
@@ -148,14 +151,16 @@ func (uim *uiManager) flatButtonsMouseMove(world *goecs.World, mme events.MouseM
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		btn := ui.Get.FlatButton(ent)
-		if btn.State.Disabled {
+		state := ui.Get.ControlState(ent)
+		if state.Disabled {
 			continue
 		}
 		pos := geometry.Get.Point(ent)
 		box := shapes.Get.Box(ent)
-		btn.State.Hover = box.Contains(pos, mme.Point)
-		uim.flatButtonsColors(ent, btn)
+		state.Hover = box.Contains(pos, mme.Point)
+		uim.flatButtonsColors(ent)
 		ent.Set(btn)
+		ent.Set(state)
 	}
 }
 
@@ -166,17 +171,19 @@ func (uim *uiManager) flatButtonsMouseDown(world *goecs.World, mde events.MouseD
 			continue
 		}
 		btn := ui.Get.FlatButton(ent)
-		if btn.State.Disabled {
+		state := ui.Get.ControlState(ent)
+		if state.Disabled {
 			continue
 		}
 		pos := geometry.Get.Point(ent)
 		box := shapes.Get.Box(ent)
 		if box.Contains(pos, mde.Point) {
-			btn.State.Clicked = true
+			state.Clicked = true
 			uim.clicked = ent
 		}
-		uim.flatButtonsColors(ent, btn)
+		uim.flatButtonsColors(ent)
 		ent.Set(btn)
+		ent.Set(state)
 	}
 }
 
@@ -187,21 +194,22 @@ func (uim *uiManager) flatButtonsMouseUp(world *goecs.World, _ events.MouseUpEve
 			continue
 		}
 		btn := ui.Get.FlatButton(ent)
-		if btn.State.Clicked {
+		state := ui.Get.ControlState(ent)
+		if state.Clicked {
 			trigger := true
 			if btn.CheckBox {
 				if btn.Group == "" {
-					btn.State.Checked = !btn.State.Checked
+					state.Checked = !state.Checked
 				} else {
-					if !btn.State.Checked {
+					if !state.Checked {
 						uim.uncheckGroup(world, btn.Group)
-						btn.State.Checked = true
+						state.Checked = true
 					} else {
 						trigger = false
 					}
 				}
 			}
-			btn.State.Clicked = false
+			state.Clicked = false
 			if trigger {
 				if btn.Sound != "" {
 					world.Signal(events.PlaySoundEvent{Name: btn.Sound, Volume: btn.Volume})
@@ -211,8 +219,9 @@ func (uim *uiManager) flatButtonsMouseUp(world *goecs.World, _ events.MouseUpEve
 
 			uim.clicked = nil
 		}
-		uim.flatButtonsColors(ent, btn)
+		uim.flatButtonsColors(ent)
 		ent.Set(btn)
+		ent.Set(state)
 	}
 }
 
@@ -223,9 +232,10 @@ func (uim *uiManager) uncheckGroup(world *goecs.World, group string) {
 			continue
 		}
 		btn := ui.Get.FlatButton(ent)
+		state := ui.Get.ControlState(ent)
 		if btn.Group == group {
-			btn.State.Checked = false
-			ent.Set(btn)
+			state.Checked = false
+			ent.Set(state)
 		}
 	}
 }
@@ -234,6 +244,9 @@ func (uim uiManager) progressBars(world *goecs.World) {
 	for it := world.Iterator(ui.TYPE.ProgressBar); it != nil; it = it.Next() {
 		ent := it.Value()
 		// calculate state if is not done yet
+		if ent.NotContains(ui.TYPE.ControlState) {
+			ent.Set(ui.ControlState{})
+		}
 		if ent.NotContains(ui.TYPE.ProgressBarHoverColor) {
 			clr := ui.Get.ProgressBarColor(ent)
 			phc := ui.ProgressBarHoverColor{}
@@ -275,19 +288,19 @@ func (uim uiManager) progressBars(world *goecs.World) {
 			}
 			ent.Set(phc)
 		} else {
-			bar := ui.Get.ProgressBar(ent)
-			uim.progressBarsColors(ent, bar)
+			uim.progressBarsColors(ent)
 		}
 	}
 }
 
-func (uim uiManager) progressBarsColors(ent *goecs.Entity, bar ui.ProgressBar) {
+func (uim uiManager) progressBarsColors(ent *goecs.Entity) {
 	bcl := ui.Get.ProgressBarHoverColor(ent)
-	if bar.State.Disabled {
+	state := ui.Get.ControlState(ent)
+	if state.Disabled {
 		ent.Set(bcl.Disabled)
-	} else if bar.State.Clicked {
+	} else if state.Clicked {
 		ent.Set(bcl.Clicked)
-	} else if bar.State.Hover {
+	} else if state.Hover {
 		ent.Set(bcl.Hover)
 	} else {
 		ent.Set(bcl.Normal)
@@ -297,8 +310,8 @@ func (uim uiManager) progressBarsColors(ent *goecs.Entity, bar ui.ProgressBar) {
 func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
 	if uim.clicked != nil {
 		if uim.clicked.Contains(ui.TYPE.ProgressBar) {
-			bar := ui.Get.ProgressBar(uim.clicked)
-			if !bar.State.Disabled {
+			state := ui.Get.ControlState(uim.clicked)
+			if !state.Disabled {
 				uim.calculateBarCurrent(world, uim.clicked, mme.Point)
 			}
 		}
@@ -308,12 +321,14 @@ func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.Mouse
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
 		bar := ui.Get.ProgressBar(ent)
-		if bar.Event != nil && !bar.State.Disabled {
+		state := ui.Get.ControlState(ent)
+		if bar.Event != nil && !state.Disabled {
 			pos := geometry.Get.Point(ent)
 			box := shapes.Get.Box(ent)
-			bar.State.Hover = box.Contains(pos, mme.Point)
-			uim.progressBarsColors(ent, bar)
+			state.Hover = box.Contains(pos, mme.Point)
+			uim.progressBarsColors(ent)
 			ent.Set(bar)
+			ent.Set(state)
 		}
 	}
 	return
@@ -327,16 +342,18 @@ func (uim *uiManager) progressBarsMouseDown(world *goecs.World, mde events.Mouse
 			continue
 		}
 		bar := ui.Get.ProgressBar(ent)
-		if bar.State.Disabled {
+		state := ui.Get.ControlState(ent)
+		if state.Disabled {
 			continue
 		}
 		pos := geometry.Get.Point(ent)
 		box := shapes.Get.Box(ent)
 		if box.Contains(pos, mde.Point) {
-			bar.State.Clicked = true
+			state.Clicked = true
 			uim.clicked = ent
-			uim.progressBarsColors(ent, bar)
+			uim.progressBarsColors(ent)
 			ent.Set(bar)
+			ent.Set(state)
 		}
 	}
 }
@@ -377,11 +394,12 @@ func (uim *uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUp
 			continue
 		}
 		bar := ui.Get.ProgressBar(ent)
-
-		if bar.State.Clicked {
-			bar.State.Clicked = false
+		state := ui.Get.ControlState(ent)
+		if state.Clicked {
+			state.Clicked = false
 			uim.clicked = nil
 			ent.Set(bar)
+			ent.Set(state)
 
 			uim.calculateBarCurrent(world, ent, mue.Point)
 
@@ -389,7 +407,7 @@ func (uim *uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUp
 				world.Signal(events.PlaySoundEvent{Name: bar.Sound, Volume: bar.Volume})
 			}
 
-			uim.progressBarsColors(ent, bar)
+			uim.progressBarsColors(ent)
 		}
 	}
 }
@@ -397,6 +415,9 @@ func (uim *uiManager) progressBarsMouseUp(world *goecs.World, mue events.MouseUp
 func (uim uiManager) spriteButtons(world *goecs.World) {
 	for it := world.Iterator(ui.TYPE.SpriteButton); it != nil; it = it.Next() {
 		ent := it.Value()
+		if ent.NotContains(ui.TYPE.ControlState) {
+			ent.Set(ui.ControlState{})
+		}
 		sb := ui.Get.SpriteButton(ent)
 		// add sprite if we have not one yet
 		if ent.NotContains(sprite.TYPE) {
@@ -415,18 +436,19 @@ func (uim uiManager) spriteButtons(world *goecs.World) {
 func (uim uiManager) refreshSpriteButton(ent *goecs.Entity) {
 	spr := sprite.Get(ent)
 	sbn := ui.Get.SpriteButton(ent)
-
-	if sbn.State.Disabled {
+	state := ui.Get.ControlState(ent)
+	if state.Disabled {
 		spr.Name = sbn.Disabled
-	} else if sbn.State.Clicked {
+	} else if state.Clicked {
 		spr.Name = sbn.Clicked
-	} else if sbn.State.Hover {
+	} else if state.Hover {
 		spr.Name = sbn.Hover
 	} else {
 		spr.Name = sbn.Normal
 	}
 
 	ent.Set(sbn)
+	ent.Set(state)
 	ent.Set(spr)
 }
 
@@ -437,13 +459,15 @@ func (uim *uiManager) spriteButtonsMouseMove(world *goecs.World, mme events.Mous
 	for it := world.Iterator(ui.TYPE.SpriteButton, sprite.TYPE, geometry.TYPE.Point); it != nil; it = it.Next() {
 		ent := it.Value()
 		sbn := ui.Get.SpriteButton(ent)
-		if sbn.State.Disabled {
+		state := ui.Get.ControlState(ent)
+		if state.Disabled {
 			continue
 		}
 		pos := geometry.Get.Point(ent)
 		spr := sprite.Get(ent)
-		sbn.State.Hover = uim.cm.SpriteAtContains(spr, pos, mme.Point)
+		state.Hover = uim.cm.SpriteAtContains(spr, pos, mme.Point)
 		ent.Set(sbn)
+		ent.Set(state)
 		uim.refreshSpriteButton(ent)
 	}
 }
@@ -455,7 +479,8 @@ func (uim *uiManager) spriteButtonsMouseDown(world *goecs.World, mde events.Mous
 			continue
 		}
 		sbn := ui.Get.SpriteButton(ent)
-		if sbn.State.Disabled {
+		state := ui.Get.ControlState(ent)
+		if state.Disabled {
 			continue
 		}
 		spr := sprite.Get(ent)
@@ -463,8 +488,9 @@ func (uim *uiManager) spriteButtonsMouseDown(world *goecs.World, mde events.Mous
 
 		if uim.cm.SpriteAtContains(spr, pos, mde.Point) {
 			uim.clicked = ent
-			sbn.State.Clicked = true
+			state.Clicked = true
 			ent.Set(sbn)
+			ent.Set(state)
 			uim.refreshSpriteButton(ent)
 		}
 	}
@@ -477,10 +503,12 @@ func (uim *uiManager) spriteButtonsMouseUp(world *goecs.World, _ events.MouseUpE
 			continue
 		}
 		sbn := ui.Get.SpriteButton(ent)
-		if sbn.State.Clicked {
+		state := ui.Get.ControlState(ent)
+		if state.Clicked {
 			uim.clicked = nil
-			sbn.State.Clicked = false
+			state.Clicked = false
 			ent.Set(sbn)
+			ent.Set(state)
 			uim.refreshSpriteButton(ent)
 			if sbn.Sound != "" {
 				world.Signal(events.PlaySoundEvent{Name: sbn.Sound, Volume: sbn.Volume})

@@ -46,7 +46,6 @@ type ButtonHoverColors struct {
 // FlatButton is a UI element for displaying a button
 type FlatButton struct {
 	Shadow   geometry.Size // Shadow is the offset of the shadow on the ui.FlatButton
-	State    ControlState  // State is this ui.FlatButton ui.ControlState
 	CheckBox bool          // CheckBox indicates if this is a checkbox
 	Group    string        // Group indicates if this has a option group
 	Sound    string        // Sound is the click sound
@@ -56,14 +55,13 @@ type FlatButton struct {
 
 // SpriteButton is a UI element for displaying a image base button
 type SpriteButton struct {
-	Sheet    string       // Sheet is the Sprite sheet
-	Normal   string       // Normal is the sprite on normal state
-	Hover    string       // Hover is the sprite on hover state
-	Clicked  string       // Clicked is the sprite on clicked state
-	Disabled string       // Disable is teh sprite on disabled state
-	State    ControlState // State is the ui.SpriteButton ui.ControlState
-	Scale    float32      // Scale is the Sprite scale
-	Sound    string       // Sound is the click sound
-	Volume   float32      // Volume is the volume for click Sound
-	Event    interface{}  // Event is the event that will be trigger when this button is click
+	Sheet    string      // Sheet is the Sprite sheet
+	Normal   string      // Normal is the sprite on normal state
+	Hover    string      // Hover is the sprite on hover state
+	Clicked  string      // Clicked is the sprite on clicked state
+	Disabled string      // Disable is teh sprite on disabled state
+	Scale    float32     // Scale is the Sprite scale
+	Sound    string      // Sound is the click sound
+	Volume   float32     // Volume is the volume for click Sound
+	Event    interface{} // Event is the event that will be trigger when this button is click
 }

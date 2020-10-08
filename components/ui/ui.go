@@ -53,6 +53,8 @@ type types struct {
 	ProgressBarColor reflect.Type
 	// ProgressBarHoverColor is the reflect.Type for ui.ProgressBarHoverColor
 	ProgressBarHoverColor reflect.Type
+	// ControlState is the reflect.Type for ui.ControlState
+	ControlState reflect.Type
 }
 
 // TYPE hold the reflect.Type for our ui components
@@ -65,6 +67,7 @@ var TYPE = types{
 	ProgressBar:           reflect.TypeOf(ProgressBar{}),
 	ProgressBarColor:      reflect.TypeOf(ProgressBarColor{}),
 	ProgressBarHoverColor: reflect.TypeOf(ProgressBarHoverColor{}),
+	ControlState:          reflect.TypeOf(ControlState{}),
 }
 
 type gets struct {
@@ -84,6 +87,8 @@ type gets struct {
 	ProgressBarColor func(e *goecs.Entity) ProgressBarColor
 	// ProgressBarHoverColor gets a ui.ProgressBarHoverColor from a goecs.Entity
 	ProgressBarHoverColor func(e *goecs.Entity) ProgressBarHoverColor
+	// ControlState gets a ui.ControlState from a goecs.Entity
+	ControlState func(e *goecs.Entity) ControlState
 }
 
 // Get a ui component
@@ -119,5 +124,9 @@ var Get = gets{
 	// ProgressBarHoverColor gets a ui.ProgressBarHoverColor from a goecs.Entity
 	ProgressBarHoverColor: func(e *goecs.Entity) ProgressBarHoverColor {
 		return e.Get(TYPE.ProgressBarHoverColor).(ProgressBarHoverColor)
+	},
+	// ControlState gets a ui.ControlState from a goecs.Entity
+	ControlState: func(e *goecs.Entity) ControlState {
+		return e.Get(TYPE.ControlState).(ControlState)
 	},
 }

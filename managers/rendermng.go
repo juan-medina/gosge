@@ -101,6 +101,7 @@ func (rdm renderingManager) renderFlatButton(ent *goecs.Entity) error {
 	box := shapes.Get.Box(ent)
 	fb := ui.Get.FlatButton(ent)
 	clr := ui.Get.ButtonColor(ent)
+	state := ui.Get.ControlState(ent)
 
 	sb := shapes.SolidBox{
 		Size:  box.Size,
@@ -140,7 +141,7 @@ func (rdm renderingManager) renderFlatButton(ent *goecs.Entity) error {
 			Y: pos.Y + gap,
 		}
 
-		if fb.State.Checked {
+		if state.Checked {
 			checkBox := shapes.SolidBox{
 				Size:  checkSize,
 				Scale: box.Scale,

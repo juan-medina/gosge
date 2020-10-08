@@ -170,23 +170,11 @@ func keyEvents(world *goecs.World, signal interface{}, _ float32) error {
 }
 
 func disableEnable(world *goecs.World) {
-	for it := world.Iterator(geometry.TYPE.Point); it != nil; it = it.Next() {
+	for it := world.Iterator(ui.TYPE.ControlState); it != nil; it = it.Next() {
 		ent := it.Value()
-		if ent.ID() != message.ID() {
-			if ent.Contains(ui.TYPE.FlatButton) {
-				fbt := ui.Get.FlatButton(ent)
-				fbt.State.Disabled = !fbt.State.Disabled
-				ent.Set(fbt)
-			} else if ent.Contains(ui.TYPE.ProgressBar) {
-				bar := ui.Get.ProgressBar(ent)
-				bar.State.Disabled = !bar.State.Disabled
-				ent.Set(bar)
-			} else if ent.Contains(ui.TYPE.SpriteButton) {
-				sbt := ui.Get.SpriteButton(ent)
-				sbt.State.Disabled = !sbt.State.Disabled
-				ent.Set(sbt)
-			}
-		}
+		state := ui.Get.ControlState(ent)
+		state.Disabled = !state.Disabled
+		ent.Set(state)
 	}
 }
 
@@ -267,10 +255,7 @@ func addOptionGroup(world *goecs.World, gameScale geometry.Scale, labelPos geome
 				Height: 2 * gameScale.Max,
 			},
 			CheckBox: true,
-			State: ui.ControlState{
-				Checked: checked,
-			},
-			Group: group,
+			Group:    group,
 		}
 
 		// add a control : flat button with checkbox
@@ -291,6 +276,9 @@ func addOptionGroup(world *goecs.World, gameScale geometry.Scale, labelPos geome
 				},
 				Scale:     gameScale.Max,
 				Thickness: int32(2 * gameScale.Max),
+			},
+			ui.ControlState{
+				Checked: checked,
 			},
 			controlPos,
 		)
@@ -604,9 +592,9 @@ func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
 		text.String = e.Message + ", " + hint
 		message.Set(text)
 	case checkBoxEvent:
-		check := ui.Get.FlatButton(e.checkEnt)
 		label := ui.Get.Text(e.valueEnt)
-		if check.State.Checked {
+		state := ui.Get.ControlState(e.checkEnt)
+		if state.Checked {
 			label.String = "Checked"
 		} else {
 			label.String = "Not checked"
