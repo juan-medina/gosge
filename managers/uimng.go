@@ -569,42 +569,76 @@ func (uim *uiManager) handleKey(world *goecs.World, key device.Key) {
 		return
 	}
 	if key == device.KeyDown || key == device.KeyUp || key == device.KeyLeft || key == device.KeyRight {
-		focusPos := geometry.Get.Point(uim.focus)
-		focusRect := uim.getControlRect(uim.focus, focusPos)
-		smallerDiff := float32(math.MaxFloat32)
-		var possible *goecs.Entity
-		for it := world.Iterator(ui.TYPE.ControlState); it != nil; it = it.Next() {
-			ent := it.Value()
-			state := ui.Get.ControlState(ent)
-			if ent.ID() == uim.focus.ID() || ent.Contains(effects.TYPE.Hide) || state.Disabled {
-				continue
-			}
-			possiblePos := geometry.Get.Point(ent)
-			possibleRect := uim.getControlRect(ent, possiblePos)
-			distance := uim.getControlDistance(focusRect, possibleRect, key)
-
-			if distance < smallerDiff {
-				smallerDiff = distance
-				possible = ent
-			}
+		if uim.focus.Contains(ui.TYPE.ProgressBar) && (key == device.KeyLeft || key == device.KeyRight) {
+			uim.moveProgressBarWithKeys(world, key)
+		} else {
+			uim.selectNextControl(world, key)
 		}
-		if possible != nil {
-			if possible.Contains(ui.TYPE.FlatButton) {
-				fbt := ui.Get.FlatButton(possible)
-				if fbt.Group != "" {
-					if uim.focus.Contains(ui.TYPE.FlatButton) {
-						fbtFocus := ui.Get.FlatButton(uim.focus)
-						if fbtFocus.Group != fbt.Group {
-							possible = uim.getSelectedInGroup(world, fbt.Group)
-						}
-					} else {
-						possible = uim.getSelectedInGroup(world, fbt.Group)
-					}
-				}
-			}
-			uim.focusControl(world, possible)
+	} else if key == device.KeySpace {
+		uim.activateFocus(world)
+	}
+}
+
+func (uim *uiManager) moveProgressBarWithKeys(world *goecs.World, key device.Key) {
+	bar := ui.Get.ProgressBar(uim.focus)
+	amt := (bar.Max - bar.Min) * 0.05
+	if key == device.KeyLeft {
+		bar.Current = float32(math.Max(float64(bar.Current-amt), float64(bar.Min)))
+	} else {
+		bar.Current = float32(math.Min(float64(bar.Current+amt), float64(bar.Max)))
+	}
+	if bar.Event != nil {
+		world.Signal(bar.Event)
+		if bar.Sound != "" {
+			world.Signal(events.PlaySoundEvent{Name: bar.Sound, Volume: bar.Volume})
 		}
 	}
+	uim.focus.Set(bar)
+}
+
+func (uim *uiManager) selectNextControl(world *goecs.World, key device.Key) {
+	focusPos := geometry.Get.Point(uim.focus)
+	focusRect := uim.getControlRect(uim.focus, focusPos)
+	smallerDiff := float32(math.MaxFloat32)
+	var possible *goecs.Entity
+	for it := world.Iterator(ui.TYPE.ControlState); it != nil; it = it.Next() {
+		ent := it.Value()
+		state := ui.Get.ControlState(ent)
+		if ent.ID() == uim.focus.ID() || ent.Contains(effects.TYPE.Hide) || state.Disabled {
+			continue
+		}
+		possiblePos := geometry.Get.Point(ent)
+		possibleRect := uim.getControlRect(ent, possiblePos)
+		distance := uim.getControlDistance(focusRect, possibleRect, key)
+
+		if distance < smallerDiff {
+			smallerDiff = distance
+			possible = ent
+		}
+	}
+	if possible != nil {
+		if possible.Contains(ui.TYPE.FlatButton) {
+			fbt := ui.Get.FlatButton(possible)
+			if fbt.Group != "" {
+				possible = uim.handleGroupSelection(world, possible)
+			}
+		}
+		uim.focusControl(world, possible)
+	}
+}
+
+func (uim *uiManager) handleGroupSelection(world *goecs.World, possible *goecs.Entity) *goecs.Entity {
+	match := possible
+	fbt := ui.Get.FlatButton(possible)
+	if uim.focus.Contains(ui.TYPE.FlatButton) {
+		fbtFocus := ui.Get.FlatButton(uim.focus)
+		if fbtFocus.Group != fbt.Group {
+			match = uim.getSelectedInGroup(world, fbt.Group)
+		}
+	} else {
+		match = uim.getSelectedInGroup(world, fbt.Group)
+	}
+	return match
 }
 
 func (uim uiManager) getControlRect(control *goecs.Entity, at geometry.Point) geometry.Rect {
@@ -678,6 +712,22 @@ func (uim *uiManager) getSelectedInGroup(world *goecs.World, group string) *goec
 		}
 	}
 	return nil
+}
+
+func (uim *uiManager) activateFocus(world *goecs.World) {
+	if uim.focus.Contains(ui.TYPE.FlatButton) {
+		state := ui.Get.ControlState(uim.focus)
+		state.Clicked = true
+		uim.focus.Set(state)
+		uim.clicked = uim.focus
+		uim.flatButtonsMouseUp(world, events.MouseUpEvent{})
+	} else if uim.focus.Contains(ui.TYPE.SpriteButton) {
+		state := ui.Get.ControlState(uim.focus)
+		state.Clicked = true
+		uim.focus.Set(state)
+		uim.clicked = uim.focus
+		uim.spriteButtonsMouseUp(world, events.MouseUpEvent{})
+	}
 }
 
 // UI returns a managers.WithSystemAndListener that handle ui components
