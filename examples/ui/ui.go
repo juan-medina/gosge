@@ -130,6 +130,22 @@ func loadGame(eng *gosge.Engine) error {
 	// add the bottom text
 	message = world.AddEntity(
 		ui.Text{
+			String:     "",
+			HAlignment: ui.CenterHAlignment,
+			VAlignment: ui.BottomVAlignment,
+			Font:       fontName,
+			Size:       fontBig * gameScale.Max,
+		},
+		geometry.Point{
+			X: designResolution.Width / 2 * gameScale.Point.X,
+			Y: designResolution.Height / 2 * gameScale.Point.Y,
+		},
+		color.White,
+	)
+
+	// add the bottom text
+	world.AddEntity(
+		ui.Text{
 			String:     hint,
 			HAlignment: ui.CenterHAlignment,
 			VAlignment: ui.BottomVAlignment,
@@ -179,14 +195,12 @@ func disableEnable(world *goecs.World) {
 }
 
 func hideUnhide(world *goecs.World) {
-	for it := world.Iterator(geometry.TYPE.Point); it != nil; it = it.Next() {
+	for it := world.Iterator(ui.TYPE.ControlState); it != nil; it = it.Next() {
 		ent := it.Value()
-		if ent.ID() != message.ID() {
-			if ent.Contains(effects.TYPE.Hide) {
-				ent.Remove(effects.TYPE.Hide)
-			} else {
-				ent.Add(effects.Hide{})
-			}
+		if ent.Contains(effects.TYPE.Hide) {
+			ent.Remove(effects.TYPE.Hide)
+		} else {
+			ent.Add(effects.Hide{})
 		}
 	}
 }
@@ -581,7 +595,7 @@ func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
 	switch e := signal.(type) {
 	case uiDemoEvent:
 		text := ui.Get.Text(message)
-		text.String = e.Message + ", " + hint
+		text.String = e.Message
 		message.Set(text)
 	case progressBarEvent:
 		bar := ui.Get.ProgressBar(e.barEnt)
@@ -589,7 +603,7 @@ func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
 		label.String = fmt.Sprintf("%d", int(bar.Current))
 		e.valueEnt.Set(label)
 		text := ui.Get.Text(message)
-		text.String = e.Message + ", " + hint
+		text.String = e.Message
 		message.Set(text)
 	case checkBoxEvent:
 		label := ui.Get.Text(e.valueEnt)
@@ -601,7 +615,7 @@ func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
 		}
 		e.valueEnt.Set(label)
 		text := ui.Get.Text(message)
-		text.String = e.Message + ", " + hint
+		text.String = e.Message
 		message.Set(text)
 	case optionEvent:
 		label := ui.Get.Text(e.valueEnt)
@@ -609,7 +623,7 @@ func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
 
 		e.valueEnt.Set(label)
 		text := ui.Get.Text(message)
-		text.String = e.Message + ", " + hint
+		text.String = e.Message
 		message.Set(text)
 	}
 	return nil
