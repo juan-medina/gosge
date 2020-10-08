@@ -111,6 +111,18 @@ var engineKeyToRayKey = map[device.Key]int32{
 	device.KeyCtrlRight: rl.KeyRightControl,
 	device.KeyEscape:    rl.KeyEscape,
 	device.KeyReturn:    rl.KeyEnter,
+	device.KeyF1:        rl.KeyF1,
+	device.KeyF2:        rl.KeyF2,
+	device.KeyF3:        rl.KeyF3,
+	device.KeyF4:        rl.KeyF4,
+	device.KeyF5:        rl.KeyF5,
+	device.KeyF6:        rl.KeyF6,
+	device.KeyF7:        rl.KeyF7,
+	device.KeyF8:        rl.KeyF8,
+	device.KeyF9:        rl.KeyF9,
+	device.KeyF10:       rl.KeyF10,
+	device.KeyF11:       rl.KeyF11,
+	device.KeyF12:       rl.KeyF12,
 }
 
 // IsKeyPressed returns if given device.Key is pressed

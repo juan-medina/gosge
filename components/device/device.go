@@ -50,5 +50,17 @@ const (
 	KeyCtrlRight             // KeyCtrlRight if the right control key
 	KeyEscape                // KeyEscape is the escape key
 	KeyReturn                // KeyReturn is the return key
+	KeyF1                    // KeyF1 is the F1 key
+	KeyF2                    // KeyF2 is the F2 key
+	KeyF3                    // KeyF3 is the F3 key
+	KeyF4                    // KeyF4 is the F4 key
+	KeyF5                    // KeyF5 is the F5 key
+	KeyF6                    // KeyF6 is the F6 key
+	KeyF7                    // KeyF7 is the F7 key
+	KeyF8                    // KeyF8 is the F8 key
+	KeyF9                    // KeyF9 is the F9 key
+	KeyF10                   // KeyF10 is the F10 key
+	KeyF11                   // KeyF11 is the F11 key
+	KeyF12                   // KeyF12 is the F12 key
 	TotalKeys                // TotalKeys is the total number of keys
 )

@@ -58,7 +58,7 @@ const (
 	rowGap      = 50
 	spriteSheet = "resources/ui.json"
 	spriteScale = 0.25
-	hint        = "press <SPACE> to hide/unhide, <ENTER> to disable/enable, <ESC> to close"
+	hint        = "press <F1> to hide/unhide, <F2> to disable/enable, <ESC> to close"
 )
 
 var (
@@ -176,9 +176,9 @@ func keyEvents(world *goecs.World, signal interface{}, _ float32) error {
 	switch e := signal.(type) {
 	case events.KeyUpEvent:
 		switch e.Key {
-		case device.KeySpace:
+		case device.KeyF1:
 			hideUnhide(world)
-		case device.KeyReturn:
+		case device.KeyF2:
 			disableEnable(world)
 		}
 	}
