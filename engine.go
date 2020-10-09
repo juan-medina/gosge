@@ -51,7 +51,7 @@ const (
 	lastPriority = int32(-1000)
 	lowPriority  = int32(-500)
 	highPriority = int32(500)
-	gosgeVersion = "v0.1.12"
+	gosgeVersion = "v0.1.13"
 )
 
 // InitFunc is a function that will get call for our game to load
