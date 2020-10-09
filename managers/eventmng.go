@@ -46,6 +46,7 @@ func (em eventManager) Listener(world *goecs.World, signal interface{}, delta fl
 		e.Time -= delta
 		if e.Time <= 0 {
 			world.Signal(e.Signal)
+			return nil
 		}
 		world.Signal(e)
 	}
