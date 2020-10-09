@@ -39,7 +39,7 @@ import (
 const (
 	normalColorDarkenFactor = 0.25 // normalColorDarkenFactor is how much dark the color will be on normal
 	hoverColorDarkenFactor  = 0.10 // hoverColorDarkenFactor is how much dark the color will be on hover
-	keyWaitDelay            = 0.25 // keyWaitDelay is the key wait delay
+	keyWaitDelay            = 0.20 // keyWaitDelay is the key wait delay
 )
 
 type uiManager struct {
@@ -62,6 +62,7 @@ func (uim *uiManager) Signals() []reflect.Type {
 		events.TYPE.KeyDownEvent,
 		events.TYPE.GamePadButtonUpEvent,
 		events.TYPE.GamePadButtonDownEvent,
+		events.TYPE.GamePadStickMoveEvent,
 	}
 }
 
@@ -99,6 +100,8 @@ func (uim *uiManager) Listener(world *goecs.World, event interface{}, _ float32)
 		uim.keyUp(v.Key)
 	case events.GamePadButtonUpEvent:
 		uim.gamepadUp(v.Gamepad, v.Button)
+	case events.GamePadStickMoveEvent:
+		uim.gamepadStickMove(world, v.Gamepad, v.Stick, v.Movement)
 	}
 	return nil
 }
@@ -767,7 +770,7 @@ func (uim *uiManager) activateFocus(world *goecs.World) {
 	}
 }
 
-func (uim *uiManager) gamepadDown(world *goecs.World, _ int32, button device.GamePadButton) {
+func (uim *uiManager) gamepadDown(world *goecs.World, _ int32, button device.GamepadButton) {
 	switch button {
 	case device.GamepadUp:
 		uim.keyDown(world, device.KeyUp)
@@ -782,7 +785,7 @@ func (uim *uiManager) gamepadDown(world *goecs.World, _ int32, button device.Gam
 	}
 }
 
-func (uim *uiManager) gamepadUp(_ int32, button device.GamePadButton) {
+func (uim *uiManager) gamepadUp(_ int32, button device.GamepadButton) {
 	switch button {
 	case device.GamepadUp:
 		uim.keyUp(device.KeyUp)
@@ -794,6 +797,29 @@ func (uim *uiManager) gamepadUp(_ int32, button device.GamePadButton) {
 		uim.keyUp(device.KeyRight)
 	case device.GamepadButton3:
 		uim.keyUp(device.KeySpace)
+	}
+}
+
+func (uim *uiManager) gamepadStickMove(world *goecs.World, _ int32, _ device.GamepadStick, movement geometry.Point) {
+	if movement.Y == -1 && uim.lastKey != device.KeyUp {
+		uim.keyDown(world, device.KeyUp)
+	} else if movement.Y > -1 && uim.lastKey == device.KeyUp {
+		uim.keyUp(device.KeyUp)
+	}
+	if movement.Y == 1 && uim.lastKey != device.KeyDown {
+		uim.keyDown(world, device.KeyDown)
+	} else if movement.Y < 1 && uim.lastKey == device.KeyDown {
+		uim.keyUp(device.KeyDown)
+	}
+	if movement.X == -1 && uim.lastKey != device.KeyLeft {
+		uim.keyDown(world, device.KeyLeft)
+	} else if movement.X > -1 && uim.lastKey == device.KeyLeft {
+		uim.keyUp(device.KeyLeft)
+	}
+	if movement.X == 1 && uim.lastKey != device.KeyRight {
+		uim.keyDown(world, device.KeyRight)
+	} else if movement.Y < 1 && uim.lastKey == device.KeyRight {
+		uim.keyUp(device.KeyRight)
 	}
 }
 

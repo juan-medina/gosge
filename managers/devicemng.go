@@ -69,11 +69,11 @@ type DeviceManager interface {
 	// IsGamepadAvailable indicates if the game pad number is available
 	IsGamepadAvailable(gamePad int32) bool
 	// IsGamepadButtonPressed returns if given gamepad button is pressed
-	IsGamepadButtonPressed(gamePad int32, button device.GamePadButton) bool
+	IsGamepadButtonPressed(gamePad int32, button device.GamepadButton) bool
 	// IsGamepadButtonReleased returns if given gamepad button is released
-	IsGamepadButtonReleased(gamePad int32, button device.GamePadButton) bool
-	// GetGamepadAxisMovement return the movement, -1..1, for a given gamepad axis
-	GetGamepadAxisMovement(gamePad int32, axis int32) float32
+	IsGamepadButtonReleased(gamePad int32, button device.GamepadButton) bool
+	// GetGamepadStickMovement return the movement, -1..1, for a given gamepad stick
+	GetGamepadStickMovement(gamePad int32, stick device.GamepadStick) geometry.Point
 
 	// GetFrameTime returns the time from the delta time for current frame
 	GetFrameTime() float32

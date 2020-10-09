@@ -135,13 +135,20 @@ type ClearFocusEvent struct{}
 // GamePadButtonUpEvent this event triggers when a gamepad button is up
 type GamePadButtonUpEvent struct {
 	Gamepad int32
-	Button  device.GamePadButton
+	Button  device.GamepadButton
 }
 
 // GamePadButtonDownEvent this event triggers when a gamepad button is down
 type GamePadButtonDownEvent struct {
 	Gamepad int32
-	Button  device.GamePadButton
+	Button  device.GamepadButton
+}
+
+// GamePadStickMoveEvent this event triggers when a gamepad stick moves
+type GamePadStickMoveEvent struct {
+	Gamepad  int32
+	Stick    device.GamepadStick
+	Movement geometry.Point
 }
 
 type types struct {
@@ -185,6 +192,8 @@ type types struct {
 	GamePadButtonUpEvent reflect.Type
 	// GamePadButtonDownEvent is the reflect.Type for events.GamePadButtonDownEvent
 	GamePadButtonDownEvent reflect.Type
+	// GamePadStickMoveEvent is the reflect.Type for events.GamePadStickMoveEvent
+	GamePadStickMoveEvent reflect.Type
 }
 
 // TYPE hold the reflect.Type for our events
@@ -209,4 +218,5 @@ var TYPE = types{
 	ClearFocusEvent:         reflect.TypeOf(ClearFocusEvent{}),
 	GamePadButtonUpEvent:    reflect.TypeOf(GamePadButtonUpEvent{}),
 	GamePadButtonDownEvent:  reflect.TypeOf(GamePadButtonDownEvent{}),
+	GamePadStickMoveEvent:   reflect.TypeOf(GamePadStickMoveEvent{}),
 }

@@ -65,12 +65,12 @@ const (
 	TotalKeys                // TotalKeys is the total number of keys
 )
 
-// GamePadButton represents a gamepad button
-type GamePadButton int32
+// GamepadButton represents a gamepad button
+type GamepadButton int32
 
 //goland:noinspection GoUnusedConst
 const (
-	GamepadFirstButton   = GamePadButton(iota) // GamepadFirstButton initial value for game pad buttons
+	GamepadFirstButton   = GamepadButton(iota) // GamepadFirstButton initial value for game pad buttons
 	GamepadUp                                  // GamepadUp DPAD UP
 	GamepadRight                               // GamepadRight DPAD RIGHT
 	GamepadDown                                // GamepadDown DPAD DOWN
@@ -89,6 +89,17 @@ const (
 	GamepadLeftThumb                           // GamepadLeftThumb LEFT THUMB
 	GamepadRightThumb                          // GamepadRightThumb RIGHT THUMB
 	TotalButtons                               // TotalButtons total gamepad buttons
+)
+
+// GamepadStick represent a gamepad stick
+type GamepadStick int32
+
+//goland:noinspection GoUnusedConst
+const (
+	GamepadFirstStick = GamepadStick(iota) // GamepadFirstStick initial value for game pad stick
+	GamepadLeftStick                       // GamepadLeftStick is the left stick
+	GamepadRightStick                      // GamepadRightStick is the right stick
+	TotalSticks                            // TotalSticks total gamepad sticks
 )
 
 // Device constants

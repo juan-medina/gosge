@@ -33,6 +33,7 @@ import (
 type eventManager struct {
 	mme events.MouseMoveEvent
 	dm  DeviceManager
+	ssm [][]geometry.Point
 }
 
 func (em eventManager) Signals() []reflect.Type {
@@ -81,12 +82,17 @@ func (em eventManager) sendKeyUpEvent(world *goecs.World, key device.Key) {
 	world.Signal(events.KeyUpEvent{Key: key})
 }
 
-func (em eventManager) sendGamePadButtonUpEvent(world *goecs.World, gamepad int32, button device.GamePadButton) {
+func (em eventManager) sendGamePadButtonUpEvent(world *goecs.World, gamepad int32, button device.GamepadButton) {
 	world.Signal(events.GamePadButtonUpEvent{Gamepad: gamepad, Button: button})
 }
 
-func (em eventManager) sendGamePadButtonDownEvent(world *goecs.World, gamepad int32, button device.GamePadButton) {
+func (em eventManager) sendGamePadButtonDownEvent(world *goecs.World, gamepad int32, button device.GamepadButton) {
 	world.Signal(events.GamePadButtonDownEvent{Gamepad: gamepad, Button: button})
+}
+
+func (em eventManager) sendGamePadStickMoveEvent(world *goecs.World, gamepad int32, stick device.GamepadStick,
+	movement geometry.Point) {
+	world.Signal(events.GamePadStickMoveEvent{Gamepad: gamepad, Stick: stick, Movement: movement})
 }
 
 func (em *eventManager) System(world *goecs.World, _ float32) error {
@@ -128,7 +134,7 @@ func (em eventManager) handleKeys(world *goecs.World) {
 	}
 }
 
-func (em eventManager) handleGamepad(world *goecs.World) {
+func (em *eventManager) handleGamepad(world *goecs.World) {
 	for pad := int32(0); pad < device.MaxGamePads; pad++ {
 		for button := device.GamepadFirstButton + 1; button < device.TotalButtons; button++ {
 			if em.dm.IsGamepadButtonReleased(pad, button) {
@@ -138,11 +144,28 @@ func (em eventManager) handleGamepad(world *goecs.World) {
 				em.sendGamePadButtonDownEvent(world, pad, button)
 			}
 		}
+		for stick := device.GamepadFirstStick + 1; stick < device.TotalSticks; stick++ {
+			mov := em.dm.GetGamepadStickMovement(pad, stick)
+			saved := em.ssm[pad][stick]
+			if mov.X != saved.X || mov.Y != saved.Y {
+				em.ssm[pad][stick] = mov
+				em.sendGamePadStickMoveEvent(world, pad, stick, mov)
+			}
+		}
 	}
 }
 
 // Events returns a managers.WithSystem that will handle signals
 func Events(dm DeviceManager) WithSystemAndListener {
+	// initialize saved stick movement
+	var ssm = make([][]geometry.Point, device.MaxGamePads)
+	for pad := int32(0); pad < device.MaxGamePads; pad++ {
+		ssm[pad] = make([]geometry.Point, device.TotalSticks)
+		for stick := device.GamepadFirstStick; stick < device.TotalSticks; stick++ {
+			ssm[pad][int32(stick)] = geometry.Point{}
+		}
+	}
+
 	return &eventManager{
 		dm: dm,
 		mme: events.MouseMoveEvent{
@@ -151,5 +174,6 @@ func Events(dm DeviceManager) WithSystemAndListener {
 				Y: -1,
 			},
 		},
+		ssm: ssm,
 	}
 }

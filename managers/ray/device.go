@@ -25,6 +25,7 @@ package ray
 import (
 	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/juan-medina/gosge/components/device"
+	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -125,6 +126,24 @@ var engineKeyToRayKey = map[device.Key]int32{
 	device.KeyF12:       rl.KeyF12,
 }
 
+// raylib axis
+const (
+	GamepadAxisLeftX  = 0 // Left stick
+	GamepadAxisLeftY  = 1 // Left stick
+	GamepadAxisRightX = 2 // Right stick
+	GamepadAxisRightY = 3 // Right stick
+)
+
+var engineStickToRayXAxis = map[device.GamepadStick]int32{
+	device.GamepadLeftStick:  GamepadAxisLeftX,
+	device.GamepadRightStick: GamepadAxisRightX,
+}
+
+var engineStickToRayYAxis = map[device.GamepadStick]int32{
+	device.GamepadLeftStick:  GamepadAxisLeftY,
+	device.GamepadRightStick: GamepadAxisRightY,
+}
+
 // IsKeyPressed returns if given device.Key is pressed
 func (dmi DeviceManagerImpl) IsKeyPressed(key device.Key) bool {
 	if v, ok := engineKeyToRayKey[key]; ok {
@@ -157,16 +176,20 @@ func (dmi DeviceManagerImpl) IsGamepadAvailable(gamePad int32) bool {
 }
 
 // IsGamepadButtonPressed returns if given gamepad button is pressed
-func (dmi DeviceManagerImpl) IsGamepadButtonPressed(gamePad int32, button device.GamePadButton) bool {
+func (dmi DeviceManagerImpl) IsGamepadButtonPressed(gamePad int32, button device.GamepadButton) bool {
 	return rl.IsGamepadButtonPressed(gamePad, int32(button))
 }
 
 // IsGamepadButtonReleased returns if given gamepad button is released
-func (dmi DeviceManagerImpl) IsGamepadButtonReleased(gamePad int32, button device.GamePadButton) bool {
+func (dmi DeviceManagerImpl) IsGamepadButtonReleased(gamePad int32, button device.GamepadButton) bool {
 	return rl.IsGamepadButtonReleased(gamePad, int32(button))
 }
 
-// GetGamepadAxisMovement return the movement, -1..1, for a given gamepad axis
-func (dmi DeviceManagerImpl) GetGamepadAxisMovement(gamePad int32, axis int32) float32 {
-	return rl.GetGamepadAxisMovement(gamePad, axis)
+// GetGamepadStickMovement return the movement, -1..1, for a given gamepad stick
+func (dmi DeviceManagerImpl) GetGamepadStickMovement(gamePad int32, stick device.GamepadStick) geometry.Point {
+	axisX := engineStickToRayXAxis[stick]
+	axisY := engineStickToRayYAxis[stick]
+	x := rl.GetGamepadAxisMovement(gamePad, axisX)
+	y := rl.GetGamepadAxisMovement(gamePad, axisY)
+	return geometry.Point{X: x, Y: y}
 }
