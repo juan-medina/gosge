@@ -64,3 +64,34 @@ const (
 	KeyF12                   // KeyF12 is the F12 key
 	TotalKeys                // TotalKeys is the total number of keys
 )
+
+// GamePadButton represents a gamepad button
+type GamePadButton int32
+
+//goland:noinspection GoUnusedConst
+const (
+	GamepadFirstButton   = GamePadButton(iota) // GamepadFirstButton initial value for game pad buttons
+	GamepadUp                                  // GamepadUp DPAD UP
+	GamepadRight                               // GamepadRight DPAD RIGHT
+	GamepadDown                                // GamepadDown DPAD DOWN
+	GamepadLeft                                // GamepadLeft DPAD LEFT
+	GamepadButton1                             // GamepadButton1 XBOX Y, PS3 Triangle
+	GamepadButton2                             // GamepadButton2 XBOX X, PS3 Square
+	GamepadButton3                             // GamepadButton3 XBOX A, PS3 Cross
+	GamepadButton4                             // GamepadButton4 XBOX B, PS3 Circle
+	GamepadLeftTrigger1                        // GamepadLeftTrigger1 L1
+	GamepadLeftTrigger2                        // GamepadLeftTrigger2 L2
+	GamepadRightTrigger1                       // GamepadRightTrigger1 R1
+	GamepadRightTrigger2                       // GamepadRightTrigger2 R2
+	GamepadSelect                              // GamepadSelect XBOX Option, PS3 Select
+	GamepadSpecial                             // GamepadSpecial XBOX X Button, PS3 PS Button
+	GamepadStart                               // GamepadStart XBOX Start, PS3 Start
+	GamepadLeftThumb                           // GamepadLeftThumb LEFT THUMB
+	GamepadRightThumb                          // GamepadRightThumb RIGHT THUMB
+	TotalButtons                               // TotalButtons total gamepad buttons
+)
+
+// Device constants
+const (
+	MaxGamePads = 4 // Max Number of Gamepads
+)

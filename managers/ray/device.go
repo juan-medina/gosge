@@ -150,3 +150,23 @@ func (dmi DeviceManagerImpl) SetExitKey(key device.Key) {
 func (dmi DeviceManagerImpl) DisableExitKey() {
 	rl.SetExitKey(0)
 }
+
+// IsGamepadAvailable indicates if the game pad number is available
+func (dmi DeviceManagerImpl) IsGamepadAvailable(gamePad int32) bool {
+	return rl.IsGamepadAvailable(gamePad)
+}
+
+// IsGamepadButtonPressed returns if given gamepad button is pressed
+func (dmi DeviceManagerImpl) IsGamepadButtonPressed(gamePad int32, button device.GamePadButton) bool {
+	return rl.IsGamepadButtonPressed(gamePad, int32(button))
+}
+
+// IsGamepadButtonReleased returns if given gamepad button is released
+func (dmi DeviceManagerImpl) IsGamepadButtonReleased(gamePad int32, button device.GamePadButton) bool {
+	return rl.IsGamepadButtonReleased(gamePad, int32(button))
+}
+
+// GetGamepadAxisMovement return the movement, -1..1, for a given gamepad axis
+func (dmi DeviceManagerImpl) GetGamepadAxisMovement(gamePad int32, axis int32) float32 {
+	return rl.GetGamepadAxisMovement(gamePad, axis)
+}

@@ -56,18 +56,24 @@ type DeviceManager interface {
 
 	// GetMousePoint returns the current Point of the mouse
 	GetMousePoint() geometry.Point
-
 	// IsMouseRelease check if the given MouseButton has been release
 	IsMouseRelease(button device.MouseButton) bool
-
 	// IsMousePressed check if the given MouseButton has been pressed
 	IsMousePressed(button device.MouseButton) bool
 
 	// IsKeyPressed returns if given device.Key is pressed
 	IsKeyPressed(key device.Key) bool
-
 	// IsKeyReleased returns if given device.Key is released
 	IsKeyReleased(key device.Key) bool
+
+	// IsGamepadAvailable indicates if the game pad number is available
+	IsGamepadAvailable(gamePad int32) bool
+	// IsGamepadButtonPressed returns if given gamepad button is pressed
+	IsGamepadButtonPressed(gamePad int32, button device.GamePadButton) bool
+	// IsGamepadButtonReleased returns if given gamepad button is released
+	IsGamepadButtonReleased(gamePad int32, button device.GamePadButton) bool
+	// GetGamepadAxisMovement return the movement, -1..1, for a given gamepad axis
+	GetGamepadAxisMovement(gamePad int32, axis int32) float32
 
 	// GetFrameTime returns the time from the delta time for current frame
 	GetFrameTime() float32

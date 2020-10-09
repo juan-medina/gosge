@@ -169,6 +169,22 @@ func loadGame(eng *gosge.Engine) error {
 	// listen to keys
 	world.AddListener(keyEvents, events.TYPE.KeyUpEvent)
 
+	// listen to game pad
+	world.AddListener(padEvents, events.TYPE.GamePadButtonUpEvent)
+
+	return nil
+}
+
+func padEvents(world *goecs.World, signal interface{}, _ float32) error {
+	switch v := signal.(type) {
+	case events.GamePadButtonUpEvent:
+		switch v.Button {
+		case device.GamepadStart:
+			hideUnhide(world)
+		case device.GamepadSelect:
+			disableEnable(world)
+		}
+	}
 	return nil
 }
 

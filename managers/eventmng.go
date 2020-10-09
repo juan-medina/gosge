@@ -81,12 +81,21 @@ func (em eventManager) sendKeyUpEvent(world *goecs.World, key device.Key) {
 	world.Signal(events.KeyUpEvent{Key: key})
 }
 
+func (em eventManager) sendGamePadButtonUpEvent(world *goecs.World, gamepad int32, button device.GamePadButton) {
+	world.Signal(events.GamePadButtonUpEvent{Gamepad: gamepad, Button: button})
+}
+
+func (em eventManager) sendGamePadButtonDownEvent(world *goecs.World, gamepad int32, button device.GamePadButton) {
+	world.Signal(events.GamePadButtonDownEvent{Gamepad: gamepad, Button: button})
+}
+
 func (em *eventManager) System(world *goecs.World, _ float32) error {
 	if em.dm.ShouldClose() {
 		em.sendGameClose(world)
 	} else {
 		em.handleMouse(world)
 		em.handleKeys(world)
+		em.handleGamepad(world)
 	}
 	return nil
 }
@@ -115,6 +124,19 @@ func (em eventManager) handleKeys(world *goecs.World) {
 		}
 		if em.dm.IsKeyPressed(key) {
 			em.sendKeyDownEvent(world, key)
+		}
+	}
+}
+
+func (em eventManager) handleGamepad(world *goecs.World) {
+	for pad := int32(0); pad < device.MaxGamePads; pad++ {
+		for button := device.GamepadFirstButton + 1; button < device.TotalButtons; button++ {
+			if em.dm.IsGamepadButtonReleased(pad, button) {
+				em.sendGamePadButtonUpEvent(world, pad, button)
+			}
+			if em.dm.IsGamepadButtonPressed(pad, button) {
+				em.sendGamePadButtonDownEvent(world, pad, button)
+			}
 		}
 	}
 }

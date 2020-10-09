@@ -39,13 +39,16 @@ import (
 const (
 	normalColorDarkenFactor = 0.25 // normalColorDarkenFactor is how much dark the color will be on normal
 	hoverColorDarkenFactor  = 0.10 // hoverColorDarkenFactor is how much dark the color will be on hover
+	keyWaitDelay            = 0.25 // keyWaitDelay is the key wait delay
 )
 
 type uiManager struct {
-	dm      DeviceManager
-	cm      *CollisionManager
-	clicked *goecs.Entity
-	focus   *goecs.Entity
+	dm       DeviceManager
+	cm       *CollisionManager
+	clicked  *goecs.Entity
+	focus    *goecs.Entity
+	lastKey  device.Key
+	keyDelay float32
 }
 
 func (uim *uiManager) Signals() []reflect.Type {
@@ -56,13 +59,17 @@ func (uim *uiManager) Signals() []reflect.Type {
 		events.TYPE.FocusOnControlEvent,
 		events.TYPE.ClearFocusEvent,
 		events.TYPE.KeyUpEvent,
+		events.TYPE.KeyDownEvent,
+		events.TYPE.GamePadButtonUpEvent,
+		events.TYPE.GamePadButtonDownEvent,
 	}
 }
 
-func (uim *uiManager) System(world *goecs.World, _ float32) error {
+func (uim *uiManager) System(world *goecs.World, delta float32) error {
 	uim.flatButtons(world)
 	uim.progressBars(world)
 	uim.spriteButtons(world)
+	uim.handleKeys(world, delta)
 	return nil
 }
 
@@ -84,8 +91,14 @@ func (uim *uiManager) Listener(world *goecs.World, event interface{}, _ float32)
 		uim.focusControl(world, v.Control)
 	case events.ClearFocusEvent:
 		uim.clearFocus(world)
+	case events.KeyDownEvent:
+		uim.keyDown(world, v.Key)
+	case events.GamePadButtonDownEvent:
+		uim.gamepadDown(world, v.Gamepad, v.Button)
 	case events.KeyUpEvent:
-		uim.handleKey(world, v.Key)
+		uim.keyUp(v.Key)
+	case events.GamePadButtonUpEvent:
+		uim.gamepadUp(v.Gamepad, v.Button)
 	}
 	return nil
 }
@@ -564,10 +577,7 @@ func (uim *uiManager) clearFocus(world *goecs.World) {
 	uim.focus = nil
 }
 
-func (uim *uiManager) handleKey(world *goecs.World, key device.Key) {
-	if uim.focus == nil {
-		return
-	}
+func (uim *uiManager) handleFocus(world *goecs.World, key device.Key) {
 	if key == device.KeyDown || key == device.KeyUp || key == device.KeyLeft || key == device.KeyRight {
 		if uim.focus.Contains(ui.TYPE.ProgressBar) && (key == device.KeyLeft || key == device.KeyRight) {
 			uim.moveProgressBarWithKeys(world, key)
@@ -576,6 +586,33 @@ func (uim *uiManager) handleKey(world *goecs.World, key device.Key) {
 		}
 	} else if key == device.KeySpace {
 		uim.activateFocus(world)
+	}
+}
+
+func (uim *uiManager) handleKeys(world *goecs.World, delta float32) {
+	if uim.focus == nil || uim.lastKey == device.FirstKey {
+		return
+	}
+	uim.keyDelay -= delta
+	if uim.keyDelay <= 0 {
+		uim.handleFocus(world, uim.lastKey)
+		uim.keyDelay = keyWaitDelay
+	}
+}
+
+func (uim *uiManager) keyDown(world *goecs.World, key device.Key) {
+	if uim.focus == nil {
+		return
+	}
+	uim.lastKey = key
+	uim.keyDelay = keyWaitDelay
+	uim.handleFocus(world, key)
+}
+
+func (uim *uiManager) keyUp(key device.Key) {
+	if uim.lastKey == key {
+		uim.lastKey = device.FirstKey
+		uim.keyDelay = 0
 	}
 }
 
@@ -730,7 +767,44 @@ func (uim *uiManager) activateFocus(world *goecs.World) {
 	}
 }
 
+func (uim *uiManager) gamepadDown(world *goecs.World, _ int32, button device.GamePadButton) {
+	switch button {
+	case device.GamepadUp:
+		uim.keyDown(world, device.KeyUp)
+	case device.GamepadDown:
+		uim.keyDown(world, device.KeyDown)
+	case device.GamepadLeft:
+		uim.keyDown(world, device.KeyLeft)
+	case device.GamepadRight:
+		uim.keyDown(world, device.KeyRight)
+	case device.GamepadButton3:
+		uim.keyDown(world, device.KeySpace)
+	}
+}
+
+func (uim *uiManager) gamepadUp(_ int32, button device.GamePadButton) {
+	switch button {
+	case device.GamepadUp:
+		uim.keyUp(device.KeyUp)
+	case device.GamepadDown:
+		uim.keyUp(device.KeyDown)
+	case device.GamepadLeft:
+		uim.keyUp(device.KeyLeft)
+	case device.GamepadRight:
+		uim.keyUp(device.KeyRight)
+	case device.GamepadButton3:
+		uim.keyUp(device.KeySpace)
+	}
+}
+
 // UI returns a managers.WithSystemAndListener that handle ui components
 func UI(dm DeviceManager, cm *CollisionManager) WithSystemAndListener {
-	return &uiManager{dm: dm, cm: cm, clicked: nil}
+	return &uiManager{
+		dm:       dm,
+		cm:       cm,
+		clicked:  nil,
+		focus:    nil,
+		lastKey:  device.FirstKey,
+		keyDelay: 0,
+	}
 }

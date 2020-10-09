@@ -132,6 +132,18 @@ type FocusOnControlEvent struct {
 // ClearFocusEvent is a signal to clear all focussed control
 type ClearFocusEvent struct{}
 
+// GamePadButtonUpEvent this event triggers when a gamepad button is up
+type GamePadButtonUpEvent struct {
+	Gamepad int32
+	Button  device.GamePadButton
+}
+
+// GamePadButtonDownEvent this event triggers when a gamepad button is down
+type GamePadButtonDownEvent struct {
+	Gamepad int32
+	Button  device.GamePadButton
+}
+
 type types struct {
 	// GameCloseEvent is the reflect.Type for events.GameCloseEvent
 	GameCloseEvent reflect.Type
@@ -169,6 +181,10 @@ type types struct {
 	FocusOnControlEvent reflect.Type
 	// ClearFocusEvent is the reflect.Type for events.ClearFocusEvent
 	ClearFocusEvent reflect.Type
+	// GamePadButtonUpEvent is the reflect.Type for events.GamePadButtonUpEvent
+	GamePadButtonUpEvent reflect.Type
+	// GamePadButtonDownEvent is the reflect.Type for events.GamePadButtonDownEvent
+	GamePadButtonDownEvent reflect.Type
 }
 
 // TYPE hold the reflect.Type for our events
@@ -191,4 +207,6 @@ var TYPE = types{
 	MusicStateChangeEvent:   reflect.TypeOf(MusicStateChangeEvent{}),
 	FocusOnControlEvent:     reflect.TypeOf(FocusOnControlEvent{}),
 	ClearFocusEvent:         reflect.TypeOf(ClearFocusEvent{}),
+	GamePadButtonUpEvent:    reflect.TypeOf(GamePadButtonUpEvent{}),
+	GamePadButtonDownEvent:  reflect.TypeOf(GamePadButtonDownEvent{}),
 }
