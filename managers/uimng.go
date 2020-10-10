@@ -383,7 +383,7 @@ func (uim *uiManager) progressBarsMouseDown(world *goecs.World, mde events.Mouse
 	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
 		shapes.TYPE.Box); it != nil; it = it.Next() {
 		ent := it.Value()
-		if ent.Contains(effects.TYPE.Hide) {
+		if ent.Contains(effects.TYPE.Hide) || !uim.isFocusable(ent) {
 			continue
 		}
 		bar := ui.Get.ProgressBar(ent)
@@ -664,6 +664,29 @@ func (uim *uiManager) moveProgressBarWithKeys(world *goecs.World, key device.Key
 	uim.focus.Set(bar)
 }
 
+func (uim *uiManager) isFocusable(control *goecs.Entity) bool {
+	if control.Contains(ui.TYPE.ProgressBar) {
+		bar := ui.Get.ProgressBar(control)
+		if bar.Event == nil {
+			return false
+		}
+		return true
+	} else if control.Contains(ui.TYPE.FlatButton) {
+		btn := ui.Get.FlatButton(control)
+		if btn.Event == nil {
+			return false
+		}
+		return true
+	} else if control.Contains(ui.TYPE.SpriteButton) {
+		spb := ui.Get.SpriteButton(control)
+		if spb.Event == nil {
+			return false
+		}
+		return true
+	}
+	return false
+}
+
 func (uim *uiManager) selectNextControl(world *goecs.World, key device.Key) {
 	focusPos := geometry.Get.Point(uim.focus)
 	focusRect := uim.getControlRect(uim.focus, focusPos)
@@ -672,7 +695,7 @@ func (uim *uiManager) selectNextControl(world *goecs.World, key device.Key) {
 	for it := world.Iterator(ui.TYPE.ControlState); it != nil; it = it.Next() {
 		ent := it.Value()
 		state := ui.Get.ControlState(ent)
-		if ent.ID() == uim.focus.ID() || ent.Contains(effects.TYPE.Hide) || state.Disabled {
+		if ent.ID() == uim.focus.ID() || ent.Contains(effects.TYPE.Hide) || state.Disabled || !uim.isFocusable(ent) {
 			continue
 		}
 		possiblePos := geometry.Get.Point(ent)

@@ -117,9 +117,13 @@ func loadGame(eng *gosge.Engine) error {
 
 	// add the progress bar
 	pos.Y += rowGap * gameScale.Max
-	addProgressBar(world, gameScale, pos, false)
+	addProgressBar(world, gameScale, pos, false, true)
 	pos.Y += rowGap * gameScale.Max
-	addProgressBar(world, gameScale, pos, true)
+	addProgressBar(world, gameScale, pos, true, true)
+	pos.Y += rowGap * gameScale.Max
+	addProgressBar(world, gameScale, pos, false, false)
+	pos.Y += rowGap * gameScale.Max
+	addProgressBar(world, gameScale, pos, true, false)
 
 	// add sprite button
 	pos.Y += rowGap * gameScale.Max
@@ -483,7 +487,7 @@ func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geomet
 	}
 }
 
-func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
+func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool, focusable bool) {
 	// control pos
 	controlPos := geometry.Point{
 		X: labelPos.X + (columnGap * gameScale.Max),
@@ -505,6 +509,10 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 			Direction: color.GradientHorizontal,
 		}
 		text = "ProgressBar [Gradient]"
+	}
+
+	if !focusable {
+		text = text + " [No focus]"
 	}
 
 	// add a label
@@ -558,10 +566,12 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 		color.White,
 	)
 
-	bar.Event = progressBarEvent{
-		barEnt:   barEnt,
-		valueEnt: valueEnt,
-		Message:  text + " clicked",
+	if focusable {
+		bar.Event = progressBarEvent{
+			barEnt:   barEnt,
+			valueEnt: valueEnt,
+			Message:  text + " clicked",
+		}
 	}
 
 	barEnt.Set(bar)
