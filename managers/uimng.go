@@ -615,7 +615,7 @@ func (uim *uiManager) handleFocus(world *goecs.World, key device.Key) {
 		} else {
 			uim.selectNextControl(world, key)
 		}
-	} else if key == device.KeySpace {
+	} else if key == device.KeySpace || key == device.KeyReturn {
 		uim.activateFocus(world)
 	}
 }
