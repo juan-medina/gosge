@@ -170,10 +170,13 @@ func (uim uiManager) flatButtonsColors(ent *goecs.Entity) {
 		ent.Set(bcl.Normal)
 	}
 	if state.Focused {
-		clr := ui.Get.ButtonColor(ent)
-		clr.Border = bcl.Hover.Border
-		clr.Text = bcl.Hover.Text
-		ent.Set(clr)
+		if ent.Contains(color.TYPE.Solid) {
+			ac := color.Get.Solid(ent)
+			clr := ui.Get.ButtonColor(ent)
+			clr.Border = ac
+			clr.Text = ac
+			ent.Set(clr)
+		}
 	}
 }
 
@@ -340,9 +343,12 @@ func (uim uiManager) progressBarsColors(ent *goecs.Entity) {
 		ent.Set(bcl.Normal)
 	}
 	if state.Focused {
-		clr := ui.Get.ProgressBarColor(ent)
-		clr.Border = bcl.Hover.Border
-		ent.Set(clr)
+		if ent.Contains(color.TYPE.Solid) {
+			ac := color.Get.Solid(ent)
+			clr := ui.Get.ProgressBarColor(ent)
+			clr.Border = ac
+			ent.Set(clr)
+		}
 	}
 }
 
@@ -565,6 +571,22 @@ func (uim *uiManager) focusControl(world *goecs.World, control *goecs.Entity) {
 		ent := it.Value()
 		state := ui.Get.ControlState(ent)
 		state.Focused = ent.ID() == control.ID()
+		if state.Focused {
+			clr := effects.AlternateColor{
+				From:  color.White,
+				To:    color.White.Alpha(170),
+				Time:  0.35,
+				Delay: 0.15,
+			}
+			ent.Add(clr)
+		} else {
+			if ent.Contains(effects.TYPE.AlternateColorState) {
+				ent.Remove(effects.TYPE.AlternateColorState)
+			}
+			if ent.Contains(effects.TYPE.AlternateColor) {
+				ent.Remove(effects.TYPE.AlternateColor)
+			}
+		}
 		ent.Set(state)
 	}
 	uim.focus = control
@@ -575,6 +597,12 @@ func (uim *uiManager) clearFocus(world *goecs.World) {
 		ent := it.Value()
 		state := ui.Get.ControlState(ent)
 		state.Focused = false
+		if ent.Contains(effects.TYPE.AlternateColorState) {
+			ent.Remove(effects.TYPE.AlternateColorState)
+		}
+		if ent.Contains(effects.TYPE.AlternateColor) {
+			ent.Remove(effects.TYPE.AlternateColor)
+		}
 		ent.Set(state)
 	}
 	uim.focus = nil
