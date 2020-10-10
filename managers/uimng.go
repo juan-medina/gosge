@@ -135,11 +135,11 @@ func (uim *uiManager) flatButtons(world *goecs.World) {
 			} else {
 				bcl.Hover.Gradient = color.Gradient{
 					From:      clr.Gradient.From.Blend(color.Black, hoverColorDarkenFactor),
-					To:        clr.Gradient.To.Blend(color.Black, normalColorDarkenFactor),
+					To:        clr.Gradient.To.Blend(color.Black, hoverColorDarkenFactor),
 					Direction: clr.Gradient.Direction,
 				}
 				bcl.Normal.Gradient = color.Gradient{
-					From:      clr.Gradient.From.Blend(color.Black, hoverColorDarkenFactor),
+					From:      clr.Gradient.From.Blend(color.Black, normalColorDarkenFactor),
 					To:        clr.Gradient.To.Blend(color.Black, normalColorDarkenFactor),
 					Direction: clr.Gradient.Direction,
 				}
