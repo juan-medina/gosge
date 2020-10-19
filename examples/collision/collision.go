@@ -63,12 +63,12 @@ var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
 	gEng             *gosge.Engine
-	gopher1          *goecs.Entity
-	gopher2          *goecs.Entity
+	gopher1          goecs.EntityID
+	gopher2          goecs.EntityID
 	move             geometry.Point
 	gameScale        geometry.Scale
-	area1            *goecs.Entity
-	area2            *goecs.Entity
+	area1            goecs.EntityID
+	area2            goecs.EntityID
 	spriteSize       geometry.Size
 	currentFactor    int
 	factors          = []demoFactors{
@@ -152,6 +152,7 @@ func loadGame(eng *gosge.Engine) error {
 			FlipX: false,
 			FlipY: false},
 		gopherPos,
+		effects.Layer{Depth: 0},
 	)
 
 	area1 = world.AddEntity(
@@ -162,6 +163,7 @@ func loadGame(eng *gosge.Engine) error {
 		},
 		areaPos,
 		color.Red,
+		effects.Layer{Depth: 0},
 	)
 
 	gopherPos = geometry.Point{
@@ -183,6 +185,7 @@ func loadGame(eng *gosge.Engine) error {
 			FlipX: false,
 			FlipY: false},
 		gopherPos,
+		effects.Layer{Depth: 1},
 	)
 
 	area2 = world.AddEntity(
@@ -193,6 +196,7 @@ func loadGame(eng *gosge.Engine) error {
 		},
 		areaPos,
 		color.Red,
+		effects.Layer{Depth: 1},
 	)
 
 	currentFactor = 0
@@ -232,9 +236,24 @@ func loadGame(eng *gosge.Engine) error {
 	return nil
 }
 
-func updateAreasSystem(_ *goecs.World, _ float32) error {
-	updateArea(gopher1, area1, factors[currentFactor].factor1)
-	updateArea(gopher2, area2, factors[currentFactor].factor2)
+func updateAreasSystem(world *goecs.World, _ float32) error {
+	var err error
+	var gopher1Ent, gopher2Ent *goecs.Entity
+	var area1Ent, area2Ent *goecs.Entity
+	if gopher1Ent, err = world.Get(gopher1); err != nil {
+		return err
+	}
+	if gopher2Ent, err = world.Get(gopher2); err != nil {
+		return err
+	}
+	if area1Ent, err = world.Get(area1); err != nil {
+		return err
+	}
+	if area2Ent, err = world.Get(area2); err != nil {
+		return err
+	}
+	updateArea(gopher1Ent, area1Ent, factors[currentFactor].factor1)
+	updateArea(gopher2Ent, area2Ent, factors[currentFactor].factor2)
 	return nil
 }
 
@@ -255,16 +274,21 @@ func updateArea(sprite *goecs.Entity, area *goecs.Entity, factor geometry.Point)
 }
 
 // move the gopher using the current move
-func moveSystem(_ *goecs.World, delta float32) error {
-	pos := geometry.Get.Point(gopher1)
+func moveSystem(world *goecs.World, delta float32) error {
+	var err error
+	var gopher1Ent *goecs.Entity
+	if gopher1Ent, err = world.Get(gopher1); err != nil {
+		return err
+	}
+	pos := geometry.Get.Point(gopher1Ent)
 	pos.X += move.X * delta
 	pos.Y += move.Y * delta
-	gopher1.Set(pos)
+	gopher1Ent.Set(pos)
 	return nil
 }
 
 // calculate move on key press
-func keyListener(_ *goecs.World, signal interface{}, _ float32) error {
+func keyListener(_ *goecs.World, signal goecs.Component, _ float32) error {
 	switch e := signal.(type) {
 	case events.KeyDownEvent:
 		if e.Key == device.KeyUp {
@@ -297,17 +321,25 @@ func keyListener(_ *goecs.World, signal interface{}, _ float32) error {
 }
 
 // color in red sprites that collides
-func collideSystem(_ *goecs.World, _ float32) error {
+func collideSystem(world *goecs.World, _ float32) error {
+	var err error
+	var gopher1Ent, gopher2Ent *goecs.Entity
+	if gopher1Ent, err = world.Get(gopher1); err != nil {
+		return err
+	}
+	if gopher2Ent, err = world.Get(gopher2); err != nil {
+		return err
+	}
 	// no collision is color white
 	color1 := color.White
 	color2 := color.White
 
 	// get a components
-	pos1 := geometry.Get.Point(gopher1)
-	spr1 := sprite.Get(gopher1)
+	pos1 := geometry.Get.Point(gopher1Ent)
+	spr1 := sprite.Get(gopher1Ent)
 
-	pos2 := geometry.Get.Point(gopher2)
-	spr2 := sprite.Get(gopher2)
+	pos2 := geometry.Get.Point(gopher2Ent)
+	spr2 := sprite.Get(gopher2Ent)
 
 	// if they collide
 	if gEng.SpritesCollidesFactor(spr1, pos1, spr2, pos2, factors[currentFactor].factor1, factors[currentFactor].factor2) {
@@ -317,8 +349,8 @@ func collideSystem(_ *goecs.World, _ float32) error {
 	}
 
 	// update colors
-	gopher1.Set(color1)
-	gopher2.Set(color2)
+	gopher1Ent.Set(color1)
+	gopher2Ent.Set(color2)
 
 	return nil
 }
