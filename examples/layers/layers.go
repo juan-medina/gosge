@@ -66,7 +66,7 @@ var (
 	}
 
 	// uiText contains the text on top of the screen
-	uiText *goecs.Entity
+	uiText goecs.EntityID
 
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
@@ -282,7 +282,8 @@ func swapLayers(w *goecs.World, old, new int) error {
 }
 
 // updateUI update the ui telling what group is top and when is going to change
-func updateUI(_ *goecs.World) error {
+func updateUI(world *goecs.World) error {
+	var err error
 	var top = 0
 	for i := 0; i < 3; i++ {
 		if groups[i].layer.Depth == topLayer.Depth {
@@ -291,9 +292,13 @@ func updateUI(_ *goecs.World) error {
 		}
 	}
 
-	txt := ui.Get.Text(uiText)
+	var uiTextEnt *goecs.Entity
+	if uiTextEnt, err = world.Get(uiText); err != nil {
+		return err
+	}
+	txt := ui.Get.Text(uiTextEnt)
 	txt.String = fmt.Sprintf("top layer %s, change in %02.02f", groups[top].name, timeToChange-time)
-	uiText.Set(txt)
+	uiTextEnt.Set(txt)
 
-	return nil
+	return err
 }
