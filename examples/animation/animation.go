@@ -36,7 +36,6 @@ import (
 	"github.com/juan-medina/gosge/events"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
-	"reflect"
 )
 
 // Game options
@@ -71,7 +70,7 @@ var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
 	// robot is our robot sprite
-	robot *goecs.Entity
+	robot goecs.EntityID
 	// gameScale is our game scale
 	gameScale geometry.Scale
 )
@@ -130,7 +129,7 @@ func loadGame(eng *gosge.Engine) error {
 			},
 			geometry.Point{},
 			effects.Layer{Depth: float32(l)}, // each layer is have it own depth
-			attach{ent: attached},            // attach the layer that is attached
+			attach{id: attached},             // attach the layer that is attached
 		)
 	}
 
@@ -198,16 +197,26 @@ func loadGame(eng *gosge.Engine) error {
 
 // a component to have an attached entity
 type attach struct {
-	ent *goecs.Entity
+	id goecs.EntityID
 }
 
-// the reflect type of the attach struct
-var attachType = reflect.TypeOf(attach{})
+func (a attach) Type() goecs.ComponentType {
+	return attachType
+}
+
+// the goecs.ComponentType of the attach struct
+var attachType = goecs.NewComponentType()
 
 // on update
 func robotMoveSystem(world *goecs.World, delta float32) error {
+	var robotEnt *goecs.Entity
+	var err error
+	// get the robot id
+	if robotEnt, err = world.Get(robot); err != nil {
+		return err
+	}
 	// get the animation from our robot
-	anim := animation.Get.Animation(robot)
+	anim := animation.Get.Animation(robotEnt)
 	// if its running
 	if anim.Current == runAnim {
 		// get from the ECS all the entities that have a layer a position and an attachment
@@ -249,7 +258,13 @@ func robotMoveSystem(world *goecs.World, delta float32) error {
 			}
 
 			// update attachment post
-			ent.Get(attachType).(attach).ent.Set(attachPos)
+			var attachEnt *goecs.Entity
+			var err error
+			// get the robot id
+			if attachEnt, err = world.Get(ent.Get(attachType).(attach).id); err != nil {
+				return err
+			}
+			attachEnt.Set(attachPos)
 			// update layer pos
 			ent.Set(pos)
 		}
@@ -258,7 +273,7 @@ func robotMoveSystem(world *goecs.World, delta float32) error {
 }
 
 // notified on events
-func keysListener(_ *goecs.World, e interface{}, _ float32) error {
+func keysListener(world *goecs.World, e goecs.Component, _ float32) error {
 	if e == nil {
 		log.Trace().Interface("signal", e).Msg("got event")
 	}
@@ -267,8 +282,14 @@ func keysListener(_ *goecs.World, e interface{}, _ float32) error {
 	case events.KeyDownEvent:
 		// it is the left o right cursor change animations
 		if v.Key == device.KeyRight || v.Key == device.KeyLeft {
+			var robotEnt *goecs.Entity
+			var err error
+			// get the robot id
+			if robotEnt, err = world.Get(robot); err != nil {
+				return err
+			}
 			// get the animation
-			anim := animation.Get.Animation(robot)
+			anim := animation.Get.Animation(robotEnt)
 
 			// if we are idle
 			if anim.Current == idleAnim {
@@ -277,13 +298,19 @@ func keysListener(_ *goecs.World, e interface{}, _ float32) error {
 			// we flip the animation if the key was left
 			anim.FlipX = v.Key == device.KeyLeft
 			// update the entity animation
-			robot.Set(anim)
+			robotEnt.Set(anim)
 		}
 	case events.KeyUpEvent:
 		// it is the left o right cursor change animations
 		if v.Key == device.KeyRight || v.Key == device.KeyLeft {
+			var robotEnt *goecs.Entity
+			var err error
+			// get the robot id
+			if robotEnt, err = world.Get(robot); err != nil {
+				return err
+			}
 			// get the animation
-			anim := animation.Get.Animation(robot)
+			anim := animation.Get.Animation(robotEnt)
 
 			// if we are running
 			if anim.Current == runAnim {
@@ -293,7 +320,7 @@ func keysListener(_ *goecs.World, e interface{}, _ float32) error {
 			// we flip the animation if the key was left
 			anim.FlipX = v.Key == device.KeyLeft
 			// update the entity animation
-			robot.Set(anim)
+			robotEnt.Set(anim)
 		}
 	}
 	return nil
