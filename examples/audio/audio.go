@@ -37,7 +37,6 @@ import (
 	"github.com/juan-medina/gosge/events"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
-	"reflect"
 )
 
 var opt = options.Options{
@@ -80,16 +79,16 @@ const (
 )
 
 var (
-	playButton  *goecs.Entity // the play button entity
-	stopButton  *goecs.Entity // the stop button
-	gopher      *goecs.Entity // the gopher sprite entity
-	geng        *gosge.Engine // the game engine
-	masterLabel *goecs.Entity // the master volume label
-	masterBar   *goecs.Entity // the master progress bar
-	musicLabel  *goecs.Entity // the music volume label
-	musicBar    *goecs.Entity // the music progress bar
-	soundLabel  *goecs.Entity // the sound volume label
-	soundBar    *goecs.Entity // the sound progress bar
+	playButton  goecs.EntityID // the play button entity
+	stopButton  goecs.EntityID // the stop button
+	gopher      goecs.EntityID // the gopher sprite entity
+	geng        *gosge.Engine  // the game engine
+	masterLabel goecs.EntityID // the master volume label
+	masterBar   goecs.EntityID // the master progress bar
+	musicLabel  goecs.EntityID // the music volume label
+	musicBar    goecs.EntityID // the music progress bar
+	soundLabel  goecs.EntityID // the sound volume label
+	soundBar    goecs.EntityID // the sound progress bar
 )
 
 var (
@@ -115,11 +114,16 @@ const (
 
 // BarClickEvent is trigger when the bar is clicked
 type BarClickEvent struct {
-	Type BarType
+	BT BarType
+}
+
+// Type is this goecs.ComponentType
+func (b BarClickEvent) Type() goecs.ComponentType {
+	return BarClickEventType
 }
 
 // BarClickEventType is the reflect.Type for BarClickEvent
-var BarClickEventType = reflect.TypeOf(BarClickEvent{})
+var BarClickEventType = goecs.NewComponentType()
 
 func loadGame(eng *gosge.Engine) error {
 	geng = eng
@@ -320,7 +324,7 @@ func loadGame(eng *gosge.Engine) error {
 }
 
 func createBar(world *goecs.World, text string, textPos, barPos geometry.Point, scale geometry.Scale,
-	barType BarType) (label, bar *goecs.Entity) {
+	barType BarType) (label, bar goecs.EntityID) {
 
 	settings := geng.GetSettings()
 	soundVolume := settings.GetFloat32("soundVolume", defaultSoundVolume)
@@ -338,7 +342,7 @@ func createBar(world *goecs.World, text string, textPos, barPos geometry.Point, 
 		Sound:  clickSound,
 		Volume: soundVolume,
 		Event: BarClickEvent{
-			Type: barType,
+			BT: barType,
 		},
 	}
 
@@ -395,102 +399,162 @@ func createBar(world *goecs.World, text string, textPos, barPos geometry.Point, 
 	return
 }
 
-func barClickListener(world *goecs.World, signal interface{}, _ float32) error {
+func barClickListener(world *goecs.World, signal goecs.Component, _ float32) error {
+	var err error
 	switch e := signal.(type) {
 	case BarClickEvent:
 		settings := geng.GetSettings()
 		masterVolume := settings.GetFloat32("masterVolume", defaultMusicVolume)
 		musicVolume := settings.GetFloat32("musicVolume", defaultMusicVolume)
 		soundVolume := settings.GetFloat32("soundVolume", defaultSoundVolume)
-		switch e.Type {
+		switch e.BT {
 		case MasterBar:
-			bar := ui.Get.ProgressBar(masterBar)
-			text := ui.Get.Text(masterLabel)
+			var masterBarEnt *goecs.Entity
+			var masterLabelEnt *goecs.Entity
+			if masterBarEnt, err = world.Get(masterBar); err != nil {
+				return err
+			}
+			bar := ui.Get.ProgressBar(masterBarEnt)
+			if masterLabelEnt, err = world.Get(masterLabel); err != nil {
+				return err
+			}
+			text := ui.Get.Text(masterLabelEnt)
 			text.String = fmt.Sprintf("Master Volume : %d%%", int(bar.Current))
-			masterLabel.Set(text)
+			masterLabelEnt.Set(text)
 			masterVolume = float32(int(bar.Current)) / 100
 			settings.SetFloat32("masterVolume", masterVolume)
-			updateUIVolume()
+			if err = updateUIVolume(world); err != nil {
+				return err
+			}
 			world.Signal(events.ChangeMasterVolumeEvent{Volume: masterVolume})
 		case MusicBar:
-			bar := ui.Get.ProgressBar(musicBar)
-			text := ui.Get.Text(musicLabel)
+			var musicBarEnt *goecs.Entity
+			var musicLabelEnt *goecs.Entity
+			if musicBarEnt, err = world.Get(musicBar); err != nil {
+				return err
+			}
+			bar := ui.Get.ProgressBar(musicBarEnt)
+			if musicLabelEnt, err = world.Get(musicLabel); err != nil {
+				return err
+			}
+			text := ui.Get.Text(musicLabelEnt)
 			text.String = fmt.Sprintf("Music Volume : %d%%", int(bar.Current))
 			musicVolume = float32(int(bar.Current)) / 100
 			settings.SetFloat32("musicVolume", musicVolume)
-			musicLabel.Set(text)
-			updateUIVolume()
+			musicLabelEnt.Set(text)
+			if err = updateUIVolume(world); err != nil {
+				return err
+			}
 			world.Signal(events.ChangeMusicVolumeEvent{
 				Name:   musicFile,
 				Volume: musicVolume,
 			})
 		case SoundBar:
-			bar := ui.Get.ProgressBar(soundBar)
-			text := ui.Get.Text(soundLabel)
+			var soundBarEnt *goecs.Entity
+			var soundLabelEnt *goecs.Entity
+			if soundBarEnt, err = world.Get(soundBar); err != nil {
+				return err
+			}
+			if soundLabelEnt, err = world.Get(soundLabel); err != nil {
+				return err
+			}
+			bar := ui.Get.ProgressBar(soundBarEnt)
+			text := ui.Get.Text(soundLabelEnt)
 			text.String = fmt.Sprintf("Sound Volume : %d%%", int(bar.Current))
 			soundVolume = float32(int(bar.Current)) / 100
 			settings.SetFloat32("soundVolume", soundVolume)
-			soundLabel.Set(text)
-			updateUIVolume()
+			soundLabelEnt.Set(text)
+			if err = updateUIVolume(world); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-func updateUIVolume() {
+func updateUIVolume(world *goecs.World) error {
+	var err error
+	var playButtonEnt *goecs.Entity
+	var stopButtonEnt *goecs.Entity
+	var masterBarEnt *goecs.Entity
+	var musicBarEnt *goecs.Entity
+	var soundBarEnt *goecs.Entity
+
+	if playButtonEnt, err = world.Get(playButton); err != nil {
+		return err
+	}
+	if stopButtonEnt, err = world.Get(stopButton); err != nil {
+		return err
+	}
+	if masterBarEnt, err = world.Get(masterBar); err != nil {
+		return err
+	}
+	if musicBarEnt, err = world.Get(musicBar); err != nil {
+		return err
+	}
+	if soundBarEnt, err = world.Get(soundBar); err != nil {
+		return err
+	}
+
 	settings := geng.GetSettings()
 	musicVolume := settings.GetFloat32("musicVolume", defaultMusicVolume)
 	soundVolume := settings.GetFloat32("soundVolume", defaultSoundVolume)
 
-	btn := ui.Get.SpriteButton(playButton)
+	btn := ui.Get.SpriteButton(playButtonEnt)
 	btn.Volume = soundVolume
-	playButton.Set(btn)
+	playButtonEnt.Set(btn)
 
-	btn = ui.Get.SpriteButton(stopButton)
+	btn = ui.Get.SpriteButton(stopButtonEnt)
 	btn.Volume = soundVolume
-	stopButton.Set(btn)
+	stopButtonEnt.Set(btn)
 
-	bar := ui.Get.ProgressBar(masterBar)
+	bar := ui.Get.ProgressBar(masterBarEnt)
 	bar.Volume = soundVolume
-	masterBar.Set(bar)
+	masterBarEnt.Set(bar)
 
-	bar = ui.Get.ProgressBar(musicBar)
+	bar = ui.Get.ProgressBar(musicBarEnt)
 	bar.Volume = soundVolume
-	musicBar.Set(bar)
+	musicBarEnt.Set(bar)
 
-	bar = ui.Get.ProgressBar(soundBar)
+	bar = ui.Get.ProgressBar(soundBarEnt)
 	bar.Volume = soundVolume
-	soundBar.Set(bar)
+	soundBarEnt.Set(bar)
 
-	sb := ui.Get.SpriteButton(playButton)
+	sb := ui.Get.SpriteButton(playButtonEnt)
 	switch sb.Event.(type) {
 	case events.PlayMusicEvent:
 		sb.Event = events.PlayMusicEvent{
 			Name:   musicFile,
 			Volume: musicVolume,
 		}
-		playButton.Set(sb)
+		playButtonEnt.Set(sb)
 	}
+	return err
 }
 
-func mouseListener(world *goecs.World, event interface{}, _ float32) error {
+func mouseListener(world *goecs.World, event goecs.Component, _ float32) error {
 	switch e := event.(type) {
 	// check if we get a mouse up
 	case events.MouseUpEvent:
+		var err error
+		var gopherEnt *goecs.Entity
+		if gopherEnt, err = world.Get(gopher); err != nil {
+			return err
+		}
 		settings := geng.GetSettings()
 		soundVolume := settings.GetFloat32("soundVolume", defaultSoundVolume)
 		// get our gopher sprite and position
-		pos := geometry.Get.Point(gopher)
-		spr := sprite.Get(gopher)
+		pos := geometry.Get.Point(gopherEnt)
+		spr := sprite.Get(gopherEnt)
 		// if we click on the gopher
 		if geng.SpriteAtContains(spr, pos, e.Point) {
 			// make the gopher move faster
-			anim := animation.Get.Animation(gopher)
+			anim := animation.Get.Animation(gopherEnt)
 			// if we are dancing, dance faster
 			if anim.Current == danceAnim {
 				anim.Speed += danceAnimSpeedIncrease
 			}
-			gopher.Set(anim)
+			gopherEnt.Set(anim)
 			// play the gopher sound
 			world.Signal(events.PlaySoundEvent{Name: gopherSound, Volume: soundVolume})
 		}
@@ -498,14 +562,23 @@ func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 	return nil
 }
 
-func musicStateListener(_ *goecs.World, event interface{}, _ float32) error {
+func musicStateListener(world *goecs.World, event goecs.Component, _ float32) error {
 	switch e := event.(type) {
 	// if is the music state has change
 	case events.MusicStateChangeEvent:
+		var err error
+		var playButtonEnt *goecs.Entity
+		var gopherEnt *goecs.Entity
+		if playButtonEnt, err = world.Get(playButton); err != nil {
+			return err
+		}
+		if gopherEnt, err = world.Get(gopher); err != nil {
+			return err
+		}
 		// get the play button ui.SpriteButton
-		sb := ui.Get.SpriteButton(playButton)
+		sb := ui.Get.SpriteButton(playButtonEnt)
 		// get the gopher current animation.Animation
-		anim := animation.Get.Animation(gopher)
+		anim := animation.Get.Animation(gopherEnt)
 		switch e.New {
 		// if the music is playing
 		case audio.StatePlaying:
@@ -545,9 +618,9 @@ func musicStateListener(_ *goecs.World, event interface{}, _ float32) error {
 		// reset anim speed
 		anim.Speed = 1
 		// update the play button entity
-		playButton.Set(sb)
+		playButtonEnt.Set(sb)
 		// update the gopher entity
-		gopher.Set(anim)
+		gopherEnt.Set(anim)
 	}
 	return nil
 }
