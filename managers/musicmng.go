@@ -26,7 +26,6 @@ import (
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components/audio"
 	"github.com/juan-medina/gosge/events"
-	"reflect"
 )
 
 type musicManager struct {
@@ -34,8 +33,8 @@ type musicManager struct {
 	sm *StorageManager
 }
 
-func (mm musicManager) Signals() []reflect.Type {
-	return []reflect.Type{
+func (mm musicManager) Signals() []goecs.ComponentType {
+	return []goecs.ComponentType{
 		events.TYPE.PlayMusicEvent,
 		events.TYPE.StopMusicEvent,
 		events.TYPE.PauseMusicEvent,
@@ -70,7 +69,7 @@ func (mm musicManager) findMusicEnt(world *goecs.World, name string) *goecs.Enti
 	return nil
 }
 
-func (mm musicManager) Listener(world *goecs.World, event interface{}, _ float32) error {
+func (mm musicManager) Listener(world *goecs.World, event goecs.Component, _ float32) error {
 	switch e := event.(type) {
 	case events.PlayMusicEvent:
 		return mm.playMusicEvent(world, e)
@@ -90,7 +89,7 @@ func (mm musicManager) playMusicEvent(world *goecs.World, pme events.PlayMusicEv
 	if def, err := mm.sm.GetMusicDef(pme.Name); err == nil {
 		var ent *goecs.Entity
 		if ent = mm.findMusicEnt(world, pme.Name); ent == nil {
-			ent = world.AddEntity(
+			entID := world.AddEntity(
 				audio.Music{
 					Name: pme.Name,
 				},
@@ -99,6 +98,10 @@ func (mm musicManager) playMusicEvent(world *goecs.World, pme events.PlayMusicEv
 					PlayingState: audio.StateStopped,
 				},
 			)
+			var err error
+			if ent, err = world.Get(entID); err != nil {
+				return err
+			}
 		}
 		state := audio.Get.MusicState(ent)
 		if state.PlayingState == audio.StateStopped || state.PlayingState == audio.StatePaused {

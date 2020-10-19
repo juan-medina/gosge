@@ -23,6 +23,7 @@
 package ui
 
 import (
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components/color"
 	"github.com/juan-medina/gosge/components/geometry"
 )
@@ -38,6 +39,11 @@ type ProgressBar struct {
 	Event   interface{}   // Event is the event that will be trigger when this bar is click
 }
 
+// Type return this goecs.ComponentType
+func (p ProgressBar) Type() goecs.ComponentType {
+	return TYPE.ProgressBar
+}
+
 // ProgressBarColor represent the colors of the ui.ProgressBar
 type ProgressBarColor struct {
 	Solid    color.Solid    // Solid is a color.Solid
@@ -46,10 +52,20 @@ type ProgressBarColor struct {
 	Border   color.Solid    // Border is a color.Solid
 }
 
+// Type return this goecs.ComponentType
+func (p ProgressBarColor) Type() goecs.ComponentType {
+	return TYPE.ProgressBarColor
+}
+
 // ProgressBarHoverColor is the hover colors for a ui.ProgressBar
 type ProgressBarHoverColor struct {
 	Normal   ProgressBarColor // Normal is the ui.ProgressBarColor on normal state
 	Hover    ProgressBarColor // Hover is the  ui.ProgressBarColor on hover state
 	Clicked  ProgressBarColor // Clicked is the  ui.ProgressBarColor on clicked state
 	Disabled ProgressBarColor // Disabled is the  ui.ProgressBarColor on disabled state
+}
+
+// Type return this goecs.ComponentType
+func (p ProgressBarHoverColor) Type() goecs.ComponentType {
+	return TYPE.ProgressBarHoverColor
 }

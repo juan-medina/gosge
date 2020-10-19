@@ -25,12 +25,16 @@ package audio
 
 import (
 	"github.com/juan-medina/goecs"
-	"reflect"
 )
 
 // Music represent an music stream
 type Music struct {
 	Name string // Name is the filename for our music stream
+}
+
+// Type return this goecs.ComponentType
+func (m Music) Type() goecs.ComponentType {
+	return TYPE.Music
 }
 
 // MusicPlayingState represent the playing state for a music stream
@@ -49,17 +53,22 @@ type MusicState struct {
 	Name         string            // Name is the current music Name
 }
 
-type types struct {
-	// Music is the reflect.Type for audio.Music
-	Music reflect.Type
-	// MusicPlayingState is the reflect.Type for audio.Music
-	MusicState reflect.Type
+// Type return this goecs.ComponentType
+func (m MusicState) Type() goecs.ComponentType {
+	return TYPE.MusicState
 }
 
-// TYPE hold the reflect.Type for our audio components
+type types struct {
+	// Music is the goecs.ComponentType for audio.Music
+	Music goecs.ComponentType
+	// MusicPlayingState is the goecs.ComponentType for audio.Music
+	MusicState goecs.ComponentType
+}
+
+// TYPE hold the goecs.ComponentType for our audio components
 var TYPE = types{
-	Music:      reflect.TypeOf(Music{}),
-	MusicState: reflect.TypeOf(MusicState{}),
+	Music:      goecs.NewComponentType(),
+	MusicState: goecs.NewComponentType(),
 }
 
 type gets struct {

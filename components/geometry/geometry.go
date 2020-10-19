@@ -26,13 +26,17 @@ package geometry
 import (
 	"github.com/juan-medina/goecs"
 	"math"
-	"reflect"
 )
 
 // Point represent a x/y coordinate
 type Point struct {
 	X float32 // The x coordinate
 	Y float32 // The y coordinate
+}
+
+// Type return this goecs.ComponentType
+func (pos Point) Type() goecs.ComponentType {
+	return TYPE.Point
 }
 
 // Clamp a geometry.Point to min max value
@@ -150,13 +154,13 @@ func (r Rect) Collides(other Rect) bool {
 }
 
 type types struct {
-	// Point is the reflect.Type for geometry.Point
-	Point reflect.Type
+	// Point is the goecs.ComponentType for geometry.Point
+	Point goecs.ComponentType
 }
 
-// TYPE hold the reflect.Type for our geometry components
+// TYPE hold the goecs.ComponentType for our geometry components
 var TYPE = types{
-	Point: reflect.TypeOf(Point{}),
+	Point: goecs.NewComponentType(),
 }
 
 type gets struct {

@@ -28,15 +28,24 @@ import (
 	"github.com/juan-medina/gosge/components/audio"
 	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/geometry"
-	"reflect"
 )
 
 // GameCloseEvent is an event that indicates that game need to close
 type GameCloseEvent struct{}
 
+// Type is this goecs.ComponentType
+func (g GameCloseEvent) Type() goecs.ComponentType {
+	return TYPE.GameCloseEvent
+}
+
 // MouseMoveEvent is an event that indicates that the mouse is moving
 type MouseMoveEvent struct {
 	geometry.Point
+}
+
+// Type is this goecs.ComponentType
+func (m MouseMoveEvent) Type() goecs.ComponentType {
+	return TYPE.MouseMoveEvent
 }
 
 // MouseUpEvent is an event that indicates that the mouse is release
@@ -47,12 +56,22 @@ type MouseUpEvent struct {
 	MouseButton device.MouseButton
 }
 
+// Type is this goecs.ComponentType
+func (m MouseUpEvent) Type() goecs.ComponentType {
+	return TYPE.MouseUpEvent
+}
+
 // MouseDownEvent is an event that indicates that the mouse is pressed
 type MouseDownEvent struct {
 	// Point is the geometry.Point where the mouse is when pressed
 	Point geometry.Point
 	// MouseButton is the device.MouseButton been pressed
 	MouseButton device.MouseButton
+}
+
+// Type is this goecs.ComponentType
+func (m MouseDownEvent) Type() goecs.ComponentType {
+	return TYPE.MouseDownEvent
 }
 
 // ChangeGameStage is an event that indicates that change game stage, all entities,
@@ -63,14 +82,29 @@ type ChangeGameStage struct {
 	Stage string
 }
 
+// Type is this goecs.ComponentType
+func (c ChangeGameStage) Type() goecs.ComponentType {
+	return TYPE.ChangeGameStage
+}
+
 // KeyUpEvent this event triggers when a key is up
 type KeyUpEvent struct {
 	Key device.Key
 }
 
+// Type is this goecs.ComponentType
+func (k KeyUpEvent) Type() goecs.ComponentType {
+	return TYPE.KeyUpEvent
+}
+
 // KeyDownEvent this event triggers when a key is down
 type KeyDownEvent struct {
 	Key device.Key
+}
+
+// Type is this goecs.ComponentType
+func (k KeyDownEvent) Type() goecs.ComponentType {
+	return TYPE.KeyDownEvent
 }
 
 // PlayMusicEvent is an event to play a music stream
@@ -79,9 +113,19 @@ type PlayMusicEvent struct {
 	Volume float32
 }
 
+// Type is this goecs.ComponentType
+func (p PlayMusicEvent) Type() goecs.ComponentType {
+	return TYPE.PlayMusicEvent
+}
+
 // StopMusicEvent is an event to play a music stream
 type StopMusicEvent struct {
 	Name string
+}
+
+// Type is this goecs.ComponentType
+func (s StopMusicEvent) Type() goecs.ComponentType {
+	return TYPE.StopMusicEvent
 }
 
 // PauseMusicEvent is an event to pause a music stream
@@ -89,15 +133,30 @@ type PauseMusicEvent struct {
 	Name string
 }
 
+// Type is this goecs.ComponentType
+func (p PauseMusicEvent) Type() goecs.ComponentType {
+	return TYPE.PauseMusicEvent
+}
+
 // ResumeMusicEvent is an event to resume a music stream
 type ResumeMusicEvent struct {
 	Name string
+}
+
+// Type is this goecs.ComponentType
+func (r ResumeMusicEvent) Type() goecs.ComponentType {
+	return TYPE.ResumeMusicEvent
 }
 
 // ChangeMusicVolumeEvent is an event to change the volume of a music stream
 type ChangeMusicVolumeEvent struct {
 	Name   string
 	Volume float32
+}
+
+// Type is this goecs.ComponentType
+func (c ChangeMusicVolumeEvent) Type() goecs.ComponentType {
+	return TYPE.ChangeMusicVolumeEvent
 }
 
 // MusicStateChangeEvent is a event trigger when a music state change
@@ -107,15 +166,30 @@ type MusicStateChangeEvent struct {
 	New  audio.MusicPlayingState // New is the current audio.MusicPlayingState
 }
 
+// Type is this goecs.ComponentType
+func (m MusicStateChangeEvent) Type() goecs.ComponentType {
+	return TYPE.MusicStateChangeEvent
+}
+
 // PlaySoundEvent is an event to play a sound wave
 type PlaySoundEvent struct {
 	Name   string
 	Volume float32
 }
 
+// Type is this goecs.ComponentType
+func (p PlaySoundEvent) Type() goecs.ComponentType {
+	return TYPE.PlaySoundEvent
+}
+
 // ChangeMasterVolumeEvent to a given Volume
 type ChangeMasterVolumeEvent struct {
 	Volume float32 // Volume to be set
+}
+
+// Type is this goecs.ComponentType
+func (c ChangeMasterVolumeEvent) Type() goecs.ComponentType {
+	return TYPE.ChangeMasterVolumeEvent
 }
 
 // DelaySignal is a signal that will happen after a time
@@ -124,13 +198,28 @@ type DelaySignal struct {
 	Time   float32     // Time to this Signal to be emitted, in seconds
 }
 
+// Type is this goecs.ComponentType
+func (d DelaySignal) Type() goecs.ComponentType {
+	return TYPE.DelaySignal
+}
+
 // FocusOnControlEvent is a signal to change the focussed control
 type FocusOnControlEvent struct {
 	Control *goecs.Entity
 }
 
+// Type is this goecs.ComponentType
+func (f FocusOnControlEvent) Type() goecs.ComponentType {
+	return TYPE.FocusOnControlEvent
+}
+
 // ClearFocusEvent is a signal to clear all focussed control
 type ClearFocusEvent struct{}
+
+// Type is this goecs.ComponentType
+func (c ClearFocusEvent) Type() goecs.ComponentType {
+	return TYPE.ClearFocusEvent
+}
 
 // GamePadButtonUpEvent this event triggers when a gamepad button is up
 type GamePadButtonUpEvent struct {
@@ -138,10 +227,20 @@ type GamePadButtonUpEvent struct {
 	Button  device.GamepadButton
 }
 
+// Type is this goecs.ComponentType
+func (g GamePadButtonUpEvent) Type() goecs.ComponentType {
+	return TYPE.GamePadButtonUpEvent
+}
+
 // GamePadButtonDownEvent this event triggers when a gamepad button is down
 type GamePadButtonDownEvent struct {
 	Gamepad int32
 	Button  device.GamepadButton
+}
+
+// Type is this goecs.ComponentType
+func (g GamePadButtonDownEvent) Type() goecs.ComponentType {
+	return TYPE.GamePadButtonDownEvent
 }
 
 // GamePadStickMoveEvent this event triggers when a gamepad stick moves
@@ -151,72 +250,77 @@ type GamePadStickMoveEvent struct {
 	Movement geometry.Point
 }
 
-type types struct {
-	// GameCloseEvent is the reflect.Type for events.GameCloseEvent
-	GameCloseEvent reflect.Type
-	// ChangeGameStage is the reflect.Type for events.ChangeGameStage
-	ChangeGameStage reflect.Type
-	// DelaySignal is the reflect.Type for events.DelaySignal
-	DelaySignal reflect.Type
-	// PlaySoundEvent is the reflect.Type for events.PlaySoundEvent
-	PlaySoundEvent reflect.Type
-	// ChangeMasterVolumeEvent is the reflect.Type for events.ChangeMasterVolumeEvent
-	ChangeMasterVolumeEvent reflect.Type
-	// PlayMusicEvent is the reflect.Type for events.PlayMusicEvent
-	PlayMusicEvent reflect.Type
-	// StopMusicEvent is the reflect.Type for events.StopMusicEvent
-	StopMusicEvent reflect.Type
-	// PauseMusicEvent is the reflect.Type for events.PauseMusicEvent
-	PauseMusicEvent reflect.Type
-	// ResumeMusicEvent is the reflect.Type for events.ResumeMusicEvent
-	ResumeMusicEvent reflect.Type
-	// ChangeMusicVolumeEvent is the reflect.Type for events.ChangeMusicVolumeEvent
-	ChangeMusicVolumeEvent reflect.Type
-	// MouseMoveEvent is the reflect.Type for events.MouseMoveEvent
-	MouseMoveEvent reflect.Type
-	// MouseDownEvent is the reflect.Type for events.MouseDownEvent
-	MouseDownEvent reflect.Type
-	// MouseUpEvent is the reflect.Type for events.MouseUpEvent
-	MouseUpEvent reflect.Type
-	// KeyDownEvent is the reflect.Type for events.KeyDownEvent
-	KeyDownEvent reflect.Type
-	// KeyUpEvent is the reflect.Type for events.KeyUpEvent
-	KeyUpEvent reflect.Type
-	// MusicStateChangeEvent is the reflect.Type for events.MusicStateChangeEvent
-	MusicStateChangeEvent reflect.Type
-	// FocusOnControlEvent is the reflect.Type for events.FocusOnControlEvent
-	FocusOnControlEvent reflect.Type
-	// ClearFocusEvent is the reflect.Type for events.ClearFocusEvent
-	ClearFocusEvent reflect.Type
-	// GamePadButtonUpEvent is the reflect.Type for events.GamePadButtonUpEvent
-	GamePadButtonUpEvent reflect.Type
-	// GamePadButtonDownEvent is the reflect.Type for events.GamePadButtonDownEvent
-	GamePadButtonDownEvent reflect.Type
-	// GamePadStickMoveEvent is the reflect.Type for events.GamePadStickMoveEvent
-	GamePadStickMoveEvent reflect.Type
+// Type is this goecs.ComponentType
+func (g GamePadStickMoveEvent) Type() goecs.ComponentType {
+	return TYPE.GamePadStickMoveEvent
 }
 
-// TYPE hold the reflect.Type for our events
+type types struct {
+	// GameCloseEvent is the goecs.ComponentType for events.GameCloseEvent
+	GameCloseEvent goecs.ComponentType
+	// ChangeGameStage is the goecs.ComponentType for events.ChangeGameStage
+	ChangeGameStage goecs.ComponentType
+	// DelaySignal is the goecs.ComponentType for events.DelaySignal
+	DelaySignal goecs.ComponentType
+	// PlaySoundEvent is the goecs.ComponentType for events.PlaySoundEvent
+	PlaySoundEvent goecs.ComponentType
+	// ChangeMasterVolumeEvent is the goecs.ComponentType for events.ChangeMasterVolumeEvent
+	ChangeMasterVolumeEvent goecs.ComponentType
+	// PlayMusicEvent is the goecs.ComponentType for events.PlayMusicEvent
+	PlayMusicEvent goecs.ComponentType
+	// StopMusicEvent is the goecs.ComponentType for events.StopMusicEvent
+	StopMusicEvent goecs.ComponentType
+	// PauseMusicEvent is the goecs.ComponentType for events.PauseMusicEvent
+	PauseMusicEvent goecs.ComponentType
+	// ResumeMusicEvent is the goecs.ComponentType for events.ResumeMusicEvent
+	ResumeMusicEvent goecs.ComponentType
+	// ChangeMusicVolumeEvent is the goecs.ComponentType for events.ChangeMusicVolumeEvent
+	ChangeMusicVolumeEvent goecs.ComponentType
+	// MouseMoveEvent is the goecs.ComponentType for events.MouseMoveEvent
+	MouseMoveEvent goecs.ComponentType
+	// MouseDownEvent is the goecs.ComponentType for events.MouseDownEvent
+	MouseDownEvent goecs.ComponentType
+	// MouseUpEvent is the goecs.ComponentType for events.MouseUpEvent
+	MouseUpEvent goecs.ComponentType
+	// KeyDownEvent is the goecs.ComponentType for events.KeyDownEvent
+	KeyDownEvent goecs.ComponentType
+	// KeyUpEvent is the goecs.ComponentType for events.KeyUpEvent
+	KeyUpEvent goecs.ComponentType
+	// MusicStateChangeEvent is the goecs.ComponentType for events.MusicStateChangeEvent
+	MusicStateChangeEvent goecs.ComponentType
+	// FocusOnControlEvent is the goecs.ComponentType for events.FocusOnControlEvent
+	FocusOnControlEvent goecs.ComponentType
+	// ClearFocusEvent is the goecs.ComponentType for events.ClearFocusEvent
+	ClearFocusEvent goecs.ComponentType
+	// GamePadButtonUpEvent is the goecs.ComponentType for events.GamePadButtonUpEvent
+	GamePadButtonUpEvent goecs.ComponentType
+	// GamePadButtonDownEvent is the goecs.ComponentType for events.GamePadButtonDownEvent
+	GamePadButtonDownEvent goecs.ComponentType
+	// GamePadStickMoveEvent is the goecs.ComponentType for events.GamePadStickMoveEvent
+	GamePadStickMoveEvent goecs.ComponentType
+}
+
+// TYPE hold the goecs.ComponentType for our events
 var TYPE = types{
-	GameCloseEvent:          reflect.TypeOf(GameCloseEvent{}),
-	ChangeGameStage:         reflect.TypeOf(ChangeGameStage{}),
-	DelaySignal:             reflect.TypeOf(DelaySignal{}),
-	PlaySoundEvent:          reflect.TypeOf(PlaySoundEvent{}),
-	ChangeMasterVolumeEvent: reflect.TypeOf(ChangeMasterVolumeEvent{}),
-	PlayMusicEvent:          reflect.TypeOf(PlayMusicEvent{}),
-	StopMusicEvent:          reflect.TypeOf(StopMusicEvent{}),
-	PauseMusicEvent:         reflect.TypeOf(PauseMusicEvent{}),
-	ResumeMusicEvent:        reflect.TypeOf(ResumeMusicEvent{}),
-	ChangeMusicVolumeEvent:  reflect.TypeOf(ChangeMusicVolumeEvent{}),
-	MouseMoveEvent:          reflect.TypeOf(MouseMoveEvent{}),
-	MouseDownEvent:          reflect.TypeOf(MouseDownEvent{}),
-	MouseUpEvent:            reflect.TypeOf(MouseUpEvent{}),
-	KeyDownEvent:            reflect.TypeOf(KeyDownEvent{}),
-	KeyUpEvent:              reflect.TypeOf(KeyUpEvent{}),
-	MusicStateChangeEvent:   reflect.TypeOf(MusicStateChangeEvent{}),
-	FocusOnControlEvent:     reflect.TypeOf(FocusOnControlEvent{}),
-	ClearFocusEvent:         reflect.TypeOf(ClearFocusEvent{}),
-	GamePadButtonUpEvent:    reflect.TypeOf(GamePadButtonUpEvent{}),
-	GamePadButtonDownEvent:  reflect.TypeOf(GamePadButtonDownEvent{}),
-	GamePadStickMoveEvent:   reflect.TypeOf(GamePadStickMoveEvent{}),
+	GameCloseEvent:          goecs.NewComponentType(),
+	ChangeGameStage:         goecs.NewComponentType(),
+	DelaySignal:             goecs.NewComponentType(),
+	PlaySoundEvent:          goecs.NewComponentType(),
+	ChangeMasterVolumeEvent: goecs.NewComponentType(),
+	PlayMusicEvent:          goecs.NewComponentType(),
+	StopMusicEvent:          goecs.NewComponentType(),
+	PauseMusicEvent:         goecs.NewComponentType(),
+	ResumeMusicEvent:        goecs.NewComponentType(),
+	ChangeMusicVolumeEvent:  goecs.NewComponentType(),
+	MouseMoveEvent:          goecs.NewComponentType(),
+	MouseDownEvent:          goecs.NewComponentType(),
+	MouseUpEvent:            goecs.NewComponentType(),
+	KeyDownEvent:            goecs.NewComponentType(),
+	KeyUpEvent:              goecs.NewComponentType(),
+	MusicStateChangeEvent:   goecs.NewComponentType(),
+	FocusOnControlEvent:     goecs.NewComponentType(),
+	ClearFocusEvent:         goecs.NewComponentType(),
+	GamePadButtonUpEvent:    goecs.NewComponentType(),
+	GamePadButtonDownEvent:  goecs.NewComponentType(),
+	GamePadStickMoveEvent:   goecs.NewComponentType(),
 }

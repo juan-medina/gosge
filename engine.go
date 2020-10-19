@@ -34,7 +34,6 @@ import (
 	"github.com/juan-medina/gosge/managers"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
-	"reflect"
 )
 
 type engineStatus int
@@ -97,7 +96,7 @@ func (e *Engine) World() *goecs.World {
 }
 
 // Listener listen to game events
-func (e *Engine) Listener(_ *goecs.World, event interface{}, _ float32) error {
+func (e *Engine) Listener(_ *goecs.World, event goecs.Component, _ float32) error {
 	switch v := event.(type) {
 	case events.GameCloseEvent:
 		e.status = statusEnding
@@ -134,8 +133,8 @@ func (e *Engine) drawLoading() {
 }
 
 // Signals return the signals that the engine itself listen to
-func (e Engine) Signals() []reflect.Type {
-	return []reflect.Type{
+func (e Engine) Signals() []goecs.ComponentType {
+	return []goecs.ComponentType{
 		events.TYPE.GameCloseEvent,
 		events.TYPE.ChangeGameStage,
 	}

@@ -25,7 +25,6 @@ package sprite
 
 import (
 	"github.com/juan-medina/goecs"
-	"reflect"
 )
 
 // Sprite is a graphic image that will drawn on the screen
@@ -38,8 +37,13 @@ type Sprite struct {
 	FlipY    bool    // FlipY indicates if the Sprite is flipped in the Y-Assis
 }
 
+// Type return this goecs.ComponentType
+func (s Sprite) Type() goecs.ComponentType {
+	return TYPE
+}
+
 // TYPE is the reflect.Type of the Sprite
-var TYPE = reflect.TypeOf(Sprite{})
+var TYPE = goecs.NewComponentType()
 
 // Get gets a Sprite from a goecs.Entity
 func Get(e *goecs.Entity) Sprite {

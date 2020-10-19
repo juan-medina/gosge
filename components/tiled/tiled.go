@@ -26,7 +26,6 @@ package tiled
 import (
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components/geometry"
-	"reflect"
 )
 
 // Map is a tiled.Map
@@ -35,10 +34,20 @@ type Map struct {
 	Scale float32 // Scale is the map scale
 }
 
+// Type return this goecs.ComponentType
+func (m Map) Type() goecs.ComponentType {
+	return TYPE.Map
+}
+
 // MapState is the state for tiled.Map
 type MapState struct {
 	Position geometry.Point // Position is the map position
 	Scale    float32        // Scale is the map scale
+}
+
+// Type return this goecs.ComponentType
+func (m MapState) Type() goecs.ComponentType {
+	return TYPE.MapState
 }
 
 // BlockInfo contains the info for a title block
@@ -49,20 +58,25 @@ type BlockInfo struct {
 	Layer      string            // Layer is the layer name for this block
 }
 
-type types struct {
-	// Map is the reflect.Type for tiled.Map
-	Map reflect.Type
-	// MapState is the reflect.Type for tiled.MapState
-	MapState reflect.Type
-	// BlockInfo is the reflect.Type for tiled.BlockInfo
-	BlockInfo reflect.Type
+// Type return this goecs.ComponentType
+func (b BlockInfo) Type() goecs.ComponentType {
+	return TYPE.BlockInfo
 }
 
-// TYPE hold the reflect.Type for our tiled components
+type types struct {
+	// Map is the goecs.ComponentType for tiled.Map
+	Map goecs.ComponentType
+	// MapState is the goecs.ComponentType for tiled.MapState
+	MapState goecs.ComponentType
+	// BlockInfo is the goecs.ComponentType for tiled.BlockInfo
+	BlockInfo goecs.ComponentType
+}
+
+// TYPE hold the goecs.ComponentType for our tiled components
 var TYPE = types{
-	Map:       reflect.TypeOf(Map{}),
-	MapState:  reflect.TypeOf(MapState{}),
-	BlockInfo: reflect.TypeOf(BlockInfo{}),
+	Map:       goecs.NewComponentType(),
+	MapState:  goecs.NewComponentType(),
+	BlockInfo: goecs.NewComponentType(),
 }
 
 type gets struct {

@@ -23,6 +23,7 @@
 package ui
 
 import (
+	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components/color"
 	"github.com/juan-medina/gosge/components/geometry"
 )
@@ -35,12 +36,22 @@ type ButtonColor struct {
 	Text     color.Solid    // Text is the text color.Solid
 }
 
+// Type return this goecs.ComponentType
+func (b ButtonColor) Type() goecs.ComponentType {
+	return TYPE.ButtonColor
+}
+
 // ButtonHoverColors is the hover colors for a FlatButton
 type ButtonHoverColors struct {
 	Normal   ButtonColor // Normal is the ui.ButtonColor on normal state
 	Hover    ButtonColor // Hover is the ui.ButtonColor on hover state
 	Clicked  ButtonColor // Clicked is the ui.ButtonColor on clicked state
 	Disabled ButtonColor // Disabled is the ui.ButtonColor on disabled state
+}
+
+// Type return this goecs.ComponentType
+func (b ButtonHoverColors) Type() goecs.ComponentType {
+	return TYPE.ButtonHoverColors
 }
 
 // FlatButton is a UI element for displaying a button
@@ -51,6 +62,11 @@ type FlatButton struct {
 	Sound    string        // Sound is the click sound
 	Volume   float32       // Volume is the volume for click Sound
 	Event    interface{}   // Event is the event that will be trigger when this button is click
+}
+
+// Type return this goecs.ComponentType
+func (f FlatButton) Type() goecs.ComponentType {
+	return TYPE.FlatButton
 }
 
 // SpriteButton is a UI element for displaying a image base button
@@ -65,4 +81,9 @@ type SpriteButton struct {
 	Sound    string      // Sound is the click sound
 	Volume   float32     // Volume is the volume for click Sound
 	Event    interface{} // Event is the event that will be trigger when this button is click
+}
+
+// Type return this goecs.ComponentType
+func (s SpriteButton) Type() goecs.ComponentType {
+	return TYPE.SpriteButton
 }

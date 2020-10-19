@@ -25,7 +25,6 @@ package ui
 
 import (
 	"github.com/juan-medina/goecs"
-	"reflect"
 )
 
 // ControlState is the state of UI element
@@ -37,38 +36,43 @@ type ControlState struct {
 	Focused  bool
 }
 
-type types struct {
-	// FlatButton is the reflect.Type for ui.FlatButton
-	FlatButton reflect.Type
-	// ButtonColor is the reflect.Type for ui.ButtonColor
-	ButtonColor reflect.Type
-	// ButtonHoverColors is the reflect.Type for ui.ButtonHoverColors
-	ButtonHoverColors reflect.Type
-	// SpriteButton is the reflect.Type for ui.SpriteButton
-	SpriteButton reflect.Type
-	// Text is the reflect.Type for ui.Text
-	Text reflect.Type
-	// ProgressBar is the reflect.Type for ui.ProgressBar
-	ProgressBar reflect.Type
-	// ProgressBarColor is the reflect.Type for ui.ProgressBarColor
-	ProgressBarColor reflect.Type
-	// ProgressBarHoverColor is the reflect.Type for ui.ProgressBarHoverColor
-	ProgressBarHoverColor reflect.Type
-	// ControlState is the reflect.Type for ui.ControlState
-	ControlState reflect.Type
+// Type return this goecs.ComponentType
+func (c ControlState) Type() goecs.ComponentType {
+	return TYPE.ControlState
 }
 
-// TYPE hold the reflect.Type for our ui components
+type types struct {
+	// FlatButton is the goecs.ComponentType for ui.FlatButton
+	FlatButton goecs.ComponentType
+	// ButtonColor is the goecs.ComponentType for ui.ButtonColor
+	ButtonColor goecs.ComponentType
+	// ButtonHoverColors is the goecs.ComponentType for ui.ButtonHoverColors
+	ButtonHoverColors goecs.ComponentType
+	// SpriteButton is the goecs.ComponentType for ui.SpriteButton
+	SpriteButton goecs.ComponentType
+	// Text is the goecs.ComponentType for ui.Text
+	Text goecs.ComponentType
+	// ProgressBar is the goecs.ComponentType for ui.ProgressBar
+	ProgressBar goecs.ComponentType
+	// ProgressBarColor is the goecs.ComponentType for ui.ProgressBarColor
+	ProgressBarColor goecs.ComponentType
+	// ProgressBarHoverColor is the goecs.ComponentType for ui.ProgressBarHoverColor
+	ProgressBarHoverColor goecs.ComponentType
+	// ControlState is the goecs.ComponentType for ui.ControlState
+	ControlState goecs.ComponentType
+}
+
+// TYPE hold the goecs.ComponentType for our ui components
 var TYPE = types{
-	FlatButton:            reflect.TypeOf(FlatButton{}),
-	ButtonColor:           reflect.TypeOf(ButtonColor{}),
-	ButtonHoverColors:     reflect.TypeOf(ButtonHoverColors{}),
-	SpriteButton:          reflect.TypeOf(SpriteButton{}),
-	Text:                  reflect.TypeOf(Text{}),
-	ProgressBar:           reflect.TypeOf(ProgressBar{}),
-	ProgressBarColor:      reflect.TypeOf(ProgressBarColor{}),
-	ProgressBarHoverColor: reflect.TypeOf(ProgressBarHoverColor{}),
-	ControlState:          reflect.TypeOf(ControlState{}),
+	FlatButton:            goecs.NewComponentType(),
+	ButtonColor:           goecs.NewComponentType(),
+	ButtonHoverColors:     goecs.NewComponentType(),
+	SpriteButton:          goecs.NewComponentType(),
+	Text:                  goecs.NewComponentType(),
+	ProgressBar:           goecs.NewComponentType(),
+	ProgressBarColor:      goecs.NewComponentType(),
+	ProgressBarHoverColor: goecs.NewComponentType(),
+	ControlState:          goecs.NewComponentType(),
 }
 
 type gets struct {

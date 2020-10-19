@@ -33,7 +33,6 @@ import (
 	"github.com/juan-medina/gosge/components/ui"
 	"github.com/juan-medina/gosge/events"
 	"math"
-	"reflect"
 )
 
 const (
@@ -51,8 +50,8 @@ type uiManager struct {
 	keyDelay float32
 }
 
-func (uim *uiManager) Signals() []reflect.Type {
-	return []reflect.Type{
+func (uim *uiManager) Signals() []goecs.ComponentType {
+	return []goecs.ComponentType{
 		events.TYPE.MouseMoveEvent,
 		events.TYPE.MouseDownEvent,
 		events.TYPE.MouseUpEvent,
@@ -74,7 +73,7 @@ func (uim *uiManager) System(world *goecs.World, delta float32) error {
 	return nil
 }
 
-func (uim *uiManager) Listener(world *goecs.World, event interface{}, _ float32) error {
+func (uim *uiManager) Listener(world *goecs.World, event goecs.Component, _ float32) error {
 	switch v := event.(type) {
 	case events.MouseMoveEvent:
 		uim.flatButtonsMouseMove(world, v)

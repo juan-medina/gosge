@@ -25,7 +25,6 @@ package managers
 
 import (
 	"github.com/juan-medina/goecs"
-	"reflect"
 )
 
 // DeviceManager constants
@@ -45,9 +44,9 @@ type WithSystem interface {
 // WithListener have a world.Listener
 type WithListener interface {
 	// Listener is a world.Listener
-	Listener(world *goecs.World, signal interface{}, delta float32) error
+	Listener(world *goecs.World, signal goecs.Component, delta float32) error
 	// Signals indicates what signals thi Listener listen to
-	Signals() []reflect.Type
+	Signals() []goecs.ComponentType
 }
 
 // WithSystemAndListener have a world.System and a world.Listener
@@ -55,7 +54,7 @@ type WithSystemAndListener interface {
 	// System is a world.System
 	System(world *goecs.World, delta float32) error
 	// Listener is a world.Listener
-	Listener(world *goecs.World, signal interface{}, delta float32) error
+	Listener(world *goecs.World, signal goecs.Component, delta float32) error
 	// Signals indicates what signals thi Listener listen to
-	Signals() []reflect.Type
+	Signals() []goecs.ComponentType
 }

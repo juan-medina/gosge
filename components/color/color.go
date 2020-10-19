@@ -25,7 +25,6 @@ package color
 
 import (
 	"github.com/juan-medina/goecs"
-	"reflect"
 )
 
 // Solid represents a RGBA color
@@ -34,6 +33,11 @@ type Solid struct {
 	G uint8 // G is the green Color component
 	B uint8 // B is the blue Color component
 	A uint8 // A is the alpha Color component
+}
+
+// Type return this goecs.ComponentType
+func (rc Solid) Type() goecs.ComponentType {
+	return TYPE.Solid
 }
 
 // Alpha returns a new Color modifying the A component
@@ -108,6 +112,11 @@ type Gradient struct {
 	Direction GradientDirection // Direction is GradientDirection for this color.Gradient
 }
 
+// Type return this goecs.ComponentType
+func (g Gradient) Type() goecs.ComponentType {
+	return TYPE.Gradient
+}
+
 //goland:noinspection GoUnusedGlobalVariable
 var (
 	Black      = Solid{A: 255}                         // Black Color
@@ -138,16 +147,16 @@ var (
 )
 
 type types struct {
-	// Solid is the reflect.Type for color.Solid
-	Solid reflect.Type
-	// Gradient is the reflect.Type for color.Gradient
-	Gradient reflect.Type
+	// Solid is the goecs.ComponentType for color.Solid
+	Solid goecs.ComponentType
+	// Gradient is the goecs.ComponentType for color.Gradient
+	Gradient goecs.ComponentType
 }
 
-// TYPE hold the reflect.Type for our color components
+// TYPE hold the goecs.ComponentType for our color components
 var TYPE = types{
-	Solid:    reflect.TypeOf(Solid{}),
-	Gradient: reflect.TypeOf(Gradient{}),
+	Solid:    goecs.NewComponentType(),
+	Gradient: goecs.NewComponentType(),
 }
 
 type gets struct {

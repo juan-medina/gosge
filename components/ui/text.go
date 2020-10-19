@@ -22,6 +22,10 @@
 
 package ui
 
+import (
+	"github.com/juan-medina/goecs"
+)
+
 // HAlignment horizontal alignment for a Text
 type HAlignment int
 
@@ -49,4 +53,9 @@ type Text struct {
 	Font       string     // Font is the font to use
 	VAlignment VAlignment // VAlignment is the text.VAlignment
 	HAlignment HAlignment // HAlignment is the text.HAlignment
+}
+
+// Type return this goecs.ComponentType
+func (t Text) Type() goecs.ComponentType {
+	return TYPE.Text
 }

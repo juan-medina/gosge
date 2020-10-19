@@ -26,7 +26,6 @@ package effects
 import (
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components/color"
-	"reflect"
 )
 
 // AlternateColorState is the state for an effect
@@ -37,6 +36,11 @@ type AlternateColorState struct {
 	To          color.Solid // To is the color.Solid that we will end to the current state
 }
 
+// Type return this goecs.ComponentType
+func (a AlternateColorState) Type() goecs.ComponentType {
+	return TYPE.AlternateColorState
+}
+
 // AlternateColor effects will cycle between two colors From and To in given Time with an Optional Delay
 type AlternateColor struct {
 	From  color.Solid // From is color.Solid that we start from
@@ -45,31 +49,46 @@ type AlternateColor struct {
 	Delay float32     // Delay is how long will stay in the final To until switching again to To
 }
 
+// Type return this goecs.ComponentType
+func (a AlternateColor) Type() goecs.ComponentType {
+	return TYPE.AlternateColor
+}
+
 // Layer effect is use to render thins in a logical layer
 type Layer struct {
 	Depth float32 // Depth is the screen depth for this effects.Layer
 }
 
+// Type return this goecs.ComponentType
+func (l Layer) Type() goecs.ComponentType {
+	return TYPE.Layer
+}
+
 // Hide indicates that this entity should be not draw
 type Hide struct{}
 
-type types struct {
-	// AlternateColorState is the reflect.Type for effects.AlternateColorState
-	AlternateColorState reflect.Type
-	// AlternateColor is the reflect.Type for effects.AlternateColor
-	AlternateColor reflect.Type
-	// Layer is the reflect.Type for effects.Layer
-	Layer reflect.Type
-	// Hide is the reflect.Type for effects.Hide
-	Hide reflect.Type
+// Type return this goecs.ComponentType
+func (h Hide) Type() goecs.ComponentType {
+	return TYPE.Hide
 }
 
-// TYPE hold the reflect.Type for our effects components
+type types struct {
+	// AlternateColorState is the goecs.ComponentType for effects.AlternateColorState
+	AlternateColorState goecs.ComponentType
+	// AlternateColor is the goecs.ComponentType for effects.AlternateColor
+	AlternateColor goecs.ComponentType
+	// Layer is the goecs.ComponentType for effects.Layer
+	Layer goecs.ComponentType
+	// Hide is the goecs.ComponentType for effects.Hide
+	Hide goecs.ComponentType
+}
+
+// TYPE hold the goecs.ComponentType for our effects components
 var TYPE = types{
-	AlternateColorState: reflect.TypeOf(AlternateColorState{}),
-	AlternateColor:      reflect.TypeOf(AlternateColor{}),
-	Layer:               reflect.TypeOf(Layer{}),
-	Hide:                reflect.TypeOf(Hide{}),
+	AlternateColorState: goecs.NewComponentType(),
+	AlternateColor:      goecs.NewComponentType(),
+	Layer:               goecs.NewComponentType(),
+	Hide:                goecs.NewComponentType(),
 }
 
 type gets struct {

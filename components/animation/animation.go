@@ -25,7 +25,6 @@ package animation
 
 import (
 	"github.com/juan-medina/goecs"
-	"reflect"
 )
 
 // Sequence represent a set of frames that will be render with a delay
@@ -38,12 +37,22 @@ type Sequence struct {
 	Delay    float32 // Delay number of seconds to wait in each frame
 }
 
+// Type return this goecs.ComponentType
+func (s Sequence) Type() goecs.ComponentType {
+	return TYPE.Sequence
+}
+
 // State allow to easily switch animations
 type State struct {
 	Current string  // Current is the animation that is running
 	Speed   float32 // Speed is the current animation speed
 	Time    float32 // Time is the time in this frame
 	Frame   int32   // Frame is the current frame number
+}
+
+// Type return this goecs.ComponentType
+func (s State) Type() goecs.ComponentType {
+	return TYPE.State
 }
 
 // Animation allow to easily switch animations
@@ -55,20 +64,25 @@ type Animation struct {
 	FlipY     bool                // FlipY indicates if the Animation is flipped in the Y-Assis
 }
 
-type types struct {
-	// Animation is the reflect.Type for animation.Animation
-	Animation reflect.Type
-	// State is the reflect.Type for animation.State
-	State reflect.Type
-	// Sequence is the reflect.Type for animation.Sequence
-	Sequence reflect.Type
+// Type return this goecs.ComponentType
+func (a Animation) Type() goecs.ComponentType {
+	return TYPE.Animation
 }
 
-// TYPE hold the reflect.Type for our animation components
+type types struct {
+	// Animation is the goecs.ComponentType for animation.Animation
+	Animation goecs.ComponentType
+	// State is the goecs.ComponentType for animation.State
+	State goecs.ComponentType
+	// Sequence is the goecs.ComponentType for animation.Sequence
+	Sequence goecs.ComponentType
+}
+
+// TYPE hold the goecs.ComponentType for our animation components
 var TYPE = types{
-	Animation: reflect.TypeOf(Animation{}),
-	State:     reflect.TypeOf(State{}),
-	Sequence:  reflect.TypeOf(Sequence{}),
+	Animation: goecs.NewComponentType(),
+	State:     goecs.NewComponentType(),
+	Sequence:  goecs.NewComponentType(),
 }
 
 type gets struct {

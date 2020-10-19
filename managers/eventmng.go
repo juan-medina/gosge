@@ -5,7 +5,6 @@ import (
 	"github.com/juan-medina/gosge/components/device"
 	"github.com/juan-medina/gosge/components/geometry"
 	"github.com/juan-medina/gosge/events"
-	"reflect"
 )
 
 /*
@@ -36,11 +35,11 @@ type eventManager struct {
 	ssm [][]geometry.Point
 }
 
-func (em eventManager) Signals() []reflect.Type {
-	return []reflect.Type{events.TYPE.DelaySignal}
+func (em eventManager) Signals() []goecs.ComponentType {
+	return []goecs.ComponentType{events.TYPE.DelaySignal}
 }
 
-func (em eventManager) Listener(world *goecs.World, signal interface{}, delta float32) error {
+func (em eventManager) Listener(world *goecs.World, signal goecs.Component, delta float32) error {
 	switch e := signal.(type) {
 	case events.DelaySignal:
 		e.Time -= delta

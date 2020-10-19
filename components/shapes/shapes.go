@@ -26,7 +26,6 @@ package shapes
 import (
 	"github.com/juan-medina/goecs"
 	"github.com/juan-medina/gosge/components/geometry"
-	"reflect"
 )
 
 //Box is a rectangular outline that we could draw in a geometry.Point with a color.Solid
@@ -36,10 +35,20 @@ type Box struct {
 	Thickness int32         // Thickness of the line
 }
 
+// Type return this goecs.ComponentType
+func (b Box) Type() goecs.ComponentType {
+	return TYPE.Box
+}
+
 //SolidBox is a rectangular shape that we could draw in a geometry.Point with a color.Solid or color.Gradient
 type SolidBox struct {
 	Size  geometry.Size // The box size
 	Scale float32       // The box scale
+}
+
+// Type return this goecs.ComponentType
+func (b SolidBox) Type() goecs.ComponentType {
+	return TYPE.SolidBox
 }
 
 // Contains return if a box at a geometry.Point contains a point
@@ -75,20 +84,25 @@ type Line struct {
 	Thickness float32        // Thickness of the line
 }
 
-type types struct {
-	// Box is the reflect.Type for shapes.Box
-	Box reflect.Type
-	// SolidBox is the reflect.Type for shapes.SolidBox
-	SolidBox reflect.Type
-	// Line is the reflect.Type for shapes.Line
-	Line reflect.Type
+// Type return this goecs.ComponentType
+func (l Line) Type() goecs.ComponentType {
+	return TYPE.Line
 }
 
-// TYPE hold the reflect.Type for our shapes components
+type types struct {
+	// Box is the goecs.ComponentType for shapes.Box
+	Box goecs.ComponentType
+	// SolidBox is the goecs.ComponentType for shapes.SolidBox
+	SolidBox goecs.ComponentType
+	// Line is the goecs.ComponentType for shapes.Line
+	Line goecs.ComponentType
+}
+
+// TYPE hold the goecs.ComponentType for our shapes components
 var TYPE = types{
-	Box:      reflect.TypeOf(Box{}),
-	SolidBox: reflect.TypeOf(SolidBox{}),
-	Line:     reflect.TypeOf(Line{}),
+	Box:      goecs.NewComponentType(),
+	SolidBox: goecs.NewComponentType(),
+	Line:     goecs.NewComponentType(),
 }
 
 type gets struct {
