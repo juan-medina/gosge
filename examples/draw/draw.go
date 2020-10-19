@@ -55,7 +55,7 @@ var (
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
 
 	// currentLine is the line that we are currently drawing
-	currentLine *goecs.Entity
+	currentLine goecs.EntityID
 
 	// pos is the current mouse position
 	pos geometry.Point
@@ -108,23 +108,28 @@ func loadGame(eng *gosge.Engine) error {
 	return nil
 }
 
-func mouseListener(world *goecs.World, signal interface{}, _ float32) error {
+func mouseListener(world *goecs.World, signal goecs.Component, _ float32) error {
 	switch e := signal.(type) {
 	// when the mouse move
 	case events.MouseMoveEvent:
 		pos = e.Point // store the mouse pos
 		// if we have a line
-		if currentLine != nil {
+		if currentLine != 0 {
+			var err error
+			var lineEnt *goecs.Entity
+			if lineEnt, err = world.Get(currentLine); err != nil {
+				return err
+			}
 			// get the line component
-			line := shapes.Get.Line(currentLine)
+			line := shapes.Get.Line(lineEnt)
 			// update the to
 			line.To = pos
-			currentLine.Set(line)
+			lineEnt.Set(line)
 		}
 	// when we press the mouse
 	case events.MouseDownEvent:
 		// if we don't have a line
-		if currentLine == nil {
+		if currentLine == 0 {
 			// create one and save the reference
 			currentLine = world.AddEntity(
 				shapes.Line{
@@ -137,7 +142,7 @@ func mouseListener(world *goecs.World, signal interface{}, _ float32) error {
 	// when we release the mouse
 	case events.MouseUpEvent:
 		// remove reference
-		currentLine = nil
+		currentLine = 0
 	}
 	return nil
 }
