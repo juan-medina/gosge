@@ -34,7 +34,6 @@ import (
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
 	"math"
-	"reflect"
 )
 
 // our game options
@@ -50,10 +49,10 @@ var opt = options.Options{
 
 // entities that we are going to create
 var (
-	leftExterior  *goecs.Entity
-	rightExterior *goecs.Entity
-	dizzyBar      *goecs.Entity
-	dizzyText     *goecs.Entity
+	leftExterior  goecs.EntityID
+	rightExterior goecs.EntityID
+	dizzyBar      goecs.EntityID
+	dizzyText     goecs.EntityID
 
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
@@ -262,17 +261,21 @@ func loadGame(eng *gosge.Engine) error {
 
 // component to make an entity to look at mouse with a pivot
 type lookAtMouse struct {
-	pivot  *goecs.Entity
+	pivot  goecs.EntityID
 	radius geometry.Point
 }
 
-var types = struct{ lookAtMouse reflect.Type }{lookAtMouse: reflect.TypeOf(lookAtMouse{})}
+func (l lookAtMouse) Type() goecs.ComponentType {
+	return types.lookAtMouse
+}
+
+var types = struct{ lookAtMouse goecs.ComponentType }{lookAtMouse: goecs.NewComponentType()}
 
 func getLookAtMouse(e *goecs.Entity) lookAtMouse {
 	return e.Get(types.lookAtMouse).(lookAtMouse)
 }
 
-func mouseMoveListener(gw *goecs.World, event interface{}, delta float32) error {
+func mouseMoveListener(gw *goecs.World, event goecs.Component, delta float32) error {
 	switch ev := event.(type) {
 	// if we move the mouse
 	case events.MouseMoveEvent:
@@ -281,7 +284,9 @@ func mouseMoveListener(gw *goecs.World, event interface{}, delta float32) error 
 			v := it.Value()
 			la := getLookAtMouse(v)
 			// make this entity to look at the mouse
-			lookAt(v, la, ev.Point)
+			if err := lookAt(gw, v, la, ev.Point); err != nil {
+				return err
+			}
 		}
 		pos := ev.Point
 		if lastMousePos.X == -1 && lastMousePos.Y == -1 {
@@ -297,8 +302,13 @@ func mouseMoveListener(gw *goecs.World, event interface{}, delta float32) error 
 	return nil
 }
 
-func lookAt(ent *goecs.Entity, la lookAtMouse, mouse geometry.Point) {
-	pos := geometry.Get.Point(la.pivot)
+func lookAt(world *goecs.World, ent *goecs.Entity, la lookAtMouse, mouse geometry.Point) error {
+	var err error
+	var pivotEnt *goecs.Entity
+	if pivotEnt, err = world.Get(la.pivot); err != nil {
+		return err
+	}
+	pos := geometry.Get.Point(pivotEnt)
 
 	dx := mouse.X - pos.X
 	dy := mouse.Y - pos.Y
@@ -314,6 +324,7 @@ func lookAt(ent *goecs.Entity, la lookAtMouse, mouse geometry.Point) {
 	}
 
 	ent.Set(np)
+	return err
 }
 
 func decreaseDizzySystem(_ *goecs.World, delta float32) error {
@@ -322,22 +333,38 @@ func decreaseDizzySystem(_ *goecs.World, delta float32) error {
 	return nil
 }
 
-func updateDizzyBarSystem(_ *goecs.World, _ float32) error {
-	bar := ui.Get.ProgressBar(dizzyBar)
+func updateDizzyBarSystem(world *goecs.World, _ float32) error {
+	var err error
+	var dizzyBarEnt *goecs.Entity
+	if dizzyBarEnt, err = world.Get(dizzyBar); err != nil {
+		return err
+	}
+	bar := ui.Get.ProgressBar(dizzyBarEnt)
 	bar.Current = dizzy
-	dizzyBar.Set(bar)
+	dizzyBarEnt.Set(bar)
 
 	// calculate how dizzy we are in 0..1
 	percent := 1 - (dizzy / maxDizzy)
 
 	// make the dizzy text color change from green to blend depending on how dizzy we are
 	cl := color.Green.Blend(color.Red, 1-percent)
-	dizzyText.Set(cl)
+	var dizzyTextEnt *goecs.Entity
+	if dizzyTextEnt, err = world.Get(dizzyText); err != nil {
+		return err
+	}
+	dizzyTextEnt.Set(cl)
 
 	// color the eyes red
 	clr := color.White.Blend(color.Red, (1-percent)/2)
-	leftExterior.Set(clr)
-	rightExterior.Set(clr)
+	var leftExteriorEnt, rightExteriorEnt *goecs.Entity
+	if leftExteriorEnt, err = world.Get(leftExterior); err != nil {
+		return err
+	}
+	if rightExteriorEnt, err = world.Get(rightExterior); err != nil {
+		return err
+	}
+	leftExteriorEnt.Set(clr)
+	rightExteriorEnt.Set(clr)
 
 	return nil
 }
