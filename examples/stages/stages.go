@@ -182,7 +182,7 @@ func mainStage(eng *gosge.Engine) error {
 	return nil
 }
 
-func mainStageKeyListener(world *goecs.World, signal interface{}, _ float32) error {
+func mainStageKeyListener(world *goecs.World, signal goecs.Component, _ float32) error {
 	switch e := signal.(type) {
 	case events.KeyUpEvent:
 		if e.Key == device.KeyEscape {
@@ -353,7 +353,7 @@ func menuStage(eng *gosge.Engine) error {
 	return nil
 }
 
-func menuStageKeyListener(world *goecs.World, signal interface{}, _ float32) error {
+func menuStageKeyListener(world *goecs.World, signal goecs.Component, _ float32) error {
 	switch e := signal.(type) {
 	case events.KeyUpEvent:
 		if e.Key == device.KeyReturn {
