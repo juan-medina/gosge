@@ -115,11 +115,7 @@ func mouseListener(world *goecs.World, signal goecs.Component, _ float32) error 
 		pos = e.Point // store the mouse pos
 		// if we have a line
 		if currentLine != 0 {
-			var err error
-			var lineEnt *goecs.Entity
-			if lineEnt, err = world.Get(currentLine); err != nil {
-				return err
-			}
+			lineEnt := world.Get(currentLine)
 			// get the line component
 			line := shapes.Get.Line(lineEnt)
 			// update the to
