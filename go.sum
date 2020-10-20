@@ -8,10 +8,6 @@ github.com/disintegration/imaging v1.6.0 h1:nVPXRUUQ36Z7MNf0O77UzgnOb1mkMMor7lmJ
 github.com/disintegration/imaging v1.6.0/go.mod h1:xuIt+sRxDFrHS0drzXUlCJthkJ8k7lkkUojDSR247MQ=
 github.com/gen2brain/raylib-go v0.0.0-20200905153824-5b0944b5567a h1:akS5kJf8OfFVsgXwNqr23pafyatC3gLDXhN4d/1JSC4=
 github.com/gen2brain/raylib-go v0.0.0-20200905153824-5b0944b5567a/go.mod h1:LUVRDQbnxUaOgzLzW5lMS+IcbqlXHIqIA9wq8wxzmcA=
-github.com/juan-medina/goecs v1.5.0 h1:Y/Uu6S1m9SxilA+DeahiScNruW3jbd3XAJuto5QoWUk=
-github.com/juan-medina/goecs v1.5.0/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
-github.com/juan-medina/goecs v1.5.1 h1:m4k08/o0t+9jQDALXHGOx7PAgZGP5ig2a1D+OeRtTe4=
-github.com/juan-medina/goecs v1.5.1/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
 github.com/juan-medina/goecs v1.5.2 h1:fBRSRU04A7vZIvMh8BHr2CxxSZj+Ew2cON4zKSpem84=
 github.com/juan-medina/goecs v1.5.2/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=

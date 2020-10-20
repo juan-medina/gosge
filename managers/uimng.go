@@ -716,8 +716,8 @@ func (uim *uiManager) selectNextControl(world *goecs.World, key device.Key) {
 			if fbt.Group != "" {
 				possible = uim.handleGroupSelection(world, possible)
 			}
-			uim.focusControl(world, possible)
 		}
+		uim.focusControl(world, possible)
 	}
 }
 
