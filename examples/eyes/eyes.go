@@ -284,9 +284,7 @@ func mouseMoveListener(gw *goecs.World, event goecs.Component, delta float32) er
 			v := it.Value()
 			la := getLookAtMouse(v)
 			// make this entity to look at the mouse
-			if err := lookAt(gw, v, la, ev.Point); err != nil {
-				return err
-			}
+			lookAt(gw, v, la, ev.Point)
 		}
 		pos := ev.Point
 		if lastMousePos.X == -1 && lastMousePos.Y == -1 {
@@ -302,12 +300,8 @@ func mouseMoveListener(gw *goecs.World, event goecs.Component, delta float32) er
 	return nil
 }
 
-func lookAt(world *goecs.World, ent *goecs.Entity, la lookAtMouse, mouse geometry.Point) error {
-	var err error
-	var pivotEnt *goecs.Entity
-	if pivotEnt, err = world.Get(la.pivot); err != nil {
-		return err
-	}
+func lookAt(world *goecs.World, ent *goecs.Entity, la lookAtMouse, mouse geometry.Point) {
+	pivotEnt := world.Get(la.pivot)
 	pos := geometry.Get.Point(pivotEnt)
 
 	dx := mouse.X - pos.X
@@ -324,7 +318,6 @@ func lookAt(world *goecs.World, ent *goecs.Entity, la lookAtMouse, mouse geometr
 	}
 
 	ent.Set(np)
-	return err
 }
 
 func decreaseDizzySystem(_ *goecs.World, delta float32) error {
@@ -334,11 +327,7 @@ func decreaseDizzySystem(_ *goecs.World, delta float32) error {
 }
 
 func updateDizzyBarSystem(world *goecs.World, _ float32) error {
-	var err error
-	var dizzyBarEnt *goecs.Entity
-	if dizzyBarEnt, err = world.Get(dizzyBar); err != nil {
-		return err
-	}
+	dizzyBarEnt := world.Get(dizzyBar)
 	bar := ui.Get.ProgressBar(dizzyBarEnt)
 	bar.Current = dizzy
 	dizzyBarEnt.Set(bar)
@@ -348,21 +337,13 @@ func updateDizzyBarSystem(world *goecs.World, _ float32) error {
 
 	// make the dizzy text color change from green to blend depending on how dizzy we are
 	cl := color.Green.Blend(color.Red, 1-percent)
-	var dizzyTextEnt *goecs.Entity
-	if dizzyTextEnt, err = world.Get(dizzyText); err != nil {
-		return err
-	}
+	dizzyTextEnt := world.Get(dizzyText)
 	dizzyTextEnt.Set(cl)
 
 	// color the eyes red
 	clr := color.White.Blend(color.Red, (1-percent)/2)
-	var leftExteriorEnt, rightExteriorEnt *goecs.Entity
-	if leftExteriorEnt, err = world.Get(leftExterior); err != nil {
-		return err
-	}
-	if rightExteriorEnt, err = world.Get(rightExterior); err != nil {
-		return err
-	}
+	leftExteriorEnt := world.Get(leftExterior)
+	rightExteriorEnt := world.Get(rightExterior)
 	leftExteriorEnt.Set(clr)
 	rightExteriorEnt.Set(clr)
 
