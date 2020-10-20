@@ -69,7 +69,8 @@ func (uim *uiManager) System(world *goecs.World, delta float32) error {
 	uim.flatButtons(world)
 	uim.progressBars(world)
 	uim.spriteButtons(world)
-	return uim.handleKeys(world, delta)
+	uim.handleKeys(world, delta)
+	return nil
 }
 
 func (uim *uiManager) Listener(world *goecs.World, event goecs.Component, _ float32) error {
@@ -77,7 +78,7 @@ func (uim *uiManager) Listener(world *goecs.World, event goecs.Component, _ floa
 	case events.MouseMoveEvent:
 		uim.flatButtonsMouseMove(world, v)
 		uim.spriteButtonsMouseMove(world, v)
-		return uim.progressBarsMouseMove(world, v)
+		uim.progressBarsMouseMove(world, v)
 	case events.MouseDownEvent:
 		uim.flatButtonsMouseDown(world, v)
 		uim.progressBarsMouseDown(world, v)
@@ -87,24 +88,19 @@ func (uim *uiManager) Listener(world *goecs.World, event goecs.Component, _ floa
 		uim.progressBarsMouseUp(world, v)
 		uim.spriteButtonsMouseUp(world, v)
 	case events.FocusOnControlEvent:
-		var err error
-		var controlEnt *goecs.Entity
-		if controlEnt, err = world.Get(v.Control); err != nil {
-			return err
-		}
-		uim.focusControl(world, controlEnt)
+		uim.focusControl(world, world.Get(v.Control))
 	case events.ClearFocusEvent:
 		uim.clearFocus(world)
 	case events.KeyDownEvent:
-		return uim.keyDown(world, v.Key)
+		uim.keyDown(world, v.Key)
 	case events.GamePadButtonDownEvent:
-		return uim.gamepadDown(world, v.Gamepad, v.Button)
+		uim.gamepadDown(world, v.Gamepad, v.Button)
 	case events.KeyUpEvent:
 		uim.keyUp(v.Key)
 	case events.GamePadButtonUpEvent:
 		uim.gamepadUp(v.Gamepad, v.Button)
 	case events.GamePadStickMoveEvent:
-		return uim.gamepadStickMove(world, v.Gamepad, v.Stick, v.Movement)
+		uim.gamepadStickMove(world, v.Gamepad, v.Stick, v.Movement)
 	}
 	return nil
 }
@@ -355,20 +351,16 @@ func (uim uiManager) progressBarsColors(ent *goecs.Entity) {
 	}
 }
 
-func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseMoveEvent) error {
+func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.MouseMoveEvent) {
 	if uim.clicked != 0 {
-		var err error
-		var clickedEnt *goecs.Entity
-		if clickedEnt, err = world.Get(uim.clicked); err != nil {
-			return err
-		}
+		clickedEnt := world.Get(uim.clicked)
 		if clickedEnt.Contains(ui.TYPE.ProgressBar) {
 			state := ui.Get.ControlState(clickedEnt)
 			if !state.Disabled {
 				uim.calculateBarCurrent(world, clickedEnt, mme.Point)
 			}
 		}
-		return nil
+		return
 	}
 	for it := world.Iterator(ui.TYPE.ProgressBar, ui.TYPE.ProgressBarHoverColor, geometry.TYPE.Point,
 		shapes.TYPE.Box); it != nil; it = it.Next() {
@@ -384,7 +376,7 @@ func (uim *uiManager) progressBarsMouseMove(world *goecs.World, mme events.Mouse
 			ent.Set(state)
 		}
 	}
-	return nil
+	return
 }
 
 func (uim *uiManager) progressBarsMouseDown(world *goecs.World, mde events.MouseDownEvent) {
@@ -616,45 +608,37 @@ func (uim *uiManager) clearFocus(world *goecs.World) {
 	uim.focus = 0
 }
 
-func (uim *uiManager) handleFocus(world *goecs.World, key device.Key) error {
-	var err error
-	var focusEnt *goecs.Entity
-	if focusEnt, err = world.Get(uim.focus); err != nil {
-		return err
-	}
+func (uim *uiManager) handleFocus(world *goecs.World, key device.Key) {
+	focusEnt := world.Get(uim.focus)
 	if key == device.KeyDown || key == device.KeyUp || key == device.KeyLeft || key == device.KeyRight {
 		if focusEnt.Contains(ui.TYPE.ProgressBar) && (key == device.KeyLeft || key == device.KeyRight) {
-			return uim.moveProgressBarWithKeys(world, key)
+			uim.moveProgressBarWithKeys(world, key)
 		}
-		return uim.selectNextControl(world, key)
+		uim.selectNextControl(world, key)
 
 	} else if key == device.KeySpace || key == device.KeyReturn {
-		return uim.activateFocus(world)
+		uim.activateFocus(world)
 	}
-	return nil
 }
 
-func (uim *uiManager) handleKeys(world *goecs.World, delta float32) error {
+func (uim *uiManager) handleKeys(world *goecs.World, delta float32) {
 	if uim.focus == 0 || uim.lastKey == device.FirstKey {
-		return nil
+		return
 	}
 	uim.keyDelay -= delta
 	if uim.keyDelay <= 0 {
-		if err := uim.handleFocus(world, uim.lastKey); err != nil {
-			return err
-		}
+		uim.handleFocus(world, uim.lastKey)
 		uim.keyDelay = keyWaitDelay
 	}
-	return nil
 }
 
-func (uim *uiManager) keyDown(world *goecs.World, key device.Key) error {
+func (uim *uiManager) keyDown(world *goecs.World, key device.Key) {
 	if uim.focus == 0 {
-		return nil
+		return
 	}
 	uim.lastKey = key
 	uim.keyDelay = keyWaitDelay
-	return uim.handleFocus(world, key)
+	uim.handleFocus(world, key)
 }
 
 func (uim *uiManager) keyUp(key device.Key) {
@@ -664,13 +648,8 @@ func (uim *uiManager) keyUp(key device.Key) {
 	}
 }
 
-func (uim *uiManager) moveProgressBarWithKeys(world *goecs.World, key device.Key) error {
-	var err error
-	var focusEnt *goecs.Entity
-	if focusEnt, err = world.Get(uim.focus); err != nil {
-		return err
-	}
-
+func (uim *uiManager) moveProgressBarWithKeys(world *goecs.World, key device.Key) {
+	focusEnt := world.Get(uim.focus)
 	bar := ui.Get.ProgressBar(focusEnt)
 	amt := (bar.Max - bar.Min) * 0.05
 	if key == device.KeyLeft {
@@ -685,7 +664,6 @@ func (uim *uiManager) moveProgressBarWithKeys(world *goecs.World, key device.Key
 		}
 	}
 	focusEnt.Set(bar)
-	return err
 }
 
 func (uim *uiManager) isFocusable(control *goecs.Entity) bool {
@@ -711,12 +689,8 @@ func (uim *uiManager) isFocusable(control *goecs.Entity) bool {
 	return false
 }
 
-func (uim *uiManager) selectNextControl(world *goecs.World, key device.Key) error {
-	var err error
-	var focusEnt *goecs.Entity
-	if focusEnt, err = world.Get(uim.focus); err != nil {
-		return err
-	}
+func (uim *uiManager) selectNextControl(world *goecs.World, key device.Key) {
+	focusEnt := world.Get(uim.focus)
 	focusPos := geometry.Get.Point(focusEnt)
 	focusRect := uim.getControlRect(focusEnt, focusPos)
 	smallerDiff := float32(math.MaxFloat32)
@@ -740,22 +714,15 @@ func (uim *uiManager) selectNextControl(world *goecs.World, key device.Key) erro
 		if possible.Contains(ui.TYPE.FlatButton) {
 			fbt := ui.Get.FlatButton(possible)
 			if fbt.Group != "" {
-				if possible, err = uim.handleGroupSelection(world, possible); err != nil {
-					return err
-				}
+				possible = uim.handleGroupSelection(world, possible)
 			}
+			uim.focusControl(world, possible)
 		}
-		uim.focusControl(world, possible)
 	}
-	return err
 }
 
-func (uim *uiManager) handleGroupSelection(world *goecs.World, possible *goecs.Entity) (*goecs.Entity, error) {
-	var err error
-	var focusEnt *goecs.Entity
-	if focusEnt, err = world.Get(uim.focus); err != nil {
-		return nil, err
-	}
+func (uim *uiManager) handleGroupSelection(world *goecs.World, possible *goecs.Entity) *goecs.Entity {
+	focusEnt := world.Get(uim.focus)
 	match := possible
 	fbt := ui.Get.FlatButton(possible)
 	if focusEnt.Contains(ui.TYPE.FlatButton) {
@@ -766,7 +733,7 @@ func (uim *uiManager) handleGroupSelection(world *goecs.World, possible *goecs.E
 	} else {
 		match = uim.getSelectedInGroup(world, fbt.Group)
 	}
-	return match, err
+	return match
 }
 
 func (uim uiManager) getControlRect(control *goecs.Entity, at geometry.Point) geometry.Rect {
@@ -842,12 +809,8 @@ func (uim *uiManager) getSelectedInGroup(world *goecs.World, group string) *goec
 	return nil
 }
 
-func (uim *uiManager) activateFocus(world *goecs.World) error {
-	var err error
-	var focusEnt *goecs.Entity
-	if focusEnt, err = world.Get(uim.focus); err != nil {
-		return err
-	}
+func (uim *uiManager) activateFocus(world *goecs.World) {
+	focusEnt := world.Get(uim.focus)
 	if focusEnt.Contains(ui.TYPE.FlatButton) {
 		state := ui.Get.ControlState(focusEnt)
 		state.Clicked = true
@@ -861,23 +824,21 @@ func (uim *uiManager) activateFocus(world *goecs.World) error {
 		uim.clicked = uim.focus
 		uim.spriteButtonsMouseUp(world, events.MouseUpEvent{})
 	}
-	return nil
 }
 
-func (uim *uiManager) gamepadDown(world *goecs.World, _ int32, button device.GamepadButton) error {
+func (uim *uiManager) gamepadDown(world *goecs.World, _ int32, button device.GamepadButton) {
 	switch button {
 	case device.GamepadUp:
-		return uim.keyDown(world, device.KeyUp)
+		uim.keyDown(world, device.KeyUp)
 	case device.GamepadDown:
-		return uim.keyDown(world, device.KeyDown)
+		uim.keyDown(world, device.KeyDown)
 	case device.GamepadLeft:
-		return uim.keyDown(world, device.KeyLeft)
+		uim.keyDown(world, device.KeyLeft)
 	case device.GamepadRight:
-		return uim.keyDown(world, device.KeyRight)
+		uim.keyDown(world, device.KeyRight)
 	case device.GamepadButton3:
-		return uim.keyDown(world, device.KeySpace)
+		uim.keyDown(world, device.KeySpace)
 	}
-	return nil
 }
 
 func (uim *uiManager) gamepadUp(_ int32, button device.GamepadButton) {
@@ -895,28 +856,27 @@ func (uim *uiManager) gamepadUp(_ int32, button device.GamepadButton) {
 	}
 }
 
-func (uim *uiManager) gamepadStickMove(world *goecs.World, _ int32, _ device.GamepadStick, movement geometry.Point) error {
+func (uim *uiManager) gamepadStickMove(world *goecs.World, _ int32, _ device.GamepadStick, movement geometry.Point) {
 	if movement.Y == -1 && uim.lastKey != device.KeyUp {
-		return uim.keyDown(world, device.KeyUp)
+		uim.keyDown(world, device.KeyUp)
 	} else if movement.Y > -1 && uim.lastKey == device.KeyUp {
 		uim.keyUp(device.KeyUp)
 	}
 	if movement.Y == 1 && uim.lastKey != device.KeyDown {
-		return uim.keyDown(world, device.KeyDown)
+		uim.keyDown(world, device.KeyDown)
 	} else if movement.Y < 1 && uim.lastKey == device.KeyDown {
 		uim.keyUp(device.KeyDown)
 	}
 	if movement.X == -1 && uim.lastKey != device.KeyLeft {
-		return uim.keyDown(world, device.KeyLeft)
+		uim.keyDown(world, device.KeyLeft)
 	} else if movement.X > -1 && uim.lastKey == device.KeyLeft {
 		uim.keyUp(device.KeyLeft)
 	}
 	if movement.X == 1 && uim.lastKey != device.KeyRight {
-		return uim.keyDown(world, device.KeyRight)
+		uim.keyDown(world, device.KeyRight)
 	} else if movement.Y < 1 && uim.lastKey == device.KeyRight {
 		uim.keyUp(device.KeyRight)
 	}
-	return nil
 }
 
 // UI returns a managers.WithSystemAndListener that handle ui components

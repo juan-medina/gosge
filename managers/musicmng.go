@@ -98,10 +98,7 @@ func (mm musicManager) playMusicEvent(world *goecs.World, pme events.PlayMusicEv
 					PlayingState: audio.StateStopped,
 				},
 			)
-			var err error
-			if ent, err = world.Get(entID); err != nil {
-				return err
-			}
+			ent = world.Get(entID)
 		}
 		state := audio.Get.MusicState(ent)
 		if state.PlayingState == audio.StateStopped || state.PlayingState == audio.StatePaused {
