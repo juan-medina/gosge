@@ -400,7 +400,6 @@ func createBar(world *goecs.World, text string, textPos, barPos geometry.Point, 
 }
 
 func barClickListener(world *goecs.World, signal goecs.Component, _ float32) error {
-	var err error
 	switch e := signal.(type) {
 	case BarClickEvent:
 		settings := geng.GetSettings()
@@ -409,92 +408,51 @@ func barClickListener(world *goecs.World, signal goecs.Component, _ float32) err
 		soundVolume := settings.GetFloat32("soundVolume", defaultSoundVolume)
 		switch e.BT {
 		case MasterBar:
-			var masterBarEnt *goecs.Entity
-			var masterLabelEnt *goecs.Entity
-			if masterBarEnt, err = world.Get(masterBar); err != nil {
-				return err
-			}
+			masterBarEnt := world.Get(masterBar)
 			bar := ui.Get.ProgressBar(masterBarEnt)
-			if masterLabelEnt, err = world.Get(masterLabel); err != nil {
-				return err
-			}
+			masterLabelEnt := world.Get(masterLabel)
 			text := ui.Get.Text(masterLabelEnt)
 			text.String = fmt.Sprintf("Master Volume : %d%%", int(bar.Current))
 			masterLabelEnt.Set(text)
 			masterVolume = float32(int(bar.Current)) / 100
 			settings.SetFloat32("masterVolume", masterVolume)
-			if err = updateUIVolume(world); err != nil {
-				return err
-			}
+			updateUIVolume(world)
 			world.Signal(events.ChangeMasterVolumeEvent{Volume: masterVolume})
 		case MusicBar:
-			var musicBarEnt *goecs.Entity
-			var musicLabelEnt *goecs.Entity
-			if musicBarEnt, err = world.Get(musicBar); err != nil {
-				return err
-			}
+			musicBarEnt := world.Get(musicBar)
 			bar := ui.Get.ProgressBar(musicBarEnt)
-			if musicLabelEnt, err = world.Get(musicLabel); err != nil {
-				return err
-			}
+			musicLabelEnt := world.Get(musicLabel)
 			text := ui.Get.Text(musicLabelEnt)
 			text.String = fmt.Sprintf("Music Volume : %d%%", int(bar.Current))
 			musicVolume = float32(int(bar.Current)) / 100
 			settings.SetFloat32("musicVolume", musicVolume)
 			musicLabelEnt.Set(text)
-			if err = updateUIVolume(world); err != nil {
-				return err
-			}
+			updateUIVolume(world)
 			world.Signal(events.ChangeMusicVolumeEvent{
 				Name:   musicFile,
 				Volume: musicVolume,
 			})
 		case SoundBar:
-			var soundBarEnt *goecs.Entity
-			var soundLabelEnt *goecs.Entity
-			if soundBarEnt, err = world.Get(soundBar); err != nil {
-				return err
-			}
-			if soundLabelEnt, err = world.Get(soundLabel); err != nil {
-				return err
-			}
+			soundBarEnt := world.Get(soundBar)
+			soundLabelEnt := world.Get(soundLabel)
 			bar := ui.Get.ProgressBar(soundBarEnt)
 			text := ui.Get.Text(soundLabelEnt)
 			text.String = fmt.Sprintf("Sound Volume : %d%%", int(bar.Current))
 			soundVolume = float32(int(bar.Current)) / 100
 			settings.SetFloat32("soundVolume", soundVolume)
 			soundLabelEnt.Set(text)
-			if err = updateUIVolume(world); err != nil {
-				return err
-			}
+			updateUIVolume(world)
 		}
 	}
 	return nil
 }
 
-func updateUIVolume(world *goecs.World) error {
-	var err error
-	var playButtonEnt *goecs.Entity
-	var stopButtonEnt *goecs.Entity
-	var masterBarEnt *goecs.Entity
-	var musicBarEnt *goecs.Entity
-	var soundBarEnt *goecs.Entity
-
-	if playButtonEnt, err = world.Get(playButton); err != nil {
-		return err
-	}
-	if stopButtonEnt, err = world.Get(stopButton); err != nil {
-		return err
-	}
-	if masterBarEnt, err = world.Get(masterBar); err != nil {
-		return err
-	}
-	if musicBarEnt, err = world.Get(musicBar); err != nil {
-		return err
-	}
-	if soundBarEnt, err = world.Get(soundBar); err != nil {
-		return err
-	}
+func updateUIVolume(world *goecs.World) {
+	playButtonEnt := world.Get(playButton)
+	stopButtonEnt := world.Get(stopButton)
+	masterBarEnt := world.Get(masterBar)
+	musicBarEnt := world.Get(musicBar)
+	soundBarEnt := world.Get(soundBar)
 
 	settings := geng.GetSettings()
 	musicVolume := settings.GetFloat32("musicVolume", defaultMusicVolume)
@@ -529,18 +487,13 @@ func updateUIVolume(world *goecs.World) error {
 		}
 		playButtonEnt.Set(sb)
 	}
-	return err
 }
 
 func mouseListener(world *goecs.World, event goecs.Component, _ float32) error {
 	switch e := event.(type) {
 	// check if we get a mouse up
 	case events.MouseUpEvent:
-		var err error
-		var gopherEnt *goecs.Entity
-		if gopherEnt, err = world.Get(gopher); err != nil {
-			return err
-		}
+		gopherEnt := world.Get(gopher)
 		settings := geng.GetSettings()
 		soundVolume := settings.GetFloat32("soundVolume", defaultSoundVolume)
 		// get our gopher sprite and position
@@ -566,15 +519,8 @@ func musicStateListener(world *goecs.World, event goecs.Component, _ float32) er
 	switch e := event.(type) {
 	// if is the music state has change
 	case events.MusicStateChangeEvent:
-		var err error
-		var playButtonEnt *goecs.Entity
-		var gopherEnt *goecs.Entity
-		if playButtonEnt, err = world.Get(playButton); err != nil {
-			return err
-		}
-		if gopherEnt, err = world.Get(gopher); err != nil {
-			return err
-		}
+		playButtonEnt := world.Get(playButton)
+		gopherEnt := world.Get(gopher)
 		// get the play button ui.SpriteButton
 		sb := ui.Get.SpriteButton(playButtonEnt)
 		// get the gopher current animation.Animation
