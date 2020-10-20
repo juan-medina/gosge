@@ -205,7 +205,7 @@ func (d DelaySignal) Type() goecs.ComponentType {
 
 // FocusOnControlEvent is a signal to change the focussed control
 type FocusOnControlEvent struct {
-	Control *goecs.Entity
+	Control goecs.EntityID
 }
 
 // Type is this goecs.ComponentType

@@ -35,7 +35,6 @@ import (
 	"github.com/juan-medina/gosge/events"
 	"github.com/juan-medina/gosge/options"
 	"github.com/rs/zerolog/log"
-	"reflect"
 	"strconv"
 )
 
@@ -64,7 +63,7 @@ const (
 var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
-	message          *goecs.Entity
+	message          goecs.EntityID
 	gEng             *gosge.Engine
 )
 
@@ -75,6 +74,7 @@ func main() {
 }
 
 func loadGame(eng *gosge.Engine) error {
+	var err error
 	gEng = eng
 
 	// Preload font
@@ -99,31 +99,51 @@ func loadGame(eng *gosge.Engine) error {
 	}
 
 	// add the flat button
-	addFlatButton(world, gameScale, pos, false, true)
+	if err = addFlatButton(world, gameScale, pos, false, true); err != nil {
+		return err
+	}
 	pos.Y += rowGap * gameScale.Max
-	addFlatButton(world, gameScale, pos, true, false)
+	if err = addFlatButton(world, gameScale, pos, true, false); err != nil {
+		return err
+	}
 
 	// add check boxes
 	pos.Y += rowGap * gameScale.Max
-	addCheckBox(world, gameScale, pos, false)
+	if err = addCheckBox(world, gameScale, pos, false); err != nil {
+		return err
+	}
 	pos.Y += rowGap * gameScale.Max
-	addCheckBox(world, gameScale, pos, true)
+	if err = addCheckBox(world, gameScale, pos, true); err != nil {
+		return err
+	}
 
 	// add option group
 	pos.Y += rowGap * gameScale.Max
-	addOptionGroup(world, gameScale, pos, false)
+	if err = addOptionGroup(world, gameScale, pos, false); err != nil {
+		return err
+	}
 	pos.Y += rowGap * gameScale.Max
-	addOptionGroup(world, gameScale, pos, true)
+	if err = addOptionGroup(world, gameScale, pos, true); err != nil {
+		return err
+	}
 
 	// add the progress bar
 	pos.Y += rowGap * gameScale.Max
-	addProgressBar(world, gameScale, pos, false, true)
+	if err = addProgressBar(world, gameScale, pos, false, true); err != nil {
+		return err
+	}
 	pos.Y += rowGap * gameScale.Max
-	addProgressBar(world, gameScale, pos, true, true)
+	if err = addProgressBar(world, gameScale, pos, true, true); err != nil {
+		return err
+	}
 	pos.Y += rowGap * gameScale.Max
-	addProgressBar(world, gameScale, pos, false, false)
+	if err = addProgressBar(world, gameScale, pos, false, false); err != nil {
+		return err
+	}
 	pos.Y += rowGap * gameScale.Max
-	addProgressBar(world, gameScale, pos, true, false)
+	if err = addProgressBar(world, gameScale, pos, true, false); err != nil {
+		return err
+	}
 
 	// add sprite button
 	pos.Y += rowGap * gameScale.Max
@@ -176,10 +196,10 @@ func loadGame(eng *gosge.Engine) error {
 	// listen to game pad
 	world.AddListener(padEvents, events.TYPE.GamePadButtonUpEvent)
 
-	return nil
+	return err
 }
 
-func padEvents(world *goecs.World, signal interface{}, _ float32) error {
+func padEvents(world *goecs.World, signal goecs.Component, _ float32) error {
 	switch v := signal.(type) {
 	case events.GamePadButtonUpEvent:
 		switch v.Button {
@@ -192,7 +212,7 @@ func padEvents(world *goecs.World, signal interface{}, _ float32) error {
 	return nil
 }
 
-func keyEvents(world *goecs.World, signal interface{}, _ float32) error {
+func keyEvents(world *goecs.World, signal goecs.Component, _ float32) error {
 	switch e := signal.(type) {
 	case events.KeyUpEvent:
 		switch e.Key {
@@ -225,7 +245,8 @@ func hideUnhide(world *goecs.World) {
 	}
 }
 
-func addOptionGroup(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
+func addOptionGroup(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) error {
+	var err error
 	// control pos
 	controlPos := geometry.Point{
 		X: labelPos.X + (columnGap * gameScale.Max),
@@ -269,7 +290,7 @@ func addOptionGroup(world *goecs.World, gameScale geometry.Scale, labelPos geome
 		Y: controlPos.Y,
 	}
 
-	valueEnt := world.AddEntity(
+	valueID := world.AddEntity(
 		ui.Text{
 			String:     group + " 1",
 			Size:       fontSmall * gameScale.Max,
@@ -293,7 +314,7 @@ func addOptionGroup(world *goecs.World, gameScale geometry.Scale, labelPos geome
 		}
 
 		// add a control : flat button with checkbox
-		checkEnt := world.AddEntity(
+		checkID := world.AddEntity(
 			check,
 			clr,
 			ui.Text{
@@ -318,17 +339,23 @@ func addOptionGroup(world *goecs.World, gameScale geometry.Scale, labelPos geome
 		)
 
 		check.Event = optionEvent{
-			valueEnt: valueEnt,
-			Message:  text + " clicked",
-			value:    group + " " + strconv.Itoa(c+1),
+			valueID: valueID,
+			Message: text + " clicked",
+			value:   group + " " + strconv.Itoa(c+1),
 		}
-
+		var checkEnt *goecs.Entity
+		if checkEnt, err = world.Get(checkID); err != nil {
+			return err
+		}
 		checkEnt.Set(check)
 		controlPos.X += 150 * gameScale.Max
 	}
+
+	return err
 }
 
-func addCheckBox(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) {
+func addCheckBox(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool) error {
+	var err error
 	// control pos
 	controlPos := geometry.Point{
 		X: labelPos.X + (columnGap * gameScale.Max),
@@ -374,7 +401,7 @@ func addCheckBox(world *goecs.World, gameScale geometry.Scale, labelPos geometry
 	}
 
 	// add a control : flat button with checkbox
-	checkEnt := world.AddEntity(
+	checkID := world.AddEntity(
 		check,
 		clr,
 		ui.Text{
@@ -397,7 +424,7 @@ func addCheckBox(world *goecs.World, gameScale geometry.Scale, labelPos geometry
 
 	controlPos.X = finalColumn * gameScale.Max
 
-	valueEnt := world.AddEntity(
+	valueID := world.AddEntity(
 		ui.Text{
 			String:     "Not checked",
 			Size:       fontSmall * gameScale.Max,
@@ -410,15 +437,23 @@ func addCheckBox(world *goecs.World, gameScale geometry.Scale, labelPos geometry
 	)
 
 	check.Event = checkBoxEvent{
-		checkEnt: checkEnt,
-		valueEnt: valueEnt,
-		Message:  text + " clicked",
+		checkID: checkID,
+		valueID: valueID,
+		Message: text + " clicked",
+	}
+
+	var checkEnt *goecs.Entity
+	if checkEnt, err = world.Get(checkID); err != nil {
+		return err
 	}
 
 	checkEnt.Set(check)
+
+	return err
 }
 
-func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool, focus bool) {
+func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool, focus bool) error {
+	var err error
 	// control pos
 	controlPos := geometry.Point{
 		X: labelPos.X + (columnGap * gameScale.Max),
@@ -485,9 +520,11 @@ func addFlatButton(world *goecs.World, gameScale geometry.Scale, labelPos geomet
 	if focus {
 		world.Signal(events.FocusOnControlEvent{Control: ctl})
 	}
+	return err
 }
 
-func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool, focusable bool) {
+func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point, gradient bool, focusable bool) error {
+	var err error
 	// control pos
 	controlPos := geometry.Point{
 		X: labelPos.X + (columnGap * gameScale.Max),
@@ -538,7 +575,7 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 		},
 	}
 
-	barEnt := world.AddEntity(
+	barID := world.AddEntity(
 		bar,
 		shapes.Box{
 			Size: geometry.Size{
@@ -554,7 +591,7 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 
 	controlPos.X = finalColumn * gameScale.Max
 
-	valueEnt := world.AddEntity(
+	valueID := world.AddEntity(
 		ui.Text{
 			String:     "50",
 			Size:       fontSmall * gameScale.Max,
@@ -568,13 +605,20 @@ func addProgressBar(world *goecs.World, gameScale geometry.Scale, labelPos geome
 
 	if focusable {
 		bar.Event = progressBarEvent{
-			barEnt:   barEnt,
-			valueEnt: valueEnt,
-			Message:  text + " clicked",
+			barID:   barID,
+			valueID: valueID,
+			Message: text + " clicked",
 		}
 	}
 
+	var barEnt *goecs.Entity
+	if barEnt, err = world.Get(barID); err != nil {
+		return err
+	}
+
 	barEnt.Set(bar)
+
+	return err
 }
 
 func addSpriteButton(world *goecs.World, gameScale geometry.Scale, labelPos geometry.Point) error {
@@ -621,70 +665,109 @@ func addSpriteButton(world *goecs.World, gameScale geometry.Scale, labelPos geom
 	return nil
 }
 
-func uiEvents(_ *goecs.World, signal interface{}, _ float32) error {
+func uiEvents(world *goecs.World, signal goecs.Component, _ float32) error {
+	var err error
+	var messageEnt *goecs.Entity
+	if messageEnt, err = world.Get(message); err != nil {
+		return err
+	}
 	switch e := signal.(type) {
 	case uiDemoEvent:
-		text := ui.Get.Text(message)
+		text := ui.Get.Text(messageEnt)
 		text.String = e.Message
-		message.Set(text)
+		messageEnt.Set(text)
 	case progressBarEvent:
-		bar := ui.Get.ProgressBar(e.barEnt)
-		label := ui.Get.Text(e.valueEnt)
+		var barEnt, labelEnt *goecs.Entity
+		if barEnt, err = world.Get(e.barID); err != nil {
+			return err
+		}
+		if labelEnt, err = world.Get(e.valueID); err != nil {
+			return err
+		}
+		bar := ui.Get.ProgressBar(barEnt)
+		label := ui.Get.Text(labelEnt)
 		label.String = fmt.Sprintf("%d", int(bar.Current))
-		e.valueEnt.Set(label)
-		text := ui.Get.Text(message)
+		labelEnt.Set(label)
+		text := ui.Get.Text(messageEnt)
 		text.String = e.Message
-		message.Set(text)
+		messageEnt.Set(text)
 	case checkBoxEvent:
-		label := ui.Get.Text(e.valueEnt)
-		state := ui.Get.ControlState(e.checkEnt)
+		var valueEnt, checkEnt *goecs.Entity
+		if valueEnt, err = world.Get(e.valueID); err != nil {
+			return err
+		}
+		if checkEnt, err = world.Get(e.checkID); err != nil {
+			return err
+		}
+		label := ui.Get.Text(valueEnt)
+		state := ui.Get.ControlState(checkEnt)
 		if state.Checked {
 			label.String = "Checked"
 		} else {
 			label.String = "Not checked"
 		}
-		e.valueEnt.Set(label)
-		text := ui.Get.Text(message)
+		valueEnt.Set(label)
+		text := ui.Get.Text(messageEnt)
 		text.String = e.Message
-		message.Set(text)
+		messageEnt.Set(text)
 	case optionEvent:
-		label := ui.Get.Text(e.valueEnt)
+		var valueEnt *goecs.Entity
+		if valueEnt, err = world.Get(e.valueID); err != nil {
+			return err
+		}
+		label := ui.Get.Text(valueEnt)
 		label.String = e.value
 
-		e.valueEnt.Set(label)
-		text := ui.Get.Text(message)
+		valueEnt.Set(label)
+		text := ui.Get.Text(messageEnt)
 		text.String = e.Message
-		message.Set(text)
+		messageEnt.Set(text)
 	}
-	return nil
+	return err
 }
 
 type uiDemoEvent struct {
 	Message string
 }
 
-var uiDemoEventType = reflect.TypeOf(uiDemoEvent{})
+func (u uiDemoEvent) Type() goecs.ComponentType {
+	return uiDemoEventType
+}
+
+var uiDemoEventType = goecs.NewComponentType()
 
 type progressBarEvent struct {
-	Message  string
-	barEnt   *goecs.Entity
-	valueEnt *goecs.Entity
+	Message string
+	barID   goecs.EntityID
+	valueID goecs.EntityID
 }
 
-var progressBarEventType = reflect.TypeOf(progressBarEvent{})
+func (p progressBarEvent) Type() goecs.ComponentType {
+	return progressBarEventType
+}
+
+var progressBarEventType = goecs.NewComponentType()
 
 type checkBoxEvent struct {
-	Message  string
-	checkEnt *goecs.Entity
-	valueEnt *goecs.Entity
+	Message string
+	checkID goecs.EntityID
+	valueID goecs.EntityID
 }
 
-var checkBoxEventType = reflect.TypeOf(checkBoxEvent{})
+func (c checkBoxEvent) Type() goecs.ComponentType {
+	return checkBoxEventType
+}
+
+var checkBoxEventType = goecs.NewComponentType()
 
 type optionEvent struct {
-	Message  string
-	value    string
-	valueEnt *goecs.Entity
+	Message string
+	value   string
+	valueID goecs.EntityID
 }
 
-var optionEventType = reflect.TypeOf(optionEvent{})
+func (o optionEvent) Type() goecs.ComponentType {
+	return optionEventType
+}
+
+var optionEventType = goecs.NewComponentType()
