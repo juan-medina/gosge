@@ -291,11 +291,7 @@ func updateUI(world *goecs.World) error {
 			break
 		}
 	}
-
-	var uiTextEnt *goecs.Entity
-	if uiTextEnt, err = world.Get(uiText); err != nil {
-		return err
-	}
+	uiTextEnt := world.Get(uiText)
 	txt := ui.Get.Text(uiTextEnt)
 	txt.String = fmt.Sprintf("top layer %s, change in %02.02f", groups[top].name, timeToChange-time)
 	uiTextEnt.Set(txt)
