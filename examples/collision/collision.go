@@ -237,21 +237,10 @@ func loadGame(eng *gosge.Engine) error {
 }
 
 func updateAreasSystem(world *goecs.World, _ float32) error {
-	var err error
-	var gopher1Ent, gopher2Ent *goecs.Entity
-	var area1Ent, area2Ent *goecs.Entity
-	if gopher1Ent, err = world.Get(gopher1); err != nil {
-		return err
-	}
-	if gopher2Ent, err = world.Get(gopher2); err != nil {
-		return err
-	}
-	if area1Ent, err = world.Get(area1); err != nil {
-		return err
-	}
-	if area2Ent, err = world.Get(area2); err != nil {
-		return err
-	}
+	gopher1Ent := world.Get(gopher1)
+	gopher2Ent := world.Get(gopher2)
+	area1Ent := world.Get(area1)
+	area2Ent := world.Get(area2)
 	updateArea(gopher1Ent, area1Ent, factors[currentFactor].factor1)
 	updateArea(gopher2Ent, area2Ent, factors[currentFactor].factor2)
 	return nil
@@ -275,11 +264,7 @@ func updateArea(sprite *goecs.Entity, area *goecs.Entity, factor geometry.Point)
 
 // move the gopher using the current move
 func moveSystem(world *goecs.World, delta float32) error {
-	var err error
-	var gopher1Ent *goecs.Entity
-	if gopher1Ent, err = world.Get(gopher1); err != nil {
-		return err
-	}
+	gopher1Ent := world.Get(gopher1)
 	pos := geometry.Get.Point(gopher1Ent)
 	pos.X += move.X * delta
 	pos.Y += move.Y * delta
@@ -322,14 +307,8 @@ func keyListener(_ *goecs.World, signal goecs.Component, _ float32) error {
 
 // color in red sprites that collides
 func collideSystem(world *goecs.World, _ float32) error {
-	var err error
-	var gopher1Ent, gopher2Ent *goecs.Entity
-	if gopher1Ent, err = world.Get(gopher1); err != nil {
-		return err
-	}
-	if gopher2Ent, err = world.Get(gopher2); err != nil {
-		return err
-	}
+	gopher1Ent := world.Get(gopher1)
+	gopher2Ent := world.Get(gopher2)
 	// no collision is color white
 	color1 := color.White
 	color2 := color.White
