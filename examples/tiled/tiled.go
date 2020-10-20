@@ -228,11 +228,7 @@ func mouseListener(world *goecs.World, event goecs.Component, _ float32) error {
 				}
 			}
 		}
-		var err error
-		var topTextEnt *goecs.Entity
-		if topTextEnt, err = world.Get(topText); err != nil {
-			return err
-		}
+		topTextEnt := world.Get(topText)
 		// get the top text component
 		text := ui.Get.Text(topTextEnt)
 		// if we don't have a layer we haven't click nothing
@@ -281,11 +277,7 @@ func keyListener(_ *goecs.World, event goecs.Component, _ float32) error {
 func moveSystem(world *goecs.World, delta float32) error {
 	// if we need to move anything
 	if move.X != 0 || move.Y != 0 {
-		var err error
-		var mapEnt *goecs.Entity
-		if mapEnt, err = world.Get(mapID); err != nil {
-			return err
-		}
+		mapEnt := world.Get(mapID)
 		// get the current position
 		pos := geometry.Get.Point(mapEnt)
 
