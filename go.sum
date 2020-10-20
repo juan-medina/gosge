@@ -12,6 +12,8 @@ github.com/juan-medina/goecs v1.5.0 h1:Y/Uu6S1m9SxilA+DeahiScNruW3jbd3XAJuto5QoW
 github.com/juan-medina/goecs v1.5.0/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
 github.com/juan-medina/goecs v1.5.1 h1:m4k08/o0t+9jQDALXHGOx7PAgZGP5ig2a1D+OeRtTe4=
 github.com/juan-medina/goecs v1.5.1/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
+github.com/juan-medina/goecs v1.5.2 h1:fBRSRU04A7vZIvMh8BHr2CxxSZj+Ew2cON4zKSpem84=
+github.com/juan-medina/goecs v1.5.2/go.mod h1:9NCnf8upBiDiF/a7Sjk42V8irmRlr7DOMQFObn8agHU=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=

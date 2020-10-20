@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gen2brain/raylib-go v0.0.0-20200905153824-5b0944b5567a
-	github.com/juan-medina/goecs v1.5.1
+	github.com/juan-medina/goecs v1.5.2
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lafriks/go-tiled v0.2.0
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
