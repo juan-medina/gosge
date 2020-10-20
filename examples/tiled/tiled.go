@@ -60,8 +60,8 @@ const (
 var (
 	// designResolution is how our game is designed
 	designResolution = geometry.Size{Width: 1920, Height: 1080}
-	// mapEnt is our map entity
-	mapEnt *goecs.Entity
+	// mapID is our map entity
+	mapID goecs.EntityID
 
 	// minMapPos is the min position that we could scroll the map
 	minMapPos geometry.Point
@@ -73,7 +73,7 @@ var (
 	gen *gosge.Engine
 
 	// topText is the text on top of the screen
-	topText *goecs.Entity
+	topText goecs.EntityID
 
 	// move indicate how we are moving
 	move geometry.Point
@@ -145,7 +145,7 @@ func loadGame(eng *gosge.Engine) error {
 	}
 
 	// add the map
-	mapEnt = world.AddEntity(
+	mapID = world.AddEntity(
 		tiled.Map{
 			Name:  mapFile,
 			Scale: gameScale.Max,
@@ -207,7 +207,7 @@ func loadGame(eng *gosge.Engine) error {
 }
 
 // listen to mouse clicks
-func mouseListener(world *goecs.World, event interface{}, _ float32) error {
+func mouseListener(world *goecs.World, event goecs.Component, _ float32) error {
 	switch e := event.(type) {
 	case events.MouseUpEvent:
 		// the block info of a clicked block
@@ -228,8 +228,13 @@ func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 				}
 			}
 		}
+		var err error
+		var topTextEnt *goecs.Entity
+		if topTextEnt, err = world.Get(topText); err != nil {
+			return err
+		}
 		// get the top text component
-		text := ui.Get.Text(topText)
+		text := ui.Get.Text(topTextEnt)
 		// if we don't have a layer we haven't click nothing
 		if clickedInfo.Layer == "" {
 			// set default text
@@ -239,13 +244,13 @@ func mouseListener(world *goecs.World, event interface{}, _ float32) error {
 			text.String = fmt.Sprintf("Tiled clicked has name = %q, layer = %q", clickedInfo.Properties["name"], clickedInfo.Layer)
 		}
 		// update the top entity
-		topText.Set(text)
+		topTextEnt.Set(text)
 	}
 	return nil
 }
 
 // listen to keys
-func keyListener(_ *goecs.World, event interface{}, _ float32) error {
+func keyListener(_ *goecs.World, event goecs.Component, _ float32) error {
 	switch e := event.(type) {
 	case events.KeyDownEvent:
 		switch e.Key {
@@ -273,9 +278,14 @@ func keyListener(_ *goecs.World, event interface{}, _ float32) error {
 	return nil
 }
 
-func moveSystem(_ *goecs.World, delta float32) error {
+func moveSystem(world *goecs.World, delta float32) error {
 	// if we need to move anything
 	if move.X != 0 || move.Y != 0 {
+		var err error
+		var mapEnt *goecs.Entity
+		if mapEnt, err = world.Get(mapID); err != nil {
+			return err
+		}
 		// get the current position
 		pos := geometry.Get.Point(mapEnt)
 
