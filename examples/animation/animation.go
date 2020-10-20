@@ -209,12 +209,8 @@ var attachType = goecs.NewComponentType()
 
 // on update
 func robotMoveSystem(world *goecs.World, delta float32) error {
-	var robotEnt *goecs.Entity
-	var err error
 	// get the robot id
-	if robotEnt, err = world.Get(robot); err != nil {
-		return err
-	}
+	robotEnt := world.Get(robot)
 	// get the animation from our robot
 	anim := animation.Get.Animation(robotEnt)
 	// if its running
@@ -256,15 +252,9 @@ func robotMoveSystem(world *goecs.World, delta float32) error {
 			} else {
 				attachPos.X = pos.X + layerWidth // attach to the right
 			}
-
-			// update attachment post
-			var attachEnt *goecs.Entity
-			var err error
 			// get the robot id
-			if attachEnt, err = world.Get(ent.Get(attachType).(attach).id); err != nil {
-				return err
-			}
-			attachEnt.Set(attachPos)
+			id := ent.Get(attachType).(attach).id
+			world.Get(id).Set(attachPos)
 			// update layer pos
 			ent.Set(pos)
 		}
@@ -274,20 +264,13 @@ func robotMoveSystem(world *goecs.World, delta float32) error {
 
 // notified on events
 func keysListener(world *goecs.World, e goecs.Component, _ float32) error {
-	if e == nil {
-		log.Trace().Interface("signal", e).Msg("got event")
-	}
 	switch v := e.(type) {
 	// is we get a key down event
 	case events.KeyDownEvent:
 		// it is the left o right cursor change animations
 		if v.Key == device.KeyRight || v.Key == device.KeyLeft {
-			var robotEnt *goecs.Entity
-			var err error
 			// get the robot id
-			if robotEnt, err = world.Get(robot); err != nil {
-				return err
-			}
+			robotEnt := world.Get(robot)
 			// get the animation
 			anim := animation.Get.Animation(robotEnt)
 
@@ -303,12 +286,8 @@ func keysListener(world *goecs.World, e goecs.Component, _ float32) error {
 	case events.KeyUpEvent:
 		// it is the left o right cursor change animations
 		if v.Key == device.KeyRight || v.Key == device.KeyLeft {
-			var robotEnt *goecs.Entity
-			var err error
 			// get the robot id
-			if robotEnt, err = world.Get(robot); err != nil {
-				return err
-			}
+			robotEnt := world.Get(robot)
 			// get the animation
 			anim := animation.Get.Animation(robotEnt)
 
