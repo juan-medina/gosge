@@ -50,6 +50,10 @@ const (
 	KeyCtrlRight             // KeyCtrlRight if the right control key
 	KeyEscape                // KeyEscape is the escape key
 	KeyReturn                // KeyReturn is the return key
+	KeyW                     // KeyW is the W key
+	KeyS                     // KeyS is the S key
+	KeyA                     // KeyA is the A key
+	KeyD                     // KeyD is the D key
 	KeyF1                    // KeyF1 is the F1 key
 	KeyF2                    // KeyF2 is the F2 key
 	KeyF3                    // KeyF3 is the F3 key

@@ -610,8 +610,10 @@ func (uim *uiManager) clearFocus(world *goecs.World) {
 
 func (uim *uiManager) handleFocus(world *goecs.World, key device.Key) {
 	focusEnt := world.Get(uim.focus)
-	if key == device.KeyDown || key == device.KeyUp || key == device.KeyLeft || key == device.KeyRight {
-		if focusEnt.Contains(ui.TYPE.ProgressBar) && (key == device.KeyLeft || key == device.KeyRight) {
+	if key == device.KeyDown || key == device.KeyUp || key == device.KeyLeft || key == device.KeyRight ||
+		key == device.KeyS || key == device.KeyW || key == device.KeyA || key == device.KeyD {
+		if focusEnt.Contains(ui.TYPE.ProgressBar) && (key == device.KeyLeft || key == device.KeyRight ||
+			key == device.KeyA || key == device.KeyD) {
 			uim.moveProgressBarWithKeys(world, key)
 		}
 		uim.selectNextControl(world, key)
@@ -652,9 +654,9 @@ func (uim *uiManager) moveProgressBarWithKeys(world *goecs.World, key device.Key
 	focusEnt := world.Get(uim.focus)
 	bar := ui.Get.ProgressBar(focusEnt)
 	amt := (bar.Max - bar.Min) * 0.05
-	if key == device.KeyLeft {
+	if key == device.KeyLeft || key == device.KeyA {
 		bar.Current = float32(math.Max(float64(bar.Current-amt), float64(bar.Min)))
-	} else {
+	} else if key == device.KeyRight || key == device.KeyD {
 		bar.Current = float32(math.Min(float64(bar.Current+amt), float64(bar.Max)))
 	}
 	if bar.Event != nil {
@@ -752,6 +754,16 @@ func (uim uiManager) getControlDistance(rect1 geometry.Rect, rect2 geometry.Rect
 	var point1 geometry.Point
 	var point2 geometry.Point
 
+	switch key {
+	case device.KeyW:
+		key = device.KeyUp
+	case device.KeyS:
+		key = device.KeyDown
+	case device.KeyA:
+		key = device.KeyLeft
+	case device.KeyD:
+		key = device.KeyRight
+	}
 	switch key {
 	case device.KeyUp:
 		point1.X = rect1.From.X + (rect1.Size.Width / 2)
